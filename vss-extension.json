@@ -1,0 +1,48 @@
+{
+  "manifestVersion": 1,
+  "version": "0.1.0",
+  "name": "ADO Planner Plugin",
+  "description": "Use for enchace Delivery plan",
+  "publisher": "{INSERT_PUBLISHER}",
+  "demands": ["api-version/3.0"],
+  "categories": ["Azure Boards"],
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "content": {
+    "details": {
+      "path": "README.md"
+    }
+  },
+  "icons": {
+    "default": "img/calendar.png"
+  },
+  "files": [
+    {
+      "path": "dist",
+      "addressable": true
+    },
+    {
+      "path": "img",
+      "addressable": true
+    }
+  ],
+  "contributions": [
+    {
+      "id": "ado-palnner-plugin",
+      "type": "ms.vss-web.hub",
+      "description": "Ado Palnner plugin",
+      "targets": ["ms.vss-work-web.work-hub-group"],
+      "properties": {
+        "name": "Delivery Plan",
+        "icon": {
+          "dark": "img/calendar.png",
+          "light": "img/calendar.png"
+        },
+        "uri": "dist/hub.html"
+      }
+    }
+  ]
+}

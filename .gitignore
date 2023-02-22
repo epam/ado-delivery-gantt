@@ -1,0 +1,11 @@
+node_modules
+.idea
+.vscode
+dist
+
+package-lock.json
+
+*.vsix
+*.iml
+
+.DS_Store
