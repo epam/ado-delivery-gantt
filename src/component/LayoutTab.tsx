@@ -3,13 +3,12 @@ import * as React from "react";
 import * as SDK from "azure-devops-extension-sdk";
 import { Card } from "azure-devops-ui/Card";
 
-import { CommonServiceIds, IProjectPageService } from "azure-devops-extension-api";
+import { CommonServiceIds, IProjectPageService, getClient } from "azure-devops-extension-api";
 import { WorkRestClient } from "azure-devops-extension-api/Work";
 import { CoreRestClient } from "azure-devops-extension-api/Core";
 import { WorkItemTrackingRestClient, WorkItemExpand, WorkItemErrorPolicy } from "azure-devops-extension-api/WorkItemTracking";
-
-import { getClient } from "./ClientWrapper";
-
+import { GanttChartTab } from "./GanttChartTab";
+import { getProgressMap } from "./ProgressCalculationService";
 
 export interface IOverviewTabState {
     userName?: string;
@@ -80,7 +79,7 @@ export class LayoutTab extends React.Component<{}, IOverviewTabState> {
         }));
 
         const items = await Promise.all(teamWorkItems.map(({ id, ids }) => workItemsClient.getWorkItemsBatch({
-            $expand: WorkItemExpand.Fields,
+            $expand: WorkItemExpand.All,
             asOf: new Date(),
             errorPolicy: WorkItemErrorPolicy.Omit,
             fields: [],
@@ -88,6 +87,7 @@ export class LayoutTab extends React.Component<{}, IOverviewTabState> {
         }).then((items) => ({ id, items: Array.isArray(items) ? items : [] } /* apply gantt chart model transfomation */))));
 
         console.log("----", items);
+        console.log('----progress map----', getProgressMap(items));
     }
 
     public render(): JSX.Element {
@@ -120,6 +120,7 @@ export class LayoutTab extends React.Component<{}, IOverviewTabState> {
                 <Card className="flex-grow bolt-table-card" contentProps={{ contentPadding: false }}>
                     {/* todo: draw gantt chart */}
                 </Card>
+                <GanttChartTab />
             </div>
         );
     }

@@ -1,10 +1,9 @@
 import * as React from "react";
 import * as SDK from "azure-devops-extension-sdk";
-import { CommonServiceIds, IExtensionDataManager, IExtensionDataService } from "azure-devops-extension-api";
+import { CommonServiceIds, IExtensionDataManager, IExtensionDataService, } from "azure-devops-extension-api";
 
 import { Button } from "azure-devops-ui/Button";
 import { TextField } from "azure-devops-ui/TextField";
-import { getClient } from "./ClientWrapper";
 
 export interface IExtensionDataState {
     dataText?: string;

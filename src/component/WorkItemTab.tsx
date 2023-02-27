@@ -11,9 +11,8 @@ import { ListSelection } from "azure-devops-ui/List";
 import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { TextField } from "azure-devops-ui/TextField";
 
-import { CommonServiceIds, IProjectPageService } from "azure-devops-extension-api";
+import { CommonServiceIds, IProjectPageService, getClient } from "azure-devops-extension-api";
 import { IWorkItemFormNavigationService, WorkItemTrackingRestClient, WorkItemTrackingServiceIds } from "azure-devops-extension-api/WorkItemTracking";
-import { getClient } from "./ClientWrapper";
 
 export class WorkItemTab extends React.Component<{}, {}> {
 

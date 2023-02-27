@@ -12,8 +12,6 @@ import { Page } from "azure-devops-ui/Page";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import {LayoutTab, StatesTab, WorkItemTab} from "./component"
-import { GanttChartTab } from "./component/GanttChartTab";
-
 interface IHubState {
   selectedTabId: string;
   fullScreenMode: boolean;
@@ -57,7 +55,6 @@ class Hub extends React.Component<{}, IHubState> {
           <Tab name="Layout" id="layout" />
           <Tab name="States" id="states" />
           <Tab name="WorkItem" id="work-item" />
-          <Tab name="GanttChart" id="gantt-chart" />
         </TabBar>
 
         {this.getPageContent()}
@@ -82,9 +79,6 @@ class Hub extends React.Component<{}, IHubState> {
     }
     else if (selectedTabId === "work-item") {
       return <WorkItemTab />;
-    }
-    else if (selectedTabId === "gantt-chart") {
-      return <GanttChartTab />
     }
   }
 

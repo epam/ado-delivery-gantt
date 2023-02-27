@@ -4,9 +4,10 @@
 
 Download and install the following tools
 1. [Visual Studio Code](https://code.visualstudio.com/download)
-2. The [tfx-cli](https://www.npmjs.com/package/tfx-cli) npm package
-3. The [webpack](https://www.npmjs.com/package/webpack) npm package
-4. The [webpack-dev-server](https://www.npmjs.com/package/webpack-dev-server) npm package
+2. node version 19.6.0 or greater
+3. The [tfx-cli](https://www.npmjs.com/package/tfx-cli) npm package
+4. The [webpack](https://www.npmjs.com/package/webpack) npm package
+5. The [webpack-dev-server](https://www.npmjs.com/package/webpack-dev-server) npm package
 
 
 ## Dependencies
@@ -25,13 +26,14 @@ Some external dependencies:
 
 ## Building the project
 
-Just install:
-    npm install
+Just run:
+    `npm install`
 
 ### Launch project to debug against Azure DevOps    
-1. npm run start:dev
-2. java LocalHTTPServer.java (env X_COOKIE="", copy from browser for dev.azure.com) 
-3. In VS Code, press **F5** to start debugging (making sure the webpack-dev-server is still running).
+1. `npm run start:dev`
+2. `javac LocalHTTPServer.java` (env X_COOKIE="", copy from browser for dev.azure.com)
+3. `java LocalHTTPServer`
+4. In VS Code, press **F5** to start debugging (making sure the webpack-dev-server is still running).
 
 Once it starts up, you will have to go through the steps of allowing the `localhost:3000` certificate again and log into your Azure DevOps account. From now on, if you leave this window open, the debugger will reattach instead of starting a clean instance each time.
 
