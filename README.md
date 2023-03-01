@@ -31,9 +31,8 @@ Just run:
 
 ### Launch project to debug against Azure DevOps    
 1. `npm run start:dev`
-2. `javac LocalHTTPServer.java` (env X_COOKIE="", copy from browser for dev.azure.com)
-3. `java LocalHTTPServer`
-4. In VS Code, press **F5** to start debugging (making sure the webpack-dev-server is still running).
+2. `java LocalHTTPServer` (env X_COOKIE="", copy from browser for dev.azure.com)
+3. In VS Code, press **F5** to start debugging (making sure the webpack-dev-server is still running).
 
 Once it starts up, you will have to go through the steps of allowing the `localhost:3000` certificate again and log into your Azure DevOps account. From now on, if you leave this window open, the debugger will reattach instead of starting a clean instance each time.
 

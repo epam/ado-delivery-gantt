@@ -1,34 +1,35 @@
+import "./component.scss";
 import * as React from 'react';
+import { useState, useEffect } from 'react';
+import * as SDK from 'azure-devops-extension-sdk';
+
 import { Gantt, Task, ViewMode } from 'gantt-task-react';
 import 'gantt-task-react/dist/index.css';
-import { useState, useEffect } from 'react';
-import { ViewSwitcher } from './ViewSwitcher';
-import * as SDK from 'azure-devops-extension-sdk';
 import {
   CommonServiceIds,
   getClient,
   IProjectPageService,
 } from 'azure-devops-extension-api';
-import { WorkRestClient } from 'azure-devops-extension-api/Work';
 import { CoreRestClient } from 'azure-devops-extension-api/Core';
 import {
   WorkItemTrackingRestClient,
   WorkItemExpand,
   WorkItemErrorPolicy,
   WorkItem,
-} from 'azure-devops-extension-api/WorkItemTracking';
-import {
   IWorkItemFormNavigationService,
   WorkItemTrackingServiceIds,
+  WorkItemLink,
 } from 'azure-devops-extension-api/WorkItemTracking';
+
+import { getProgressMap } from "../service/ProgressCalculationService";
+import { ViewSwitcher } from './ViewSwitcher';
+
+import { fethcTeamWorkItems, fetchIterationDefinition } from '../service/WiqlService';
 
 const VSTS_SCHEDULING_START_DATE = 'Microsoft.VSTS.Scheduling.StartDate';
 const VSTS_SCHEDULING_TARGET_DATE = 'Microsoft.VSTS.Scheduling.TargetDate';
-const VSTS_CLOSE_DATE = 'Microsoft.VSTS.Common.ClosedDate';
-const CREATE_DATE = 'System.CreatedDate';
 const WORK_ITEM_TYPE = 'System.WorkItemType';
 const ITEM_TITLE = 'System.Title';
-const ITEM_ID = 'System.Id';
 const PROJECT = 'project';
 const EPIC = 'Epic';
 const FEATURE = 'Feature';
@@ -40,7 +41,6 @@ export const GanttChartTab = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [view, setView] = useState<ViewMode>(ViewMode.Week);
   const [isChecked, setIsChecked] = useState(true);
-  let taskIds: WorkItem[] = [];
 
   let columnWidth = 60;
   if (view === ViewMode.Month) {
@@ -56,191 +56,136 @@ export const GanttChartTab = () => {
         CommonServiceIds.ProjectPageService
       );
       const project = await projectService.getProject();
-      const coreClient = getClient(CoreRestClient);
-      const workClient = getClient(WorkRestClient);
-
-      const workItemsClient = getClient(WorkItemTrackingRestClient);
 
       if (project) {
-        const projectName = project.name;
-        const currentDate = new Date();
+        const { name: projectName } = project;
         const projects: Task[] = [];
-
+        const coreClient = getClient(CoreRestClient);
+        const workItemsClient = getClient(WorkItemTrackingRestClient);
         const teams = await coreClient.getTeams(projectName);
 
-        const teamWorkItems = await Promise.all(
-          teams.map(({ projectId, id, name }) => {
-            return workClient
-              .getTeamFieldValues({
-                project: projectName,
-                projectId,
-                team: name,
-                teamId: id,
-              })
-              .then(({ values }) => {
-                const areas = values.map(({ value }) => `'${value}'`);
-                return workItemsClient
-                  .queryByWiql(
-                    {
-                      query: `SELECT * FROM workitems WHERE [System.AreaPath] IN (${areas}) ORDER BY [System.ChangedDate] DESC`,
-                    },
-                    projectId,
-                    id
-                  )
-                  .then(({ workItems = [] }) => ({
-                    id,
-                    ids: workItems.map(({ id }) => id),
-                  }));
-              });
-          })
-        );
+        const teamWorkItems = await Promise.all(teams.map(fethcTeamWorkItems));
+        const teamIterations = new Map((await Promise.all(teams.map(fetchIterationDefinition))).map(({ id, ...rest }) => [id, rest]));
+        const projectItems = await Promise.all(teamWorkItems.map(({ id, ids, connections }) => ids.length > 0 ? workItemsClient.getWorkItemsBatch({
+          $expand: WorkItemExpand.All,
+          asOf: new Date(),
+          errorPolicy: WorkItemErrorPolicy.Omit,
+          fields: [],
+          ids
+        }).then((items) => ({ id, items: Array.isArray(items) ? items : [], connections }))
+          : Promise.resolve({ id, items: [], connections: {} })));
 
-        const items = await Promise.all(
-          teamWorkItems.map(({ id, ids }) =>
-            workItemsClient
-              .getWorkItemsBatch({
-                $expand: WorkItemExpand.All,
-                asOf: new Date(),
-                errorPolicy: WorkItemErrorPolicy.Omit,
-                fields: [],
-                ids,
-              })
-              .then((items) => ({
-                id,
-                items: Array.isArray(items) ? items : [],
-              }))
-          )
-        );
+        const map = projectItems.reduce((acc, { id, items }) => {
+          acc.set(id + EPIC, items.filter((item) => item.fields[WORK_ITEM_TYPE] === EPIC));
+          acc.set(id + USER_STORY, items.filter((item) => item.fields[WORK_ITEM_TYPE] === USER_STORY));
+          acc.set(id + FEATURE, items.filter((item) => item.fields[WORK_ITEM_TYPE] === FEATURE));
+          acc.set(id + TASK_ITEM, items.filter((item) => item.fields[WORK_ITEM_TYPE] === TASK_ITEM));
+          return acc;
+        }, new Map<String, WorkItem[]>());
 
-        console.log(items);
+        const progressMap = getProgressMap(teams, map);
 
-        teams.forEach((team) => {
+        type TeamDictionaryValue = { connections: { [key: string]:  WorkItemLink[]; }, map: Map<string, WorkItem>};
+
+        const teamDictionary = new Map<string, TeamDictionaryValue>(projectItems.map(({ id, items, connections }) => [id, { connections, map: new Map(items.map(item => [`${item.id}`, item])) }]));
+
+        teams.forEach(team => {
+          const teamId = team.id;
+          const iteration = teamIterations.get(teamId);
+          const { start, end } = iteration as { start: Date, end: Date };
+
           projects.push({
-            start: new Date(
-              currentDate.getFullYear(),
-              currentDate.getMonth(),
-              1
-            ),
-            end: new Date(
-              currentDate.getFullYear() + 1,
-              currentDate.getMonth(),
-              1
-            ),
+            //displayOrder: latestOrder,
+            start,
+            end,
             name: team.name,
-            id: team.id,
+            // project: team.id,
+            id: teamId,
             progress: 0,
             type: PROJECT,
             hideChildren: true,
           });
 
-          items.forEach((item) =>
-            item.items.forEach((wItem) => {
-              if (item.id === team.id) {
-                const startEpicDate = wItem.fields[VSTS_SCHEDULING_START_DATE];
-                const endEpicDate = wItem.fields[VSTS_SCHEDULING_TARGET_DATE];
-                if (
-                  wItem.fields[WORK_ITEM_TYPE] == EPIC &&
-                  startEpicDate &&
-                  endEpicDate
-                ) {
-                 const forward = wItem?.relations.find((forward) => forward.rel === 'System.LinkTypes.Hierarchy-Forward');
-                  projects.push({
-                    start: startEpicDate,
-                    end: endEpicDate,
-                    name: wItem.fields[ITEM_TITLE],
-                    id: wItem.fields[ITEM_ID],
-                    progress: 25,
-                    type: forward ? PROJECT : TASK,
-                    project: item.id,
-                    dependencies: [team.id],
-                    hideChildren: true,
-                  });
+          const { connections, map } = teamDictionary.get(teamId) as TeamDictionaryValue;
 
-                  wItem.relations.filter((relation) => relation.rel === 'System.LinkTypes.Hierarchy-Forward').forEach((wFeature) => {
-                    const id = getUrlId(wFeature.url);
-                  //  if (id && id !== Number(item.id)) {
-                      const feature = item.items.find((it1) => it1.id === id && it1.fields[WORK_ITEM_TYPE] === FEATURE);
-                      const startFeatureDate = feature && feature.fields[VSTS_SCHEDULING_START_DATE]
-                            ? feature.fields[VSTS_SCHEDULING_START_DATE]
-                            : startEpicDate;
-                          const endFeatureDate = feature && feature.fields[VSTS_SCHEDULING_TARGET_DATE]
-                            ? feature.fields[VSTS_SCHEDULING_TARGET_DATE]
-                            : endEpicDate;
-                      if (
-                        feature
-                      ) {
-                        const forward = feature.relations.find((forward) => forward.rel === 'System.LinkTypes.Hierarchy-Forward');
-                        projects.push({
-                          start: startFeatureDate,
-                          end: endFeatureDate,
-                          name: feature.fields[ITEM_TITLE],
-                          id: feature.fields[ITEM_ID],
-                          progress: 0,
-                          type: forward ? PROJECT : TASK,
-                          project: wItem.fields[ITEM_ID],
-                          dependencies: [wItem.fields[ITEM_ID]],
-                          hideChildren: true,
-                        });
+          Object.keys(connections)
+            .filter(itemId => map.get(itemId)?.fields[WORK_ITEM_TYPE] === EPIC)
+            .map(itemId => connections[itemId])
+            .reduce((acc, next) => [...acc, ...next], [])
+            .forEach(item => {
+              const { target: { id } } = item;
+              const workItem = map.get(`${id}`) as WorkItem;
+              const progress = progressMap.get(team.id + workItem.id);
+              const hasChild = workItem?.relations?.some(({ attributes = {} }) => attributes.name === 'Child');
 
-                        feature.relations.filter((relation) => relation.rel === 'System.LinkTypes.Hierarchy-Forward').forEach((wStory) => {
-                          const sId = getUrlId(wStory.url);
-                          const storyItem = item.items.find((it2) => it2.id === sId && it2.fields[WORK_ITEM_TYPE] == USER_STORY);
-                          const startStoryDate = storyItem && storyItem.fields[CREATE_DATE]
-                            ? storyItem.fields[CREATE_DATE]
-                            : feature.fields[VSTS_SCHEDULING_START_DATE];
-                          const endStoryDate = storyItem && storyItem.fields[VSTS_CLOSE_DATE]
-                            ? storyItem.fields[VSTS_CLOSE_DATE]
-                            : feature.fields[VSTS_SCHEDULING_TARGET_DATE];
-                          if (storyItem) {
-                            //if (sId && sId !== feature.id) {
-                              const forward = storyItem.relations.find((forward) => forward.rel === 'System.LinkTypes.Hierarchy-Forward');
-                              projects.push({
-                                start: startStoryDate,
-                                end: endStoryDate,
-                                name: storyItem.fields[ITEM_TITLE],
-                                id: storyItem.fields[ITEM_ID],
-                                progress: 0,
-                                type: forward ? PROJECT : TASK,
-                                project: feature.fields[ITEM_ID],
-                                dependencies: [feature.fields[ITEM_ID]],
-                                hideChildren: true,
-                              });
-                          //  }
-                            storyItem.relations.filter((relation) => relation.rel === 'System.LinkTypes.Hierarchy-Forward').forEach((wTask) => {
-                              const tId = getUrlId(wTask.url);
-                              const taskItem = item.items.find((it3) => it3.id === tId && it3.fields[WORK_ITEM_TYPE] == TASK_ITEM);
-                              const startTaskDate = taskItem && taskItem.fields[CREATE_DATE]
-                                ? taskItem.fields[CREATE_DATE]
-                                : startStoryDate;
-                              const endTaskDate = taskItem && taskItem.fields[VSTS_CLOSE_DATE]
-                                ? taskItem.fields[VSTS_CLOSE_DATE]
-                                : endStoryDate;
-                              if (taskItem) {
-                              //if (tId && Number(tId) !== storyItem.id) {
-                                projects.push({
-                                  start: startTaskDate,
-                                  end: endTaskDate,
-                                  name: taskItem.fields[ITEM_TITLE],
-                                  id: taskItem.fields[ITEM_ID],
-                                  progress: 0,
-                                  type: TASK,
-                                  project: storyItem.fields[ITEM_ID],
-                                  dependencies: [storyItem.fields[ITEM_ID]],
-                                  hideChildren: true,
-                                });
-                              //}
-                            }
-                          });
-                          }
-                        });
-                      }
-                   // }
-                  });
-                }
-              }
-            })
-          );
-        });
+              projects.push({
+                //displayOrder: latestOrder,
+                start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
+                end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
+                name: workItem.fields[ITEM_TITLE],
+                id: workItem.id + '',
+                progress: progress?.timelineProgress || 0,
+                styles: {
+                  backgroundColor: progress?.status,
+                  // backgroundSelectedColor: "string";
+                  // progressColor: "string";
+                  // progressSelectedColor: "string";
+                },
+                type: hasChild && PROJECT || TASK,
+                project: `${item?.source?.id || teamId}`,
+                hideChildren: true,
+                // isDisabled:
+                dependencies: [`${item?.source?.id || teamId}`]
+              });
+            });
+
+            const othersId = `${teamId}_others`;
+
+            projects.push({
+              //displayOrder: latestOrder,
+              start,
+              end,
+              name: 'Others',
+              project: team.id,
+              id: othersId,
+              progress: 0,
+              type: PROJECT,
+              hideChildren: true,
+            });
+
+          Object.keys(connections)
+            .filter(itemId => map.get(itemId)?.fields[WORK_ITEM_TYPE] !== EPIC)
+            .map(itemId => connections[itemId])
+            .reduce((acc, next) => [...acc, ...next], [])
+            .forEach(item => {
+              const { target: { id } } = item;
+              const workItem = map.get(`${id}`) as WorkItem;
+              const progress = progressMap.get(team.id + workItem.id);
+              const hasChild = workItem?.relations?.some(({ attributes = {} }) => attributes.name === 'Child');
+
+              projects.push({
+                //displayOrder: latestOrder,
+                start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
+                end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
+                name: workItem.fields[ITEM_TITLE],
+                id: workItem.id + '',
+                progress: progress?.timelineProgress || 0,
+                styles: {
+                  backgroundColor: progress?.status,
+                  // backgroundSelectedColor: "string";
+                  // progressColor: "string";
+                  // progressSelectedColor: "string";
+                },
+                type: hasChild && PROJECT || TASK,
+                project: `${item?.source?.id || othersId}`,
+                hideChildren: true,
+                // isDisabled:
+                dependencies: [`${item?.source?.id || othersId}`]
+              });
+            });
+          });
+
+        console.log("Tasks ----", projects);
         setTasks(projects);
       }
     })();
@@ -262,13 +207,6 @@ export const GanttChartTab = () => {
     const taskId = task.id;
     if (isSelected && Number(taskId)) {
       navSvc.openWorkItem(parseInt(taskId));
-    }
-  };
-
-  const getUrlId = (url: string): Number | undefined => {
-    const id = url.split(/[/ ]+/).pop();
-    if (id) {
-      return Number(id);
     }
   };
 

@@ -11,7 +11,9 @@ import { Header, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
-import {LayoutTab, StatesTab, WorkItemTab} from "./component"
+import { LayoutTab, StatesTab, WorkItemTab } from "./component"
+import { useEffect, useState } from "react";
+
 interface IHubState {
   selectedTabId: string;
   fullScreenMode: boolean;
@@ -20,57 +22,23 @@ interface IHubState {
   useCompactPivots?: boolean;
 }
 
-class Hub extends React.Component<{}, IHubState> {
-  constructor(props: {}) {
-    super(props);
-    this.state = {
-      selectedTabId: "layout",
-      fullScreenMode: false
+export const Hub = () => {
+
+  const [hubState, setHubState] = useState<IHubState>({ fullScreenMode: false, selectedTabId: 'layout' });
+
+  useEffect(() => {
+    const load = async () => {
+      await SDK.init();
+      initializeFullScreenState();
     };
-  }
 
-  public componentDidMount() {
-    SDK.init();
-    this.initializeFullScreenState();
-  }
-
-  public render(): JSX.Element {
-
-    const { selectedTabId, headerDescription, useCompactPivots, useLargeTitle } = this.state;
-
-    return (
-      <Page className="sample-hub flex-grow">
-
-        <Header title="Sample Hub"
-          commandBarItems={this.getCommandBarItems()}
-          description={headerDescription}
-          titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />
+    load()
+      .catch(console.error);
+  }, []);
 
 
-        <TabBar
-          onSelectedTabChanged={this.onSelectedTabChanged}
-          selectedTabId={selectedTabId}
-          tabSize={useCompactPivots ? TabSize.Compact : TabSize.Tall}>
-
-          <Tab name="Layout" id="layout" />
-          <Tab name="States" id="states" />
-          <Tab name="WorkItem" id="work-item" />
-        </TabBar>
-
-        {this.getPageContent()}
-      </Page>
-    );
-  }
-
-
-  private onSelectedTabChanged = (newTabId: string) => {
-    this.setState({
-      selectedTabId: newTabId
-    })
-  }
-
-  private getPageContent() {
-    const { selectedTabId } = this.state;
+  const getPageContent = () => {
+    const { selectedTabId } = hubState;
     if (selectedTabId === "layout") {
       return <LayoutTab />;
     }
@@ -82,86 +50,132 @@ class Hub extends React.Component<{}, IHubState> {
     }
   }
 
-  private getCommandBarItems(): IHeaderCommandBarItem[] {
+  const getCommandBarItems = (): IHeaderCommandBarItem[] => {
+    const { fullScreenMode } = hubState;
     return [
       {
         id: "fullScreen",
-        ariaLabel: this.state.fullScreenMode ? "Exit full screen mode" : "Enter full screen mode",
+        ariaLabel: fullScreenMode ? "Exit full screen mode" : "Enter full screen mode",
         iconProps: {
-          iconName: this.state.fullScreenMode ? "BackToWindow" : "FullScreen"
+          iconName: fullScreenMode ? "BackToWindow" : "FullScreen"
         },
-        onActivate: () => { this.onToggleFullScreenMode() }
+        onActivate: () => { onToggleFullScreenMode() }
       },
       {
         id: "customDialog",
         text: "Custom Dialog",
-        onActivate: () => { this.onCustomPromptClick() },
+        onActivate: () => { onCustomPromptClick() },
         tooltipProps: {
           text: "Open a dialog with custom extension content"
         }
       }
     ];
-  }
+  };
 
-  private async onMessagePromptClick(): Promise<void> {
+  const onMessagePromptClick = async () => {
     const dialogService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
     dialogService.openMessageDialog("Use large title?", {
       showCancel: true,
       title: "Message dialog",
       onClose: (result) => {
-        this.setState({ useLargeTitle: result });
+        setHubState(current => {
+          return { ...current, useLargeTitle: result }
+        });
       }
     });
   }
 
-  private async onCustomPromptClick(): Promise<void> {
+  const onCustomPromptClick = async () => {
     const dialogService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
+    const { useCompactPivots } = hubState;
     dialogService.openCustomDialog<boolean | undefined>(SDK.getExtensionContext().id + ".panel-content", {
       title: "Custom dialog",
       configuration: {
         message: "Use compact pivots?",
-        initialValue: this.state.useCompactPivots
+        initialValue: useCompactPivots
       },
       onClose: (result) => {
         if (result !== undefined) {
-          this.setState({ useCompactPivots: result });
+          setHubState(current => {
+            return { ...current, useCompactPivots: result };
+          });
         }
       }
     });
   }
 
-  private async onPanelClick(): Promise<void> {
+  const onPanelClick = async () => {
     const panelService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
+    const { headerDescription } = hubState;
     panelService.openPanel<boolean | undefined>(SDK.getExtensionContext().id + ".panel-content", {
       title: "My Panel",
       description: "Description of my panel",
       configuration: {
         message: "Show header description?",
-        initialValue: !!this.state.headerDescription
+        initialValue: !!headerDescription
       },
       onClose: (result) => {
         if (result !== undefined) {
-          this.setState({ headerDescription: result ? "This is a header description" : undefined });
+          setHubState(current => {
+            return { ...current, headerDescription: headerDescription }
+          });
         }
       }
     });
   }
 
-  private async initializeFullScreenState() {
+  const initializeFullScreenState = async () => {
     const layoutService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
     const fullScreenMode = await layoutService.getFullScreenMode();
-    if (fullScreenMode !== this.state.fullScreenMode) {
-      this.setState({ fullScreenMode });
+    if (fullScreenMode !== hubState.fullScreenMode) {
+      setHubState(current => {
+        return { ...current, fullScreenMode: fullScreenMode }
+      });
     }
   }
 
-  private async onToggleFullScreenMode(): Promise<void> {
-    const fullScreenMode = !this.state.fullScreenMode;
-    this.setState({ fullScreenMode });
+  const onToggleFullScreenMode = async () => {
+    const { fullScreenMode } = hubState;
+    setHubState(current => {
+      return { ...current, fullScreenMode: fullScreenMode }
+    });
 
     const layoutService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
     layoutService.setFullScreenMode(fullScreenMode);
   }
+
+  const onSelectedTabChanged = (newTabId: string) => {
+    setHubState(current => {
+      return { ...current, selectedTabId: newTabId }
+    });
+  }
+
+
+  const { selectedTabId, headerDescription, useCompactPivots, useLargeTitle } = hubState;
+
+  return (
+    <Page className="sample-hub flex-grow">
+
+      <Header title="Sample Hub"
+        commandBarItems={getCommandBarItems()}
+        description={headerDescription}
+        titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />
+
+
+      <TabBar
+        onSelectedTabChanged={onSelectedTabChanged}
+        selectedTabId={selectedTabId}
+        tabSize={useCompactPivots ? TabSize.Compact : TabSize.Tall}>
+
+        <Tab name="Layout" id="layout" />
+        <Tab name="States" id="states" />
+        <Tab name="WorkItem" id="work-item" />
+        <Tab name="GanttChart" id="gantt-chart" />
+      </TabBar>
+
+      {getPageContent()}
+    </Page>
+  );
 
 }
 

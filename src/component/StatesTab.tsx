@@ -4,6 +4,7 @@ import { CommonServiceIds, IExtensionDataManager, IExtensionDataService, } from 
 
 import { Button } from "azure-devops-ui/Button";
 import { TextField } from "azure-devops-ui/TextField";
+import { useEffect, useState } from "react";
 
 export interface IExtensionDataState {
     dataText?: string;
@@ -11,71 +12,72 @@ export interface IExtensionDataState {
     ready?: boolean;
 }
 
-export class StatesTab extends React.Component<{}, IExtensionDataState> {
+export const StatesTab = () => {
 
-    private _dataManager?: IExtensionDataManager;
+    const [statesTab, setStatesTab] = useState<IExtensionDataState>({});
 
-    constructor(props: {}) {
-        super(props);
-        this.state = {};
-    }
+    let _dataManager: IExtensionDataManager | undefined;
 
-    public componentDidMount() {
-        this.initializeState();
-    }
+    useEffect(() => {
+        const initialize = async () => {
+            await SDK.ready();
+            const accessToken = await SDK.getAccessToken();
+            const extDataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
+            _dataManager = await extDataService.getExtensionDataManager(SDK.getExtensionContext().id, accessToken);
 
-    private async initializeState(): Promise<void> {
-        await SDK.ready();
-        const accessToken = await SDK.getAccessToken();
-        const extDataService = await SDK.getService<IExtensionDataService>(CommonServiceIds.ExtensionDataService);
-        this._dataManager = await extDataService.getExtensionDataManager(SDK.getExtensionContext().id, accessToken);
-
-        this._dataManager.getValue<string>("test-id").then((data) => {
-            this.setState({
-                dataText: data,
-                persistedText: data,
-                ready: true
+            _dataManager.getValue<string>("test-id").then((data) => {
+                setStatesTab({
+                    dataText: data,
+                    persistedText: data,
+                    ready: true
+                });
+            }, () => {
+                setStatesTab({
+                    dataText: "",
+                    ready: true
+                });
             });
-        }, () => {
-            this.setState({
-                dataText: "",
-                ready: true
+        }
+
+        initialize()
+            .catch(console.error);
+    }, []);
+
+    const onTextValueChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, value: string): void => {
+        setStatesTab(current => {
+            return { ...current, dataText: value }
+        });
+    };
+
+    const onSaveData = (): void => {
+        const { dataText } = statesTab;
+        setStatesTab(current => {
+            return { ...current, ready: false }
+        });
+        _dataManager!.setValue<string>("test-id", dataText || "").then(() => {
+            setStatesTab(current => {
+                return { ...current, persistedText: dataText, ready: true }
             });
         });
     }
 
-    public render(): JSX.Element {
-        const { dataText, ready, persistedText } = this.state;
-        return (
-            <div className="page-content page-content-top flex-row rhythm-horizontal-16">
-                <TextField
-                    value={dataText}
-                    onChange={this.onTextValueChanged}
-                    disabled={!ready}
-                />
-                <Button
-                    text="Save"
-                    primary={true}
-                    onClick={this.onSaveData}
-                    disabled={!ready || dataText === persistedText}
-                />
-            </div>
-        );
 
-    }
+    const { dataText, ready, persistedText } = statesTab;
 
-    private onTextValueChanged = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, value: string): void => {
-        this.setState({ dataText: value });
-    }
+    return (
+        <div className="page-content page-content-top flex-row rhythm-horizontal-16">
+            <TextField
+                value={dataText}
+                onChange={onTextValueChanged}
+                disabled={!ready}
+            />
+            <Button
+                text="Save"
+                primary={true}
+                onClick={onSaveData}
+                disabled={!ready || dataText === persistedText}
+            />
+        </div>
+    );
 
-    private onSaveData = (): void => {
-        const { dataText } = this.state;
-        this.setState({ ready: false });
-        this._dataManager!.setValue<string>("test-id", dataText || "").then(() => {
-            this.setState({
-                ready: true,
-                persistedText: dataText
-            });
-        });
-    }
 }

@@ -1,3 +1,4 @@
+import { WebApiTeam } from "azure-devops-extension-api/Core";
 import { WorkItem } from "azure-devops-extension-api/WorkItemTracking";
 
 interface ProgressInterface {
@@ -8,29 +9,31 @@ interface ProgressInterface {
     type: string;
 }
 
-export function getProgressMap(projects: { id: String; items: WorkItem[] }[]): Map<number, ProgressInterface>[] {
-    return projects.map(project => {
-        let projectItems = project['items'];
-        let tasks = projectItems.filter((item) => item.fields['System.WorkItemType'] === 'Task');
-        let stories = projectItems.filter((item) => item.fields['System.WorkItemType'] === 'User Story');
-        let features = projectItems.filter((item) => item.fields['System.WorkItemType'] === 'Feature');
-        let epics = projectItems.filter((item) => item.fields['System.WorkItemType'] === 'Epic');
-        let progressMap: Map<number, ProgressInterface> = new Map<number, ProgressInterface>();
+export function getProgressMap(teams: WebApiTeam[], map: Map<String, WorkItem[]>): Map<string, ProgressInterface> {
+    let progressMap = new Map<string, ProgressInterface>();
+    teams.forEach(team => {
 
-        calculateSimpleItems(tasks, progressMap);
-        calculateSimpleItems(stories, progressMap);
-        calculateTimelineProgressItems(features, progressMap);
-        calculateTimelineProgressItems(epics, progressMap);
+        let tasks = map.get(team.id + 'Task');
+        let stories = map.get(team.id + 'User Story');
+        let features = map.get(team.id + 'Feature');
+        let epics = map.get(team.id + 'Epic');
+
+        calculateSimpleItems(team.id, tasks || [], progressMap);
+        calculateSimpleItems(team.id, stories || [], progressMap);
+        calculateTimelineProgressItems(team.id, features || [], progressMap);
+        calculateTimelineProgressItems(team.id, epics || [], progressMap);
         return progressMap;
     });
+
+    return progressMap
 }
 
-function calculateSimpleItems(items: WorkItem[], progressMap: Map<number, ProgressInterface>) {
+function calculateSimpleItems(id: string, items: WorkItem[], progressMap: Map<string, ProgressInterface>) {
     items.forEach(item => {
         let itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 1 : 0;
         let parentId = getParentId(item);
         if (parentId != null) {
-            progressMap.set(item.id, {
+            progressMap.set(id + item.id, {
                 parentId: parentId ? parseInt(parentId) : 0,
                 subtaskProgress: itemProgress,
                 type: item.fields["System.WorkItemType"]
@@ -39,7 +42,7 @@ function calculateSimpleItems(items: WorkItem[], progressMap: Map<number, Progre
     });
 }
 
-function calculateTimelineProgressItems(items: WorkItem[], progressMap: Map<number, ProgressInterface>) {
+function calculateTimelineProgressItems(id: string, items: WorkItem[], progressMap: Map<string, ProgressInterface>) {
     items.forEach(item => {
         if (item.fields['Microsoft.VSTS.Scheduling.StartDate'] && item.fields['Microsoft.VSTS.Scheduling.TargetDate']) {
             const startDate = new Date(item.fields['Microsoft.VSTS.Scheduling.StartDate']);
@@ -50,7 +53,7 @@ function calculateTimelineProgressItems(items: WorkItem[], progressMap: Map<numb
             let itemProgress = calculateProgress(startDate, endDate, subitemProgress);
             let parentId = getParentId(item);
             if (parentId != null || item.fields["System.WorkItemType"] === 'Epic') {
-                progressMap.set(item.id, {
+                progressMap.set(id + item.id, {
                     parentId: parentId ? parseInt(parentId) : 0,
                     subtaskProgress: itemProgress[0],
                     timelineProgress: itemProgress[1],
