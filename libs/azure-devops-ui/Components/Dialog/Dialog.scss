@@ -1,0 +1,68 @@
+@import '../../_coreStyles.scss';
+.bolt-dialog-callout-content {
+    margin: $spacing-16;
+    border-radius: 6px;
+    overflow: hidden;
+
+    @include ms-high-contrast-override {
+        border: solid 1px;
+    }
+
+    &.bolt-callout-shadow {
+        box-shadow: 0px 25.6px 57.6px $panelShadowColor, 0px 4.8px 14.4px $panelShadowSecondaryColor;
+    }
+
+    &.bolt-dialog-mobile {
+        margin-left: $spacing-32;
+        margin-right: $spacing-32;
+        min-width: 0px;
+    }
+}
+
+.bolt-lower-right-corner-dialog-content {
+    width: 420px;
+}
+
+.bolt-dialog .bolt-panel-footer {
+    padding: $spacing-16 $spacing-20;
+}
+
+.bolt-dialog-content {
+    padding-bottom: $spacing-4;
+}
+
+.bolt-dialog-content-bottom-padding {
+    padding-bottom: $spacing-32;
+}
+
+.bolt-dialog-content {
+    overflow: auto;
+    position: relative;
+}
+
+.bolt-dialog-callout.no-events {
+    pointer-events: none;
+}
+
+.bolt-dialog {
+    pointer-events: auto;
+}
+
+.bolt-dialog-resize-icon {
+    margin-left: auto;
+    padding-right: $spacing-4;
+    cursor: se-resize;
+}
+
+.bolt-dialog .bolt-dialog-resizable-footer {
+    padding-bottom: 0;
+    min-height: 48px;
+}
+
+.bolt-dialog-overlay {
+    background-color: $calloutFilteredBackgroundColor;
+
+    @include ms-high-contrast-override {
+        background: transparent;
+    }
+}

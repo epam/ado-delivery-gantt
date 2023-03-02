@@ -1,0 +1,62 @@
+@import '../../_coreStyles.scss';
+.bolt-suggestions-container {
+    background: $neutral-2;
+    border-radius: 4px;
+    max-height: 300px;
+    min-width: 294px;
+}
+
+.bolt-suggestions-item {
+    border-left: 2px solid transparent;
+
+    &:hover,
+    &:focus,
+    &.bolt-suggestions-isSuggested {
+        background-color: $transblack-4;
+        border-left: 2px solid $communication-tint-10;
+
+        @include ms-high-contrast-override {
+            forced-color-adjust: none;
+            background-color: highlight;
+            color: highlightText;
+        }
+    }
+}
+
+.bolt-suggestions-item {
+    @include ms-high-contrast-override {
+        .bolt-button.bolt-icon-button.bolt-contact-card-button {
+            border-color: highlightText;
+            color: window;
+            &:focus {
+                border-color: windowtext;
+            }
+        }
+    }
+}
+
+.bolt-suggestions-none {
+    height: 32px;
+    padding: $spacing-8;
+}
+
+.bolt-suggestions-none-live-region.has-suggestions {
+    height: 0px;
+    width: 0px;
+}
+
+.bolt-suggestions-item-button {
+    padding: $spacing-8;
+
+    @include ms-high-contrast-override {
+        border: 1px solid Highlight;
+    }
+}
+
+.bolt-suggestion-spacer {
+    padding: $spacing-4;
+}
+
+.bolt-suggestions-spinner {
+    height: 300px;
+}

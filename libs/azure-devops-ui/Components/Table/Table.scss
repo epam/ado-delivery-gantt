@@ -1,0 +1,256 @@
+@import '../../_widgetsCommon.scss';
+$tableCellVerticalPadding: 0.5625rem;
+$tableCellHorizontalPadding: 0.75rem;
+
+$tableCellLinkVerticalPadding: 0.1875rem;
+$tableCellLinkHorizontalPadding: 0.375rem;
+
+$tableCellInlineLinkVerticalPadding: 0.1875rem;
+$tableCellInlineLinkHorizontalPadding: 0.25rem;
+
+.bolt-table-header-cell {
+    outline: none;
+    padding: 0;
+    border-bottom: 1px solid $list-cell-bottom-border-color;
+}
+
+.bolt-table-header-border {
+    border-bottom: 1px solid $list-cell-bottom-border-color;
+}
+
+.bolt-table-header-cell-content {
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: $secondary-text;
+    font-weight: $fontWeightSemiBold;
+    margin: 7px 0px;
+    outline: none;
+    padding: 0.375rem 0.6875rem;
+    position: relative;
+    text-align: left;
+
+    @include ms-high-contrast-override {
+        border-color: transparent;
+    }
+}
+
+.bolt-table-header-cell-actionable > .bolt-table-header-cell-content {
+    cursor: pointer;
+
+    &:hover {
+        background-color: $list-row-hover-color;
+    }
+}
+
+.bolt-focus-visible .bolt-table-header-cell-actionable:focus > .bolt-table-header-cell-content {
+    background-color: $list-row-select-color;
+}
+
+.bolt-table-header-cell-empty:hover {
+    background-color: inherit;
+}
+
+.bolt-table-header-sort-icon {
+    padding: 0 4px;
+}
+
+.bolt-table-header-sizer {
+    bottom: 0px;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}
+
+.bolt-table-header-row.focused .bolt-table-cell-content-reveal,
+.bolt-table-header-row:hover .bolt-table-cell-content-reveal,
+.bolt-table-row.focused .bolt-table-cell-content-reveal,
+.bolt-table-row:hover .bolt-table-cell-content-reveal {
+    visibility: visible;
+}
+
+.bolt-table-two-line-cell-item {
+    padding: 1px;
+
+    .bolt-table-link:focus {
+        @include box-shadow-focus-rect(true);
+    }
+}
+
+.bolt-table-two-line-cell-icon {
+    margin-right: 12px;
+}
+
+.bolt-table-cell-compact {
+    padding: 0px;
+}
+
+.bolt-table-show-lines .bolt-table-row:not(.first-row) .bolt-table-cell {
+    border-top: 1px solid $list-cell-bottom-border-color;
+}
+
+.bolt-table-cell-primary {
+    font-weight: $fontWeightSemiBold;
+}
+
+.bolt-table-cell-tertiary {
+    color: rgba(0, 0, 0, 0.55); /* @TODO: What color to use for a light color. */
+}
+
+.justify-cell-start .bolt-list-cell-child {
+    justify-content: flex-start;
+}
+
+.justify-cell-end .bolt-list-cell-child {
+    justify-content: flex-end;
+}
+
+.bolt-table-cell-content {
+    padding: $tableCellVerticalPadding $tableCellHorizontalPadding;
+
+    .bolt-list-cell-child:not(:last-child) {
+        margin-right: 4px;
+    }
+
+    .bolt-list-cell-text {
+        flex-grow: 1;
+        overflow: hidden;
+    }
+}
+
+/// Apply to a cell's content if the cell contains only a link.
+/// @group table|link
+.bolt-table-cell-content-with-link {
+    padding: ($tableCellVerticalPadding - $tableCellLinkVerticalPadding) ($tableCellHorizontalPadding - $tableCellLinkHorizontalPadding);
+}
+
+/// Apply to a cell's content if the cell contains an inline link, along with other content.
+/// @group table|link
+.bolt-table-cell-content-with-inline-link {
+    padding: ($tableCellVerticalPadding - $tableCellInlineLinkVerticalPadding) ($tableCellHorizontalPadding - $tableCellInlineLinkHorizontalPadding);
+}
+
+/// Apply to a cell's content if the cell contains a button.
+/// @group table|link
+.bolt-table-cell-content-with-button {
+    padding-top: 0.125rem;
+    padding-bottom: 0.125rem;
+}
+
+.bolt-table-inline-link-left-padding {
+    padding-left: $tableCellInlineLinkHorizontalPadding;
+}
+
+.bolt-table-inline-link-right-padding {
+    padding-right: $tableCellInlineLinkHorizontalPadding;
+}
+
+/// Apply bolt-table-link to a link in a table.
+/// @group table|link
+.bolt-table-link.bolt-link {
+    padding: $tableCellLinkVerticalPadding $tableCellLinkHorizontalPadding;
+
+    text-decoration: underline;
+    color: inherit;
+    border-radius: 4px;
+
+    &:focus,
+    &:active {
+        outline: none;
+    }
+
+    &:hover {
+        color: $communication-foreground;
+        background-color: $transblack-6;
+    }
+}
+
+/// Apply to a link in a table that is inline - meaning there are multiple links
+/// or other non-link content in the cell.
+/// @group table|link
+.bolt-table-inline-link.bolt-table-link {
+    padding: $tableCellInlineLinkVerticalPadding $tableCellInlineLinkHorizontalPadding;
+}
+
+/// Apply to your cell's content to only show on row hover/focus
+/// @group table|visibility
+.bolt-table-cell-content-reveal {
+    visibility: hidden;
+
+    @include xsmall-screen {
+        visibility: visible;
+    }
+}
+
+.bolt-table-cell-select .bolt-table-header-cell-content:hover {
+    background-color: inherit;
+}
+
+.bolt-table-cell-select {
+    padding: 2px 0px 0px 0px;
+    font-weight: $fontWeightNormal;
+}
+
+.bolt-table-spacer-cell {
+    z-index: 1;
+}
+
+.bolt-gripper-container {
+    margin-left: 5px;
+    width: 0.625rem;
+
+    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+.bolt-gripper {
+    background-image: url("data:image/svg+xml;utf8,<svg width='6' height='20' viewBox='0 0 6 20' fill='black' opacity='0.3' xmlns='http://www.w3.org/2000/svg'><circle cx='1' cy='7' r='1'/><circle cx='1' cy='13' r='1'/><circle cx='1' cy='19' r='1'/><circle cx='5' cy='7' r='1'/><circle cx='1' cy='1' r='1'/><circle cx='5' cy='1' r='1'/><circle cx='5' cy='13' r='1'/><circle cx='5' cy='19' r='1'/></svg>");
+    height: 1.25rem;
+    width: 0.625rem;
+}
+
+.bolt-focus-visible .bolt-table-header-cell:focus > .bolt-table-header-cell-content {
+    @include box-shadow-focus-rect();
+
+    border-color: $communication-background;
+    z-index: 1;
+
+    @include ms-high-contrast-override {
+        border-color: highlight;
+        forced-color-adjust: none;
+        background: transparent;
+        color: windowtext;
+    }
+}
+
+.bolt-focus-visible .bolt-table .bolt-list-row:focus .bolt-list-cell {
+    border-color: $list-row-select-focus-border-color;
+}
+
+.bolt-focus-visible {
+    .bolt-table-link:focus {
+        color: $communication-foreground;
+        background-color: $transblack-6;
+    }
+}
+
+.bolt-focus-visible {
+    .bolt-table-header-sizer:focus {
+        border: 1px solid $communication-background;
+    }
+}
+
+.bolt-table-container.sticky-table {
+    display: inline-block;
+    overflow: auto;
+}
+
+.bolt-table.sticky-table th {
+    position: -webkit-sticky;
+    position: sticky;
+
+    background: $backgroundColor;
+    top: 0;
+    z-index: 9;
+}

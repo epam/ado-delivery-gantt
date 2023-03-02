@@ -1,0 +1,46 @@
+@import '../../Core/_platformCommon.scss';
+.bolt-sizer {
+    outline-width: 0;
+    user-select: none;
+    z-index: 1;
+}
+
+.bolt-focus-visible .bolt-sizer {
+    outline-width: 1px;
+}
+
+.bolt-sizer-column {
+    cursor: ns-resize;
+    padding: 2px 0;
+}
+
+.bolt-sizer-column.divider::before {
+    background-color: $neutral-8;
+    content: "";
+    height: 1px;
+}
+
+.bolt-sizer-row {
+    cursor: ew-resize;
+    padding: 0 2px;
+}
+
+.bolt-sizer-row.divider::before {
+    background-color: $neutral-8;
+    content: "";
+    width: 1px;
+}
+
+.bolt-sizer-portal {
+    background-color: transparent;
+    pointer-events: auto;
+    z-index: 100;
+}
+
+.bolt-sizer-portal-column {
+    cursor: ns-resize;
+}
+
+.bolt-sizer-portal-row {
+    cursor: ew-resize;
+}

@@ -1,0 +1,1 @@
+{"version":3,"sourceRoot":"","sources":["../../../src/Components/Spinner/Spinner.scss","../../../src/Core/_platformCommon.scss"],"names":[],"mappings":"AACA;EACI;EACA;;;AAGJ;EACI;IACI;;EAEJ;IACI;;;AAIR;EACI;EACA,kBCGuB;EDFvB;EAEA;EACA;EACA;EACA;;AAEA;EACI;EACA;;AAEJ;EACI;EACA;;AAEJ;EACI;EACA;;AAEJ;EACI;EACA;;;AAIR;EACI,OCxBuB","file":"Spinner.css"}

@@ -1,0 +1,43 @@
+import "../../CommonImports";
+import "../../Core/core.css";
+import "./IdentityPicker.css";
+import * as React from "react";
+import { IIdentityPickerProps } from "./IdentityPicker.Props";
+export declare class IdentityPicker extends React.Component<IIdentityPickerProps, {
+    error: string;
+}> {
+    private cachedResults;
+    private resolveEmailPromises;
+    private itemRefs;
+    private tagPickerRef;
+    private currentPromise;
+    private openedIdentityCard;
+    private outerElement;
+    private lastSearchVal;
+    private suggestions;
+    private suggestionsLoading;
+    private _isMounted;
+    private static readonly area;
+    private static readonly feature;
+    constructor(props: IIdentityPickerProps);
+    render(): JSX.Element;
+    componentDidMount(): void;
+    componentWillUnmount(): void;
+    private updateResolvedEmail;
+    private updateSuggestionsList;
+    private areTagsEqual;
+    private renderSuggestionItem;
+    private onKeyDownSuggestionItem;
+    private createDefaultItem;
+    private onOpenPersonaCard;
+    private onClosePersonaCard;
+    private shouldBlurClear;
+    private onEmptyInputFocus;
+    private focusContactCardButton;
+    private onAddIdentity;
+    private onDelimitedSearch;
+    private renderCustomSuggestionItem;
+    private convertItemToPill;
+    private onResolveSuggestions;
+    private setStateSafe;
+}

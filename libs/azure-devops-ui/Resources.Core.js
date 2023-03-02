@@ -1,0 +1,16 @@
+export var AgoHours = "{0}h ago";
+export var AgoMinutes = "{0}m ago";
+export var Collapsed = "Collapsed";
+export var DayAtTimeFormat = "{0} at {1}";
+export var DaysHoursMinutes = "{0}d {1}h {2}m";
+export var Expanded = "Expanded";
+export var FriendlyNumberBillionsFormat = "{0}B+";
+export var FriendlyNumberMillionsFormat = "{0}M+";
+export var FriendlyNumberThousandsFormat = "{0}K+";
+export var HoursMinutesSeconds = "{0}h {1}m {2}s";
+export var JustNow = "Just now";
+export var LessThanASecond = "<1s";
+export var MinutesSeconds = "{0}m {1}s";
+export var Seconds = "{0}s";
+export var Today = "Today";
+export var Yesterday = "Yesterday";

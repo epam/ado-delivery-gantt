@@ -1,0 +1,16 @@
+@import '../../_coreStyles.scss';
+.bolt-formitem-label {
+    // @OLD-PLATFORM-OVERRIDE
+    // legacy platform sets has label { color: $secondary-text; } which we don't want
+    color: inherit;
+    margin-bottom: $spacing-8;
+}
+
+.bolt-formitem-message {
+    color: $secondary-text;
+    margin-top: $spacing-8;
+}
+
+.bolt-formitem-message-error {
+    color: $error-text;
+}

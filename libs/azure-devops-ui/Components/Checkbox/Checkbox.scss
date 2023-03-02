@@ -1,0 +1,121 @@
+@import '../../_widgetsCommon.scss';
+.bolt-checkbox {
+    border-radius: 4px;
+    color: $primary-text;
+    display: inline-flex;
+    align-items: center;
+
+    &:focus {
+        outline: none;
+        @include ms-high-contrast-override {
+            border: 1px solid;
+            border-color: windowtext;
+        }
+    }
+
+    &.disabled {
+        color: $disabled-text;
+        cursor: default;
+
+        @include ms-high-contrast-override {
+            forced-color-adjust: none;
+            color: graytext;
+        }
+
+        .bolt-checkmark {
+            @include ms-high-contrast-override {
+                border-color: graytext;
+                color: graytext;
+            }
+        }
+
+        &.checked .bolt-checkmark {
+            background-color: $neutral-20;
+
+            @include ms-high-contrast-override {
+                background-color: transparent;
+                border-color: graytext;
+            }
+        }
+
+        &:not(.checked) .bolt-checkmark {
+            border: 1px solid $neutral-20;
+            @include ms-high-contrast-override {
+                border-color: graytext;
+            }
+        }
+    }
+
+    &.labelled {
+        padding: 2px 4px 2px 5px;
+    }
+
+    &:not(.labelled) {
+        margin: 2px;
+    }
+
+    &.checked .bolt-checkmark {
+        border: 1px solid transparent;
+        background-color: $communication-background;
+        color: $text-on-communication-background;
+
+        @include ms-high-contrast-override {
+            background-color: transparent;
+        }
+    }
+
+    &:not(.checked):not(.disabled) .bolt-checkmark {
+        border: 1px solid $secondary-text;
+        @include ms-high-contrast-override {
+            color: windowtext;
+            border-color: windowtext;
+        }
+
+        > .fabric-icon {
+            visibility: hidden;
+        }
+    }
+}
+
+.bolt-checkmark {
+    border-radius: 0.25rem;
+    color: transparent;
+    padding: 1px;
+    height: 1rem;
+    width: 1rem;
+}
+
+.bolt-checkbox-label {
+    padding-left: 10px;
+    padding-bottom: 1px;
+}
+
+.bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus {
+    @include box-shadow-focus-rect(false, true);
+
+    &:not(.checked):not(.labelled) .bolt-checkmark {
+        border: 1px solid $communication-background;
+        @include ms-high-contrast-highlight();
+
+        @include ms-high-contrast-override {
+            color: windowtext;
+        }
+    }
+
+    &.checked:not(.labelled) .bolt-checkmark {
+        border: 1px solid $backgroundColor;
+        @include ms-high-contrast-highlight();
+
+        @include ms-high-contrast-override {
+            color: windowtext;
+        }
+    }
+
+    .bolt-checkmark {
+        @include ms-high-contrast-highlight();
+
+        @include ms-high-contrast-override {
+            color: windowtext;
+        }
+    }
+}

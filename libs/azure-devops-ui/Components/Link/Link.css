@@ -1,0 +1,55 @@
+.bolt-link {
+  border-radius: 2px;
+  color: rgba(0, 90, 158, 1);
+  color: var(--communication-foreground,rgba(0, 90, 158, 1));
+  cursor: pointer;
+  outline: transparent;
+  text-decoration: none;
+  transition: color 80ms cubic-bezier(0.165, 0.84, 0.44, 1), background 80ms linear;
+}
+.bolt-link:hover {
+  color: rgba( 0, 69, 120 ,  1 );
+  color: rgba( var(--palette-primary-shade-30,0, 69, 120) ,  1 );
+}
+.bolt-focus-visible .bolt-link:focus {
+  animation: ms-focus-shadow-with-border-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23), 0 0 0 1px rgba(0, 120, 212, 1);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23)), 0 0 0 1px var(--focus-border-color,rgba(0, 120, 212, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-link:focus {
+    animation: none;
+  }
+}
+.bolt-link.subtle {
+  border-radius: 4px;
+  color: inherit;
+  padding: 3px 6px;
+}
+.bolt-link.subtle:hover {
+  color: rgba(0, 90, 158, 1);
+  color: var(--communication-foreground,rgba(0, 90, 158, 1));
+  background-color: rgba(0, 0, 0, 0.06);
+  background-color: var(--palette-black-alpha-6,rgba(0, 0, 0, 0.06));
+}
+.bolt-link.disabled {
+  cursor: default;
+}
+.bolt-link.underline {
+  text-decoration: underline;
+}
+
+.bolt-focus-visible .bolt-link.subtle:focus {
+  background-color: rgba(0, 0, 0, 0.06);
+  background-color: var(--palette-black-alpha-6,rgba(0, 0, 0, 0.06));
+  color: rgba(0, 90, 158, 1);
+  color: var(--communication-foreground,rgba(0, 90, 158, 1));
+  outline: none;
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-link:focus {
+    outline: 1px solid highlight !important;
+  }
+}
+
+/*# sourceMappingURL=Link.css.map */

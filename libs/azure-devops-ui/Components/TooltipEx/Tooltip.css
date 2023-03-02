@@ -1,0 +1,46 @@
+.bolt-tooltip {
+  max-width: 320px;
+  animation: tooltip-fade-in 300ms ease-in;
+}
+.bolt-tooltip .bolt-callout-content {
+  background-color: transparent;
+}
+
+.bolt-tooltip-content {
+  background-color: rgba( 51, 51, 51 ,  0.95 );
+  background-color: rgba( var(--palette-neutral-80,51, 51, 51) ,  0.95 );
+  border-radius: 2px;
+  color: rgba( 255, 255, 255 ,  1 );
+  color: rgba( var(--palette-neutral-0,255, 255, 255) ,  1 );
+  padding: 8px 12px;
+  text-align: left;
+  /* @NOTE: List break-all first and break-word second, IE11/Firefox dont support break-word, they will fallback to break-all */
+  word-break: break-all;
+  word-break: break-word;
+}
+
+.bolt-tooltip-fade-out {
+  animation: tooltip-fade-out 300ms ease-in;
+}
+.bolt-tooltip-fade-out.bolt-callout {
+  pointer-events: none;
+}
+
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes tooltip-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/*# sourceMappingURL=Tooltip.css.map */

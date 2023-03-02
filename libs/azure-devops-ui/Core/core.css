@@ -1,0 +1,937 @@
+/**
+ * User-agent style overrides required for the components to function correctly.
+ */
+* {
+  box-sizing: inherit;
+}
+
+body {
+  box-sizing: border-box;
+}
+
+/* Layout styles */
+.absolute-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.no-events {
+  pointer-events: none;
+}
+
+.scroll-hidden {
+  overflow: hidden;
+}
+
+.v-scroll-hidden {
+  overflow-y: hidden;
+}
+
+.h-scroll-hidden {
+  overflow-x: hidden;
+}
+
+.scroll-auto {
+  overflow: auto;
+}
+@media screen and (max-width: 599px) {
+  .scroll-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.v-scroll-auto {
+  overflow-y: auto;
+}
+@media screen and (max-width: 599px) {
+  .v-scroll-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.h-scroll-auto {
+  overflow-x: auto;
+}
+@media screen and (max-width: 599px) {
+  .h-scroll-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.full-height {
+  height: 100%;
+}
+
+.full-size {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/*
+ * Flex styles - applied to the flexbox (flex container).
+ */
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.inline-flex-column {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.inline-flex-row {
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.flex-center {
+  align-items: center;
+}
+
+.flex-end {
+  align-items: flex-end;
+}
+
+.flex-start {
+  align-items: flex-start;
+}
+
+.flex-stretch {
+  align-items: stretch;
+}
+
+.flex-baseline {
+  align-items: baseline;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-space-between {
+  justify-content: space-between;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/*
+ * Flex styles - appled to the flex-items (flexbox children).
+ */
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-noshrink {
+  flex-shrink: 0;
+}
+
+.flex-self-center {
+  align-self: center;
+}
+
+.flex-self-end {
+  align-self: flex-end;
+}
+
+.flex-self-start {
+  align-self: flex-start;
+}
+
+.flex-self-stretch {
+  align-self: stretch;
+}
+
+/*
+ * FlexBox semantic styles.
+ */
+.flex-cell {
+  align-items: center;
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+/* Typography styles */
+.title-l {
+  font-size: 1.75rem;
+  font-weight: bold;
+  letter-spacing: -0.04em;
+}
+
+.title-m {
+  font-size: 1.3125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.title-s {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.title-xs {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.body-xl {
+  font-size: 1.0625rem;
+}
+
+.body-l {
+  font-size: 0.9375rem;
+}
+
+.body-m {
+  font-size: 0.875rem;
+}
+
+.body-s {
+  font-size: 0.75rem;
+}
+
+.body-xs {
+  font-size: 0.6875rem;
+}
+
+.monospaced-m {
+  font-family: Menlo, Consolas, Courier New, monospace;
+  font-size: 0.8125rem;
+}
+
+.monospaced-s {
+  font-family: Menlo, Consolas, Courier New, monospace;
+  font-size: 0.75rem;
+}
+
+.monospaced-xs {
+  font-family: Menlo, Consolas, Courier New, monospace;
+  font-size: 0.6875rem;
+}
+
+/* Font size styles - these can be used to override typography styles */
+.font-size-xxs {
+  font-size: 0.5625rem;
+}
+
+.font-size-xs {
+  font-size: 0.625rem;
+}
+
+.font-size-s {
+  font-size: 0.6875rem;
+}
+
+.font-size {
+  font-size: 0.75rem;
+}
+
+.font-size-ms {
+  font-size: 0.8125rem;
+}
+
+.font-size-m {
+  font-size: 0.875rem;
+}
+
+.font-size-mm {
+  font-size: 0.9375rem;
+}
+
+.font-size-ml {
+  font-size: 1rem;
+}
+
+.font-size-l {
+  font-size: 1.125rem;
+}
+
+.font-size-ll {
+  font-size: 1.5rem;
+}
+
+.font-size-lll {
+  font-size: 1.75rem;
+}
+
+.font-size-xl {
+  font-size: 2.25rem;
+}
+
+.font-size-xxl {
+  font-size: 2.5rem;
+}
+
+.font-size-xxxl {
+  font-size: 3.5rem;
+}
+
+.font-size-xxxxl {
+  font-size: 4.5rem;
+}
+
+/* Font weight styles - these can be used to override typography styles */
+.font-weight-light {
+  font-weight: 200;
+}
+
+.font-weight-normal {
+  font-weight: normal;
+}
+
+.font-weight-semibold {
+  font-weight: 600;
+}
+
+.font-weight-heavy {
+  font-weight: bold;
+}
+
+.secondary-text {
+  color: rgba(0, 0, 0, .55);
+  color: var(--text-secondary-color,rgba(0, 0, 0, .55));
+}
+@media (forced-colors: active) {
+  .secondary-text {
+    color: graytext;
+  }
+}
+
+.monospaced-text {
+  font-family: Menlo, Consolas, Courier New, monospace;
+}
+
+.error-text {
+  color: rgba(218, 10, 0, 1);
+  color: var(--status-error-text,rgba(218, 10, 0, 1));
+}
+
+.error-text-important {
+  color: rgba(218, 10, 0, 1) !important;
+  color: var(--status-error-text,rgba(218, 10, 0, 1)) !important;
+}
+
+/* Theme-related styles */
+.themed {
+  background-color: rgba(255, 255, 255, 1);
+  background-color: var(--background-color,rgba(255, 255, 255, 1));
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+}
+
+.v-align-middle {
+  vertical-align: middle;
+}
+
+/* Depth styles */
+.depth-0 {
+  box-shadow: 0 0 0 0 transparent;
+}
+
+.depth-4 {
+  box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, .132), 0 0.3px 0.9px 0 rgba(0, 0, 0, .108);
+  box-shadow: 0 1.6px 3.6px 0 var(--callout-shadow-color,rgba(0, 0, 0, .132)), 0 0.3px 0.9px 0 var(--callout-shadow-secondary-color,rgba(0, 0, 0, .108));
+}
+
+.depth-8 {
+  box-shadow: 0 3.2px 7.2px 0 rgba(0, 0, 0, .132), 0 0.6px 1.8px 0 rgba(0, 0, 0, .108);
+  box-shadow: 0 3.2px 7.2px 0 var(--callout-shadow-color,rgba(0, 0, 0, .132)), 0 0.6px 1.8px 0 var(--callout-shadow-secondary-color,rgba(0, 0, 0, .108));
+}
+
+.depth-16 {
+  box-shadow: 0 6.4px 14.4px 0 rgba(0, 0, 0, .132), 0 1.2px 3.6px 0 rgba(0, 0, 0, .108);
+  box-shadow: 0 6.4px 14.4px 0 var(--callout-shadow-color,rgba(0, 0, 0, .132)), 0 1.2px 3.6px 0 var(--callout-shadow-secondary-color,rgba(0, 0, 0, .108));
+}
+
+.depth-64 {
+  box-shadow: 0 25.6px 57.6px 0 rgba(0, 0, 0, .132), 0 4.8px 14.4px 0 rgba(0, 0, 0, .108);
+  box-shadow: 0 25.6px 57.6px 0 var(--callout-shadow-color,rgba(0, 0, 0, .132)), 0 4.8px 14.4px 0 var(--callout-shadow-secondary-color,rgba(0, 0, 0, .108));
+}
+
+/* Sub layer styles */
+.sub-layer {
+  z-index: 10;
+}
+
+/* General cursor styles */
+.cursor-default {
+  cursor: default;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* General text styles */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.white-space-nowrap {
+  white-space: nowrap;
+}
+
+.word-break {
+  word-break: break-all;
+  word-break: break-word;
+}
+
+.selectable-text {
+  user-select: text;
+  cursor: text;
+}
+
+/* General link styles */
+.link-icon {
+  padding: 2px 2px;
+}
+
+.link-text {
+  padding: 0 2px;
+}
+
+.no-outline {
+  outline: none;
+}
+
+/* General icon styles */
+.icon-margin {
+  margin-right: 6px;
+}
+
+.icon-large-margin {
+  margin-right: 12px;
+}
+
+.contributed-icon-image {
+  background-size: contain;
+}
+.contributed-icon-image.non-themed {
+  filter: none;
+  filter: var(--third-party-icon-filter,none);
+}
+
+/*
+    Padding / Margin styles
+
+    The no/-0 styles have !important because they are intended to remove padding / Margin.
+    They shouldn't be added as the default case, only when trying to reset the padding / Margin
+    that a different selector with a single level of selectivity has added.
+*/
+.shadow-padding {
+  margin: -4px;
+  padding: 4px;
+}
+
+.margin-0,
+.no-margin {
+  margin: 0px !important;
+}
+
+.margin-4 {
+  margin: 4px;
+}
+
+.margin-8 {
+  margin: 8px;
+}
+
+.margin-16 {
+  margin: 16px;
+}
+
+.margin-bottom-4 {
+  margin-bottom: 4px;
+}
+
+.margin-bottom-8 {
+  margin-bottom: 8px;
+}
+
+.margin-bottom-16 {
+  margin-bottom: 16px;
+}
+
+.margin-horizontal-0,
+.no-h-margin {
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+
+.margin-horizontal-4 {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.margin-horizontal-8 {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.margin-horizontal-16 {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+.margin-horizontal-20 {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.margin-left-4 {
+  margin-left: 4px;
+}
+
+.margin-left-8 {
+  margin-left: 8px;
+}
+
+.margin-left-16 {
+  margin-left: 16px;
+}
+
+.margin-right-4 {
+  margin-right: 4px;
+}
+
+.margin-right-8 {
+  margin-right: 8px;
+}
+
+.margin-right-16 {
+  margin-right: 16px;
+}
+
+.margin-top-4 {
+  margin-top: 4px;
+}
+
+.margin-top-8 {
+  margin-top: 8px;
+}
+
+.margin-top-16 {
+  margin-top: 16px;
+}
+
+.margin-vertical-0,
+.no-v-margin {
+  margin-bottom: 0px !important;
+  margin-top: 0px !important;
+}
+
+.margin-vertical-4 {
+  margin-bottom: 4px;
+  margin-top: 4px;
+}
+
+.margin-vertical-8 {
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+
+.margin-vertical-16 {
+  margin-bottom: 16px;
+  margin-top: 16px;
+}
+
+.margin-vertical-20 {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.padding-0,
+.no-padding {
+  padding: 0px !important;
+}
+
+.padding-4 {
+  padding: 4px;
+}
+
+.padding-8 {
+  padding: 8px;
+}
+
+.padding-16 {
+  padding: 16px;
+}
+
+.padding-bottom-0,
+.no-bottom-padding {
+  padding-bottom: 0px !important;
+}
+
+.padding-bottom-4 {
+  padding-bottom: 4px;
+}
+
+.padding-bottom-8 {
+  padding-bottom: 8px;
+}
+
+.padding-bottom-16 {
+  padding-bottom: 16px;
+}
+
+.padding-horizontal-0,
+.no-h-padding {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+
+.padding-horizontal-4 {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.padding-horizontal-8 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.padding-horizontal-16 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.padding-horizontal-20 {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.padding-left-4 {
+  padding-left: 4px;
+}
+
+.padding-left-8 {
+  padding-left: 8px;
+}
+
+.padding-left-16 {
+  padding-left: 16px;
+}
+
+.padding-right-4 {
+  padding-right: 4px;
+}
+
+.padding-right-8 {
+  padding-right: 8px;
+}
+
+.padding-right-16 {
+  padding-right: 16px;
+}
+
+.padding-top-0,
+.no-top-padding {
+  padding-top: 0px !important;
+}
+
+.padding-top-4 {
+  padding-top: 4px;
+}
+
+.padding-top-8 {
+  padding-top: 8px;
+}
+
+.padding-top-16 {
+  padding-top: 16px;
+}
+
+.padding-vertical-0,
+.no-v-padding {
+  padding-bottom: 0px !important;
+  padding-top: 0px !important;
+}
+
+.padding-vertical-4 {
+  padding-bottom: 4px;
+  padding-top: 4px;
+}
+
+.padding-vertical-8 {
+  padding-bottom: 8px;
+  padding-top: 8px;
+}
+
+.padding-vertical-16 {
+  padding-bottom: 16px;
+  padding-top: 16px;
+}
+
+.padding-vertical-20 {
+  padding-bottom: 20px;
+  padding-top: 20px;
+}
+
+/* Rhythm styles */
+.rhythm-horizontal-4 > :not(:first-child) {
+  margin-left: 4px;
+}
+
+.rhythm-horizontal-8 > :not(:first-child) {
+  margin-left: 8px;
+}
+
+.rhythm-horizontal-16 > :not(:first-child) {
+  margin-left: 16px;
+}
+
+.rhythm-vertical-4 > :not(:first-child) {
+  margin-top: 4px;
+}
+
+.rhythm-vertical-8 > :not(:first-child) {
+  margin-top: 8px;
+}
+
+.rhythm-vertical-16 > :not(:first-child) {
+  margin-top: 16px;
+}
+
+.rhythm-vertical-20 > :not(:first-child) {
+  margin-top: 20px;
+}
+
+.rhythm-vertical-24 > :not(:first-child) {
+  margin-top: 24px;
+}
+
+.rhythm-vertical-32 > :not(:first-child) {
+  margin-top: 32px;
+}
+
+/*
+    Visibility styles
+    NOTE - leave at the end of the file so they will override the general layout styles above.
+*/
+.visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.hidden {
+  display: none;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.separator-line-top {
+  border-top:  1px solid;
+  border-top-color: rgba( 234, 234, 234 ,  1 );
+  border-top-color: rgba( var(--palette-neutral-8,234, 234, 234) ,  1 );
+}
+
+.separator-line-bottom {
+  border-bottom:  1px solid;
+  border-bottom-color: rgba( 234, 234, 234 ,  1 );
+  border-bottom-color: rgba( var(--palette-neutral-8,234, 234, 234) ,  1 );
+}
+
+.subtle-border {
+  border:  1px solid;
+  border-color: rgba( 234, 234, 234 ,  1 );
+  border-color: rgba( var(--palette-neutral-8,234, 234, 234) ,  1 );
+}
+
+/*
+    Custom styles for shimmer effects on elements.
+*/
+.shimmer {
+  animation-duration: 4s;
+  animation-timing-function: ease-in-out;
+  animation-direction: normal;
+  animation-iteration-count: infinite;
+  background: linear-gradient(to right, rgba( 244, 244, 244 ,  1 ) 0%, rgba( 234, 234, 234 ,  1 ) 50%, rgba( 244, 244, 244 ,  1 ) 100%) 0px 0px/90% 100% no-repeat rgba( 244, 244, 244 ,  1 );
+  background: linear-gradient(to right, rgba( var(--palette-neutral-4,244, 244, 244) ,  1 ) 0%, rgba( var(--palette-neutral-8,234, 234, 234) ,  1 ) 50%, rgba( var(--palette-neutral-4,244, 244, 244) ,  1 ) 100%) 0px 0px/90% 100% no-repeat rgba( var(--palette-neutral-4,244, 244, 244) ,  1 );
+  transition: opacity 200ms ease 0s;
+}
+
+@keyframes shimmer-wide {
+  0% {
+    background-position: -500px;
+  }
+  100% {
+    background-position: 500px;
+  }
+}
+@keyframes shimmer-thin {
+  0% {
+    background-position: -200px;
+  }
+  100% {
+    background-position: 200px;
+  }
+}
+.shimmer-line {
+  animation-name: shimmer-wide;
+  border-radius: 0.5em;
+}
+
+.shimmer-circle-small {
+  animation-name: shimmer-thin;
+  border-radius: 50%;
+  height: 1.3em;
+  margin-right: 4px;
+  width: 1.3em;
+}
+
+.shimmer-circle-large {
+  animation-name: shimmer-thin;
+  border-radius: 50%;
+  height: 2.3em;
+  margin-right: 4px;
+  width: 2.3em;
+}
+
+/*
+    Custom scrollbar support (only on Chrome)
+*/
+.custom-scrollbar {
+  scrollbar-color: rgba(0, 0, 0, 0.20) transparent;
+  scrollbar-color: var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20)) transparent;
+  scrollbar-width: thin;
+}
+.custom-scrollbar.scroll-auto-hide {
+  scrollbar-color: transparent transparent;
+}
+.custom-scrollbar.scroll-auto-hide:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.20) transparent;
+  scrollbar-color: var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20)) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 18px;
+  height: 18px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border: 6px solid transparent;
+  background: rgba(0, 0, 0, 0.20);
+  background: var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20));
+  border-radius: 10px;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:vertical {
+  min-height: 30px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:horizontal {
+  min-width: 30px;
+}
+
+.custom-scrollbar.scroll-auto-hide::-webkit-scrollbar-thumb {
+  background: transparent;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar.scroll-auto-hide:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.20);
+  background: var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20));
+  background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.30);
+  background: var(--palette-black-alpha-30,rgba(0, 0, 0, 0.30));
+  background-clip: padding-box;
+  border: 4px solid transparent;
+}
+
+.custom-scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar-hidden::-webkit-scrollbar {
+  width: 0;
+}
+
+.grayscale {
+  filter: grayscale(100%);
+}
+
+.screen-reader-only {
+  user-select: none;
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  -webkit-clip-path: inset(50%);
+  overflow: hidden !important;
+  white-space: nowrap;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/*# sourceMappingURL=core.css.map */

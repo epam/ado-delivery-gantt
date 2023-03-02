@@ -1,0 +1,12 @@
+@import '../../Core/_platformCommon.scss';
+/**
+ * Dropdown button styles
+ */
+.bolt-dropdown-button {
+    display: inline-flex;
+}
+
+.bolt-dropdown-button .icon-right {
+    font-size: $fontSize;
+    padding-left: 10px;
+}

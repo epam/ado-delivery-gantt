@@ -1,0 +1,25 @@
+.bolt-colorpip {
+  width: 32px;
+  height: 32px;
+  padding: 8px 8px;
+}
+.bolt-colorpip:focus {
+  outline: none;
+}
+.bolt-colorpip:focus .bolt-colorpip-content {
+  box-shadow: 0 0 0 2px rgba( 255, 255, 255 ,  1 ), 0 0 0 5px rgba( 234, 234, 234 ,  1 );
+  box-shadow: 0 0 0 2px rgba( var(--palette-neutral-0,255, 255, 255) ,  1 ), 0 0 0 5px rgba( var(--palette-neutral-8,234, 234, 234) ,  1 );
+}
+.bolt-colorpip .bolt-colorpip-content {
+  width: 16px;
+  height: 16px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px rgba( 255, 255, 255 ,  1 );
+  box-shadow: 0 0 0 2px rgba( var(--palette-neutral-0,255, 255, 255) ,  1 );
+}
+.bolt-colorpip .bolt-colorpip-content.selected, .bolt-colorpip .bolt-colorpip-content.selected:focus {
+  box-shadow: 0 0 0 2px rgba( 255, 255, 255 ,  1 ), 0 0 0 5px rgba(0, 120, 215, 0.24);
+  box-shadow: 0 0 0 2px rgba( var(--palette-neutral-0,255, 255, 255) ,  1 ), 0 0 0 5px rgba(0, 120, 215, 0.24);
+}
+
+/*# sourceMappingURL=ColorPip.css.map */

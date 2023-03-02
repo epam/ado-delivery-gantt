@@ -1,0 +1,365 @@
+/**
+ * Generalized focus treatment for components 
+ */
+.focus-treatment:focus {
+  outline: none;
+}
+
+.bolt-focus-visible .bolt-tab.focus-treatment:focus, .bolt-focus-visible .bolt-tab.focus-treatment.focused {
+  border-radius: 3px;
+  animation: ms-focus-shadow-with-border-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23), 0 0 0 1px rgba(0, 120, 212, 1);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23)), 0 0 0 1px var(--focus-border-color,rgba(0, 120, 212, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-tab.focus-treatment:focus, .bolt-focus-visible .bolt-tab.focus-treatment.focused {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-tab.focus-treatment:focus, .bolt-focus-visible .bolt-tab.focus-treatment.focused {
+    border: 1px solid Highlight;
+    forced-color-adjust: none;
+    color: windowtext;
+  }
+  .bolt-focus-visible .bolt-tab.focus-treatment:focus > *, .bolt-focus-visible .bolt-tab.focus-treatment.focused > * {
+    forced-color-adjust: auto;
+  }
+}
+
+.bolt-tab {
+  color: inherit;
+}
+
+.bolt-tabbar .vss-FilterBar {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 8px;
+  height: 32px;
+}
+.bolt-tabbar .vss-FilterBar .vss-FilterBar--list {
+  align-items: center;
+}
+.bolt-tabbar .vss-FilterBar .vss-FilterBar--list .vss-FilterBar--item.vss-FilterBar--item-keyword-container {
+  margin-right: 0px;
+}
+.bolt-tabbar .vss-FilterBar .vss-FilterBar--list .vss-FilterBar--right-items .vss-FilterBar--action {
+  display: none;
+}
+
+.bolt-tabbar.sticky {
+  position: sticky;
+  background-color: rgba(255, 255, 255, 1);
+  background-color: var(--background-color,rgba(255, 255, 255, 1));
+  z-index: 2;
+  top: 0px;
+}
+
+.bolt-tabbar-grey.sticky {
+  background-color: rgba( 248, 248, 248 ,  1 );
+  background-color: rgba( var(--palette-neutral-2,248, 248, 248) ,  1 );
+}
+
+.bolt-tabbar-on-callout.sticky {
+  background-color: rgba(255, 255, 255, 1);
+  background-color: var(--callout-background-color,rgba(255, 255, 255, 1));
+}
+
+@supports (-ms-ime-align: auto) {
+  .bolt-tabbar.sticky.sticky {
+    position: relative;
+  }
+}
+@media screen and (max-width: 600px) {
+  .bolt-tabbar-tabs {
+    overflow-x: auto;
+  }
+}
+.bolt-tabbar-tabs.compact .bolt-tab {
+  height: 2rem;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  display: inline-block;
+  margin-right: 0px;
+  padding: 0 8px;
+  text-align: center;
+  position: relative;
+  border: 0;
+  overflow: visible;
+}
+.bolt-tabbar-tabs.compact .bolt-tab .bolt-tab-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.bolt-tabbar-tabs.compact .bolt-tab .bolt-tab-inner-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.bolt-tabbar-tabs.compact .bolt-tab .bolt-tab-badge {
+  margin-left: 4px;
+  max-width: 80px;
+  cursor: pointer;
+}
+.bolt-tabbar-tabs.compact .bolt-tab .bolt-tab-badge .bolt-pill-focusable {
+  overflow: hidden;
+}
+.bolt-tabbar-tabs.compact .bolt-tab:last-child {
+  margin-right: 0;
+}
+@media (forced-colors: active) {
+  .bolt-tabbar-tabs.compact .bolt-tab {
+    border: 1px solid transparent;
+  }
+}
+.bolt-tabbar-tabs.compact .bolt-tab:hover {
+  color: inherit;
+}
+@media (forced-colors: active) {
+  .bolt-tabbar-tabs.compact .bolt-tab:hover {
+    border-color: Highlight;
+  }
+}
+.bolt-tabbar-tabs.compact .bolt-tab .bolt-tab-text::before {
+  content: attr(data-content);
+  display: block;
+  font-weight: normal;
+  height: 0px;
+  visibility: hidden;
+}
+.bolt-tabbar-tabs.compact .bolt-tab .bolt-tab-text::after {
+  content: attr(data-content);
+  display: block;
+  font-weight: 600;
+  height: 0px;
+  visibility: hidden;
+}
+.bolt-tabbar-tabs.compact .bolt-tab .bolt-tab-icon + .bolt-tab-text {
+  margin-left: 4px;
+}
+.bolt-tabbar-tabs.compact .bolt-tab.selected .bolt-tab-inner-container {
+  font-weight: 600;
+  padding-top: 2px;
+  border-bottom: 2px solid rgba(0, 120, 212, 1);
+  border-bottom: 2px solid var(--communication-background,rgba(0, 120, 212, 1));
+}
+.bolt-tabbar-tabs.tall .bolt-tab {
+  height: 3rem;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  display: inline-block;
+  margin-right: 0px;
+  padding: 0 8px;
+  text-align: center;
+  position: relative;
+  border: 0;
+  overflow: visible;
+}
+.bolt-tabbar-tabs.tall .bolt-tab .bolt-tab-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.bolt-tabbar-tabs.tall .bolt-tab .bolt-tab-inner-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.bolt-tabbar-tabs.tall .bolt-tab .bolt-tab-badge {
+  margin-left: 4px;
+  max-width: 80px;
+  cursor: pointer;
+}
+.bolt-tabbar-tabs.tall .bolt-tab .bolt-tab-badge .bolt-pill-focusable {
+  overflow: hidden;
+}
+.bolt-tabbar-tabs.tall .bolt-tab:last-child {
+  margin-right: 0;
+}
+@media (forced-colors: active) {
+  .bolt-tabbar-tabs.tall .bolt-tab {
+    border: 1px solid transparent;
+  }
+}
+.bolt-tabbar-tabs.tall .bolt-tab:hover {
+  color: inherit;
+}
+@media (forced-colors: active) {
+  .bolt-tabbar-tabs.tall .bolt-tab:hover {
+    border-color: Highlight;
+  }
+}
+.bolt-tabbar-tabs.tall .bolt-tab .bolt-tab-text::before {
+  content: attr(data-content);
+  display: block;
+  font-weight: normal;
+  height: 0px;
+  visibility: hidden;
+}
+.bolt-tabbar-tabs.tall .bolt-tab .bolt-tab-text::after {
+  content: attr(data-content);
+  display: block;
+  font-weight: 600;
+  height: 0px;
+  visibility: hidden;
+}
+.bolt-tabbar-tabs.tall .bolt-tab .bolt-tab-icon + .bolt-tab-text {
+  margin-left: 4px;
+}
+.bolt-tabbar-tabs.tall .bolt-tab.selected .bolt-tab-inner-container {
+  font-weight: 600;
+  padding-top: 2px;
+  border-bottom: 2px solid rgba(0, 120, 212, 1);
+  border-bottom: 2px solid var(--communication-background,rgba(0, 120, 212, 1));
+}
+.bolt-tabbar-tabs.large-link .bolt-tab {
+  height: 2.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  display: inline-block;
+  margin-right: 0px;
+  padding: 0 8px;
+  text-align: center;
+  position: relative;
+  border: 0;
+  overflow: visible;
+}
+.bolt-tabbar-tabs.large-link .bolt-tab .bolt-tab-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.bolt-tabbar-tabs.large-link .bolt-tab .bolt-tab-inner-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.bolt-tabbar-tabs.large-link .bolt-tab .bolt-tab-badge {
+  margin-left: 4px;
+  max-width: 80px;
+  cursor: pointer;
+}
+.bolt-tabbar-tabs.large-link .bolt-tab .bolt-tab-badge .bolt-pill-focusable {
+  overflow: hidden;
+}
+.bolt-tabbar-tabs.large-link .bolt-tab:last-child {
+  margin-right: 0;
+}
+@media (forced-colors: active) {
+  .bolt-tabbar-tabs.large-link .bolt-tab {
+    border: 1px solid transparent;
+  }
+}
+.bolt-tabbar-tabs.large-link .bolt-tab:hover {
+  color: inherit;
+}
+@media (forced-colors: active) {
+  .bolt-tabbar-tabs.large-link .bolt-tab:hover {
+    border-color: Highlight;
+  }
+}
+.bolt-tabbar-tabs.large-link .bolt-tab .bolt-tab-text::before {
+  content: attr(data-content);
+  display: block;
+  font-weight: normal;
+  height: 0px;
+  visibility: hidden;
+}
+.bolt-tabbar-tabs.large-link .bolt-tab .bolt-tab-text::after {
+  content: attr(data-content);
+  display: block;
+  font-weight: 600;
+  height: 0px;
+  visibility: hidden;
+}
+.bolt-tabbar-tabs.large-link .bolt-tab .bolt-tab-icon + .bolt-tab-text {
+  margin-left: 4px;
+}
+.bolt-tabbar-tabs.large-link .bolt-tab.selected .bolt-tab-inner-container {
+  font-weight: 600;
+  padding-top: 2px;
+  border-bottom: 2px solid rgba(0, 120, 212, 1);
+  border-bottom: 2px solid var(--communication-background,rgba(0, 120, 212, 1));
+}
+
+.bolt-tablist {
+  border-right: 1px solid rgba(0, 0, 0, 0.20);
+  border-right: 1px solid var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20));
+  overflow: auto;
+}
+
+.bolt-tablist-tabs .bolt-tab {
+  height: 32px;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: transparent;
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  display: inline-block;
+  padding-left: 32px;
+}
+.bolt-tablist-tabs .bolt-tab .bolt-tab-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.bolt-tablist-tabs .bolt-tab .bolt-tab-inner-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.bolt-tablist-tabs .bolt-tab .bolt-tab-badge {
+  margin-left: 4px;
+  max-width: 80px;
+  cursor: pointer;
+}
+.bolt-tablist-tabs .bolt-tab .bolt-tab-badge .bolt-pill-focusable {
+  overflow: hidden;
+}
+.bolt-tablist-tabs .bolt-tab.selected {
+  background-color: rgba( 234, 234, 234 ,  1 );
+  background-color: rgba( var(--palette-neutral-8,234, 234, 234) ,  1 );
+}
+@media (forced-colors: active) {
+  .bolt-tablist-tabs .bolt-tab.selected {
+    background: highlight;
+    forced-color-adjust: none;
+  }
+  .bolt-tablist-tabs .bolt-tab.selected .bolt-tab-text {
+    color: windowtext;
+    background: window;
+  }
+}
+.bolt-tablist-tabs a.bolt-tab {
+  color: inherit;
+}
+
+.bolt-tablist-heading {
+  align-items: center;
+  height: 32px;
+  margin-top: 16px;
+  padding-left: 32px;
+}
+
+.bolt-tablist-title {
+  height: 48px;
+  align-items: center;
+  display: flex;
+  padding-left: 32px;
+}
+
+.bolt-tablist-subtitle {
+  padding-left: 32px;
+}
+
+/*# sourceMappingURL=Tabs.css.map */

@@ -1,0 +1,105 @@
+@import '../../_coreStyles.scss';
+$message-bar-button-height: $spacing-32;
+$message-bar-line-height: $spacing-20;
+
+.bolt-messagebar {
+    padding: $spacing-8 $spacing-16;
+
+    &.severity-info {
+        background-color: $transblack-2;
+    }
+
+    &.severity-success {
+        background-color: $status-success-background;
+    }
+
+    &.severity-warning {
+        background-color: $status-warning-background;
+    }
+
+    &.severity-error {
+        background-color: $status-error-background;
+    }
+}
+
+.bolt-messagebar-icons,
+.bolt-messagebar-buttons {
+    max-height: 50px;
+}
+
+.bolt-messagebar-icon {
+    margin-left: $spacing-8;
+    margin-right: $spacing-16;
+
+    .severity-info & {
+        color: $status-info-foreground;
+    }
+
+    .severity-success & {
+        color: $status-success-foreground;
+    }
+
+    .severity-warning & {
+        color: $status-warning-icon-foreground;
+    }
+
+    .severity-error & {
+        color: $status-error-foreground;
+    }
+}
+
+.bolt-messagebar-message {
+    align-items: center;
+    min-height: $message-bar-button-height;
+
+    &:not(:last-child) {
+        margin-right: 90px;
+    }
+}
+
+.bolt-messagebar-buttons {
+    margin-left: auto;
+
+    .bolt-button:first-child {
+        margin-left: $spacing-8;
+    }
+
+    .bolt-button:not(:last-child) {
+        margin-right: $spacing-8;
+    }
+}
+
+// .icon-only necessary to override size props
+.bolt-messagebar-close-button.bolt-button.icon-only {
+    font-size: $fontSizeML;
+    padding: 0px;
+
+    margin-right: -4px;
+}
+
+.bolt-messagebar.mobile {
+    .bolt-messagebar-content {
+        padding: 10px $spacing-20 10px 10px;
+    }
+
+    .bolt-messagebar-icon {
+        align-self: flex-start;
+        margin: 0px;
+        padding: 6px $spacing-8;
+    }
+
+    .bolt-messagebar-message {
+        margin: 0px 0px 6px $spacing-8;
+        min-height: 0px;
+    }
+
+    .bolt-messagebar-buttons {
+        margin-bottom: 6px;
+        margin-top: 2px;
+    }
+
+    .bolt-messagebar-close-button {
+        margin-left: $spacing-8;
+        margin-right: -10px;
+    }
+}

@@ -1,0 +1,13 @@
+/**
+ * Dropdown button styles
+ */
+.bolt-dropdown-button {
+  display: inline-flex;
+}
+
+.bolt-dropdown-button .icon-right {
+  font-size: 0.75rem;
+  padding-left: 10px;
+}
+
+/*# sourceMappingURL=MenuButton.css.map */

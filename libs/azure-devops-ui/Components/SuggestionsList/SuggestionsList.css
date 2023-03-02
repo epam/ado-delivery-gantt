@@ -1,0 +1,64 @@
+.bolt-suggestions-container {
+  background: rgba( 248, 248, 248 ,  1 );
+  background: rgba( var(--palette-neutral-2,248, 248, 248) ,  1 );
+  border-radius: 4px;
+  max-height: 300px;
+  min-width: 294px;
+}
+
+.bolt-suggestions-item {
+  border-left: 2px solid transparent;
+}
+.bolt-suggestions-item:hover, .bolt-suggestions-item:focus, .bolt-suggestions-item.bolt-suggestions-isSuggested {
+  background-color: rgba(0, 0, 0, 0.04);
+  background-color: var(--palette-black-alpha-4,rgba(0, 0, 0, 0.04));
+  border-left:  2px solid;
+  border-left-color: rgba( 43, 136, 216 ,  1 );
+  border-left-color: rgba( var(--palette-primary-tint-10,43, 136, 216) ,  1 );
+}
+@media (forced-colors: active) {
+  .bolt-suggestions-item:hover, .bolt-suggestions-item:focus, .bolt-suggestions-item.bolt-suggestions-isSuggested {
+    forced-color-adjust: none;
+    background-color: highlight;
+    color: highlightText;
+  }
+}
+
+@media (forced-colors: active) {
+  .bolt-suggestions-item .bolt-button.bolt-icon-button.bolt-contact-card-button {
+    border-color: highlightText;
+    color: window;
+  }
+  .bolt-suggestions-item .bolt-button.bolt-icon-button.bolt-contact-card-button:focus {
+    border-color: windowtext;
+  }
+}
+
+.bolt-suggestions-none {
+  height: 32px;
+  padding: 8px;
+}
+
+.bolt-suggestions-none-live-region.has-suggestions {
+  height: 0px;
+  width: 0px;
+}
+
+.bolt-suggestions-item-button {
+  padding: 8px;
+}
+@media (forced-colors: active) {
+  .bolt-suggestions-item-button {
+    border: 1px solid Highlight;
+  }
+}
+
+.bolt-suggestion-spacer {
+  padding: 4px;
+}
+
+.bolt-suggestions-spinner {
+  height: 300px;
+}
+
+/*# sourceMappingURL=SuggestionsList.css.map */

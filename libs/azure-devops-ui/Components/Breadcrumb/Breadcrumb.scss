@@ -1,0 +1,105 @@
+@import '../../_coreStyles.scss';
+.bolt-breadcrumb-container {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding-left: 3px;
+}
+
+.bolt-breadcrumb-with-items {
+    min-width: 50px;
+}
+
+.bolt-breadcrumb-divider-container {
+    display: flex;
+    align-items: center;
+    align-self: stretch;
+}
+
+.bolt-breadcrumb-divider {
+    padding: 0px 8px;
+}
+
+.bolt-breadcrumb-item {
+    display: inline-flex;
+    align-items: center;
+    align-self: stretch;
+
+    a {
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: none;
+    }
+}
+
+.bolt-breadcrumb-hidden-element {
+    display: none;
+}
+
+.bolt-breadcrumb-item-text-container {
+    align-items: center;
+    border-radius: 2px;
+    display: flex;
+
+    &:hover {
+        background-color: $transblack-6;
+    }
+    &:active {
+        background-color: $transblack-8;
+    }
+}
+
+.bolt-breadcrumb-list-item {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    position: relative;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.bolt-breadcrumb-overflow {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.bolt-breadcrumb-overflow-visible {
+    min-width: 50px;
+}
+
+.bolt-breadcrumb-item-icon {
+    color: $secondary-text;
+    padding-top: $spacing-4;
+    padding-bottom: $spacing-4;
+    padding-left: $spacing-8;
+
+    &.icon-only {
+        padding-right: $spacing-8;
+    }
+}
+
+.bolt-breadcrumb-item-text {
+    color: $secondary-text;
+    padding: 4px 8px;
+    max-width: 200px;
+    font-weight: 400;
+}
+
+///
+/// When buttons are placed into a breadcrumb we will update the visuals to match the other
+/// breadcrumb items.
+///
+.bolt-breadcrumb .bolt-button {
+    color: $secondary-text;
+    font-weight: $fontWeightNormal;
+    padding: 3px $spacing-8;
+}
+
+.bolt-focus-visible .bolt-breadcrumb .bolt-button.bolt-focus-treatment:focus {
+    border-color: transparent;
+}

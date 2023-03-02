@@ -1,0 +1,26 @@
+.bolt-identitypickerdropdown-textField {
+  min-width: 270px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.bolt-identity-picker-clearButton {
+  padding: 4px;
+  cursor: pointer;
+}
+.bolt-identity-picker-clearButton:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  background-color: var(--palette-black-alpha-6,rgba(0, 0, 0, 0.06));
+}
+
+.bolt-identitypicker-filterbaritem {
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+@media screen and (max-width: 599px) {
+  .bolt-identitypicker-filterbaritem {
+    min-width: 200px;
+  }
+}
+
+/*# sourceMappingURL=IdentityPickerDropdown.css.map */

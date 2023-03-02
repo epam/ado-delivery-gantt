@@ -1,0 +1,29 @@
+@import '../../_coreStyles.scss';
+$picker-margin-top-bottom: $spacing-4 - $spacingBorder;
+$picker-margin-left-right: $spacing-4;
+$picker-width: 270px;
+$picker-filterbar-width: 200px;
+
+.bolt-identitypickerdropdown-textField {
+    min-width: $picker-width;
+    padding-top: $picker-margin-top-bottom;
+    padding-bottom: $picker-margin-top-bottom;
+}
+
+.bolt-identity-picker-clearButton {
+    padding: $spacing-4;
+
+    cursor: pointer;
+
+    &:hover {
+        background-color: $transblack-6;
+    }
+}
+
+.bolt-identitypicker-filterbaritem {
+    @include xsmall-screen {
+        min-width: $picker-filterbar-width;
+    }
+    background-color: transparent;
+    border: 1px solid transparent;
+}

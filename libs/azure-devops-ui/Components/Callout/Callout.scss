@@ -1,0 +1,62 @@
+@import '../../_coreStyles.scss';
+$callout-small-width: 320px;
+$callout-medium-width: 480px;
+$callout-large-width: 640px;
+$callout-extra-large-width: 800px;
+
+.bolt-callout {
+    background-color: transparent;
+    pointer-events: auto;
+}
+
+/* NOTE: Create a element that overlaps the container by 5000px on all sides.
+ * This allows callouts to layout naturally and not be influenced by edges of
+ * the window.
+ */
+.bolt-portal.bolt-layout-relative {
+    bottom: -5000px;
+    left: -5000px;
+    right: -5000px;
+    top: -5000px;
+}
+
+.bolt-light-dismiss {
+    pointer-events: auto;
+}
+
+.bolt-callout-modal {
+    background-color: $transblack-20;
+
+    @include ms-high-contrast-override {
+        background: transparent;
+    }
+}
+
+.bolt-callout-content {
+    background-color: $calloutBackgroundColor;
+    z-index: 1;
+}
+
+.bolt-callout-shadow {
+    box-shadow: 0px 6px 12px $calloutShadowColor;
+}
+
+.bolt-callout-extra-large {
+    width: $callout-extra-large-width;
+}
+
+.bolt-callout-large {
+    width: $callout-large-width;
+}
+
+.bolt-callout-medium {
+    width: $callout-medium-width;
+}
+
+.bolt-callout-small {
+    width: $callout-small-width;
+}
+
+.bolt-callout-auto {
+    width: auto;
+}

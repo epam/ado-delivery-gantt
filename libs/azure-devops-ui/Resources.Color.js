@@ -1,0 +1,17 @@
+export var Black = "Black";
+export var Blue = "Blue";
+export var EightyPercentLighterColor = "80% lighter {0}";
+export var FortyPercentLighterColor = "40% lighter {0}";
+export var Green = "Green";
+export var Indigo = "Indigo";
+export var Orange = "Orange";
+export var Pink = "Pink";
+export var Purple = "Purple";
+export var Red = "Red";
+export var SixtyPercentLighterColor = "60% lighter {0}";
+export var Teal = "Teal";
+export var TenPercentLighterColor = "10% lighter {0}";
+export var Turquoise = "Turquoise";
+export var TwentyPercentLighterColor = "20% lighter {0}";
+export var White = "White";
+export var Yellow = "Yellow";

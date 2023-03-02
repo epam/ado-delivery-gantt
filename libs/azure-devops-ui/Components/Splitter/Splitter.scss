@@ -1,0 +1,147 @@
+@import '../../_coreStyles.scss';
+$dividerFullSize: 4px;
+$dividerOffset: $dividerFullSize / 2;
+
+.vss-Splitter--container {
+    flex-grow: 1;
+    position: relative;
+
+    .vss-Splitter--pane-fixed {
+        flex-grow: 0;
+        flex-shrink: 0;
+        max-width: 100%;
+    }
+
+    .vss-Splitter--pane-flexible {
+        // webkit declarations are required for PhantomJs dependent L2 tests
+        -webkit-box-flex: 1 1 0%;
+        -webkit-flex: 1 1 0%;
+        flex: 1 1 0%;
+        min-height: 0;
+        min-width: 0;
+    }
+
+    .vss-Splitter--divider {
+        position: relative;
+        user-select: none;
+        // webkit declarations are required for PhantomJs dependent L2 tests
+        -webkit-box-flex: 0 0 $dividerFullSize;
+        -webkit-flex: 0 0 $dividerFullSize;
+        flex: 0 0 $dividerFullSize;
+
+        @include ms-high-contrast-override {
+            &:after {
+                background-color: windowText;
+            }
+
+            &:focus {
+                &:after {
+                    background-color: highlight;
+                }
+            }
+        }
+
+        &:after {
+            content: "";
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+            background-color: $subtleBorderColor;
+        }
+    }
+
+    .vss-Splitter--drag-placeholder {
+        position: absolute;
+        background-color: $subtleBorderColor;
+        z-index: 1000;
+    }
+
+    &.vss-Splitter--container-row {
+        // webkit declarations are required for PhantomJs dependent L2 tests
+        display: -webkit-box;
+        -webkit-flex-direction: row;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+
+        .vss-Splitter--divider {
+            cursor: ew-resize;
+
+            &:after {
+                top: 0;
+                bottom: 0;
+                width: 1px;
+                left: 50%;
+                transition: 100ms width, 100ms left;
+            }
+
+            &:not(.vss-Splitter--divider-dragging):hover:after,
+            &:focus:after {
+                width: $dividerFullSize;
+                left: calc(50% - #{$dividerOffset});
+            }
+        }
+
+        .vss-Splitter--drag-placeholder {
+            height: 100%;
+            width: $dividerFullSize;
+            cursor: ew-resize;
+        }
+
+        .vss-splitter-expand-button {
+            margin: auto $spacing-4 $spacing-8 $spacing-4;
+        }
+
+        .vss-Splitter--pane-flexible {
+            // Disable any min-width styles in the child elements
+            width: 0px;
+        }
+    }
+
+    &.vss-Splitter--container-column {
+        // webkit declarations are required for PhantomJs dependent L2 tests
+        display: -webkit-box;
+        -webkit-flex-direction: column;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+
+        .vss-Splitter--divider {
+            cursor: ns-resize;
+
+            &:after {
+                left: 0;
+                right: 0;
+                height: 1px;
+                top: 50%;
+                transition: 100ms height, 100ms top;
+            }
+
+            &:not(.vss-Splitter--divider-dragging):hover:after,
+            &:focus:after {
+                height: $dividerFullSize;
+                top: calc(50% - #{$dividerOffset});
+            }
+        }
+
+        .vss-Splitter--drag-placeholder {
+            width: 100%;
+            height: $dividerFullSize;
+            cursor: ns-resize;
+        }
+
+        .vss-splitter-expand-button {
+            margin: $spacing-4 $spacing-8 $spacing-4 auto;
+        }
+
+        .vss-Splitter--pane-flexible {
+            // Disable any min-height styles in the child elements
+            height: 0px;
+        }
+    }
+
+    // Prevent iframes in the splitter (e.g. extension hosts) from eating the drag events
+    &.vss-Splitter--container-dragging iframe {
+        pointer-events: none;
+    }
+}

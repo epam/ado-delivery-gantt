@@ -1,0 +1,125 @@
+@import '../../_coreStyles.scss';
+$headerIconButtonOffset: $spacing-4;
+
+// Remove this selector once all headers are wrapped with containers providing the spacing.
+.bolt-header-no-spacing-defined {
+    padding-left: $default-horizontal-spacing;
+    padding-top: $default-vertical-spacing;
+    padding-right: $default-horizontal-spacing;
+}
+
+.bolt-header-condensed {
+    padding-top: $condensed-vertical-spacing;
+    padding-bottom: $condensed-vertical-spacing;
+}
+
+.bolt-header-default {
+    padding-top: $default-vertical-spacing;
+    padding-bottom: $default-vertical-spacing;
+}
+
+.bolt-header-relaxed {
+    padding-top: $relaxed-vertical-spacing;
+    padding-bottom: $relaxed-vertical-spacing;
+}
+
+.bolt-header-with-commandbar.bolt-header-condensed {
+    padding-right: $condensed-horizontal-spacing - $headerIconButtonOffset;
+}
+
+.bolt-header-with-commandbar.bolt-header-default {
+    padding-right: $default-horizontal-spacing - $headerIconButtonOffset;
+}
+
+.bolt-header-with-commandbar.bolt-header-relaxed {
+    padding-right: $relaxed-horizontal-spacing - $headerIconButtonOffset;
+}
+
+.bolt-header-with-commandbar {
+    // Remove this padding once all headers are wrapped with containers providing the spacing.
+
+    // If there is a command bar, it will be responsible
+    // for adding the additional 4px of padding, as long as
+    // the last item is not an icon button.
+    padding-right: $default-horizontal-spacing - $headerIconButtonOffset;
+
+    @include xsmall-screen {
+        padding-right: $default-horizontal-spacing;
+    }
+}
+
+.bolt-header-with-back-button {
+    padding-left: $default-horizontal-spacing - $headerIconButtonOffset;
+
+    @include xsmall-screen {
+        flex-direction: column;
+        padding-left: $default-horizontal-spacing;
+    }
+}
+
+.bolt-header-title-area {
+    flex-shrink: 25;
+}
+
+.bolt-header-content-area {
+    min-width: 0px;
+}
+
+.bolt-header-title {
+    padding-top: $spacing-4;
+    padding-bottom: $spacing-4;
+
+    &.l {
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+
+    &.s {
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    margin-right: $spacing-8;
+
+    @include xsmall-screen {
+        // For small screen, show ellipsis for header title.
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.bolt-header-icon {
+    font-size: $fontSizeML;
+    margin-right: $spacing-8;
+    margin-top: $spacing-8;
+
+    &.l {
+        margin-top: 10px;
+    }
+
+    &.s {
+        margin-top: 6px;
+    }
+}
+
+.bolt-header-separator {
+    height: 1px;
+    background-color: $neutral-4;
+}
+
+.bolt-button.bolt-header-back-button {
+    background-color: transparent;
+    font-size: $fontSizeML;
+    margin-right: $spacing-8;
+
+    @include xsmall-screen {
+        padding: 0px;
+
+        .bolt-button-text {
+            font-size: $fontSize;
+            color: $secondary-text;
+            font-weight: $fontWeightNormal;
+        }
+    }
+}

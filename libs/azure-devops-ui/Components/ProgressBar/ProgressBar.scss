@@ -1,0 +1,24 @@
+@import '../../_coreStyles.scss';
+.bolt-progress-bar-container {
+    background: $neutral-10;
+    height: 3px;
+    position: relative;
+    z-index: 10;
+}
+
+.bolt-progress-bar-bar {
+    &.complete {
+        opacity: 0;
+    }
+
+    background: $communication-shade-10;
+    height: 100%;
+    left: 0;
+    opacity: 0.5;
+    position: absolute;
+    top: 0;
+    transition: transform 350ms cubic-bezier(0.165, 0.84, 0.44, 1), opacity 350ms ease-in-out, background 350ms ease-in-out;
+    transform-origin: left;
+    transform: scaleX(0);
+    width: 100%;
+}

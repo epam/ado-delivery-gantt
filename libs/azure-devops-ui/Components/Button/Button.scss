@@ -1,0 +1,227 @@
+@import '../../_widgetsCommon.scss';
+.bolt-button {
+    align-items: center;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    justify-content: center;
+    line-height: inherit;
+    outline: none;
+    overflow: visible; /* IE11 needs overflow visible for the focus treatment to show up */
+    padding: 6px 12px;
+    position: relative;
+    transition: background 80ms linear;
+
+    @include ms-high-contrast-override {
+        border: 1px solid windowtext;
+    }
+}
+
+/* This is here to work around Legacy styles setting the heights of all buttons to 30px */
+button.bolt-button {
+    height: auto;
+}
+
+/* Needed to remove the focus-rectangle from FireFox. */
+.bolt-button::-moz-focus-inner {
+    border: 0;
+}
+
+/* Danger modifiers */
+.bolt-button.danger {
+    background-color: $danger-background;
+    color: $danger-background-text;
+}
+
+.bolt-button.danger:hover {
+    background-color: $danger-background-hover;
+}
+
+.bolt-button.danger:active,
+.bolt-button.danger.active {
+    background-color: $danger-background-active;
+}
+
+/* Primary modifiers */
+.bolt-button.primary {
+    background-color: $communication-background;
+    color: $text-on-communication-background;
+}
+
+.bolt-button.primary:hover {
+    background-color: $communication-background-hover;
+}
+
+.bolt-button.primary:active,
+.bolt-button.primary.active {
+    background-color: $communication-background-active;
+}
+
+.bolt-button:not(.disabled):hover {
+    @include ms-high-contrast-override {
+        color: HighLight;
+    }
+}
+
+/* Disabled modifiers */
+.bolt-button.disabled,
+.bolt-button.disabled:hover,
+.bolt-button.disabled:focus {
+    background-color: $transblack-6;
+    color: $disabled-text;
+
+    @include ms-high-contrast-override {
+        color: GrayText;
+        forced-color-adjust: none;
+    }
+    cursor: default;
+}
+
+/* Subtle modifiers (before standard for overrides) */
+.bolt-button.subtle,
+.bolt-button.subtle.disabled:hover,
+.bolt-button.subtle.disabled:focus {
+    background-color: transparent;
+}
+
+.bolt-button.subtle {
+    &:hover {
+        background-color: $transblack-6;
+    }
+    &:active {
+        background-color: $transblack-20;
+    }
+}
+
+/* Basic button colors */
+.bolt-button {
+    background-color: $transblack-6;
+    color: $primary-text;
+    margin: 0;
+}
+
+.bolt-button:focus {
+    // Needed for the scenario where buttons are right next to each
+    // other without any space between. Without this change, the
+    // focus treatment could be clipped by an adjacent element.
+    z-index: 1;
+}
+
+.bolt-button:hover {
+    background-color: $transblack-10;
+}
+
+.bolt-button:active,
+.bolt-button.active {
+    background-color: $transblack-20;
+}
+
+.bolt-link-button {
+    text-decoration: none;
+}
+
+.bolt-button.icon-only {
+    padding: 8px 22px;
+    font-weight: normal;
+}
+
+.bolt-button.icon-only.subtle {
+    padding: 8px;
+}
+
+.bolt-button:not(.icon-only) > .left-icon {
+    font-weight: $fontWeightNormal;
+    padding-right: 10px;
+}
+
+// Override global a styles
+.bolt-button.bolt-link-button {
+    color: $primary-text;
+
+    &:hover {
+        color: $primary-text;
+        text-decoration: none;
+    }
+
+    &:visited {
+        color: $primary-text;
+    }
+
+    &:active,
+    &.active {
+        color: $primary-text;
+    }
+
+    &.disabled {
+        color: $disabled-text;
+
+        @include ms-high-contrast-override {
+            color: GrayText;
+            forced-color-adjust: none;
+        }
+    }
+}
+
+.bolt-button.bolt-link-button.primary {
+    color: $text-on-communication-background;
+
+    &:hover {
+        color: $text-on-communication-background;
+    }
+
+    &:visited {
+        color: $text-on-communication-background;
+    }
+
+    &:active,
+    &.active {
+        color: $text-on-communication-background;
+    }
+}
+
+.bolt-focus-visible .bolt-button.bolt-focus-treatment:focus {
+    @include box-shadow-focus-rect();
+    @include ms-high-contrast-highlight();
+
+    border-color: $focus-border-color;
+
+    @include ms-high-contrast-override {
+        background: window;
+        color: windowtext;
+    }
+
+    &.primary {
+        @include box-shadow-focus-rect(false, true);
+        border-color: $text-on-communication-background;
+
+        @include ms-high-contrast-override {
+            border-color: highlight;
+            box-shadow: none;
+        }
+    }
+
+    &.danger {
+        @include box-shadow-focus-rect(false, true);
+        border-color: $text-on-communication-background;
+
+        @include ms-high-contrast-override {
+            border-color: highlight;
+            box-shadow: none;
+        }
+    }
+
+    &:after {
+        content: none !important;
+    }
+}
+
+// Fabric override: Dialog footers set the font-size to 0 and expect child elements to set their font-size
+.ms-Dialog-action .bolt-button {
+    font-size: $fontSizeM;
+}

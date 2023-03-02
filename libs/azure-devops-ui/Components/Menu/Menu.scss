@@ -1,0 +1,188 @@
+@import '../../_widgetsCommon.scss';
+.bolt-contextual-menu {
+    border-radius: 4px;
+    max-width: 320px;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    @include ms-high-contrast-override {
+        border: 1px solid;
+    }
+}
+
+.bolt-contextual-submenu {
+    // Sub-menus may get clipped on narrow screens without this.
+    // Any standard contextual menu with text will be a minimum of 180 px wide (plus padding)
+    // based on the style for bolt-menuitem-cell-text below. This forces the submenu container to
+    // have a minimum width and be rendered on top of the parent menu (if necessary).
+    @include xsmall-screen {
+        min-width: 200px;
+    }
+}
+
+// @@FIREFOX, @@SAFARI: Needed to make sure FireFox & Safari leave room for the vertical scrollbar.
+.overflow .bolt-contextual-menu {
+    overflow-y: scroll;
+}
+
+.bolt-menu {
+    border-collapse: separate;
+    color: $primary-text;
+    display: table;
+    table-layout: auto;
+
+    // @@OLD-PLATFORM: Default font size in the product is 12 px, so we can't have inherit here.
+    font-size: 0.875rem;
+}
+
+.bolt-menuitem-row {
+    background-color: transparent;
+    border-radius: 3px;
+    color: inherit;
+    display: table-row;
+    outline: none;
+    overflow: hidden;
+    text-decoration: none;
+    white-space: nowrap;
+
+    @include ms-high-contrast-override {
+        border: 1px solid transparent;
+    }
+
+    &.focused {
+        background-color: transparent;
+        outline: none;
+
+        @include ms-high-contrast-override {
+            border-color: windowtext;
+        }
+    }
+
+    &:hover,
+    &.expanded {
+        background-color: $transblack-4;
+    }
+
+    @include ms-high-contrast-override {
+        &.expanded {
+            border-color: windowtext;
+        }
+
+        &:hover {
+            background-color: highlight;
+        }
+    }
+
+    &.disabled {
+        color: $disabled-text;
+
+        @include ms-high-contrast-override {
+            color: grayText;
+        }
+
+        &:hover {
+            background-color: transparent;
+        }
+    }
+}
+
+.bolt-focus-visible .bolt-menuitem-row.focused {
+    animation: focus-shadow-pulse-inset $focus-pulse-duration ease-in-out infinite;
+    background-color: $transblack-4;
+    outline: none;
+}
+
+// Work around for old platform styles
+a.bolt-menuitem-row:not(.ms-Button),
+a.bolt-menuitem-row:not(.ms-Button):visited,
+a.bolt-menuitem-row:not(.ms-Button):hover {
+    color: $primary-text;
+    text-decoration: none;
+
+    @include ms-high-contrast-override {
+        color: windowtext;
+    }
+}
+
+a.bolt-menuitem-row:not(.ms-Button):hover,
+a.bolt-menuitem-row:not(.ms-Button):focus {
+    @include ms-high-contrast-override {
+        color: highlighttext;
+    }
+}
+
+a.bolt-menuitem-row {
+    @include ms-high-contrast-override {
+        .bolt-list-cell {
+            border-color: transparent;
+        }
+    }
+}
+
+a.bolt-menuitem-row:hover {
+    @include ms-high-contrast-override {
+        .bolt-list-cell {
+            border-color: highlight;
+        }
+    }
+}
+
+.bolt-focus-visible a.bolt-menuitem-row:focus {
+    @include ms-high-contrast-override {
+        .bolt-list-cell {
+            border-color: highlight;
+        }
+    }
+}
+
+.bolt-menuitem-header {
+    font-weight: $fontWeightSemiBold;
+}
+
+.bolt-menuitem-divider:hover,
+.bolt-menuitem-header:hover {
+    background-color: transparent;
+
+    @include ms-high-contrast-override {
+        border: 1px solid transparent;
+    }
+}
+
+.bolt-menuitem-cell {
+    padding: 0;
+    vertical-align: middle;
+
+    &:first-child .bolt-menuitem-cell-content {
+        padding-right: 0px;
+    }
+
+    &:last-child .bolt-menuitem-cell-content {
+        padding-left: 0px;
+    }
+}
+
+.bolt-menuitem-cell-content {
+    justify-content: center;
+    padding: 6px;
+}
+
+.bolt-menuitem-cell-text {
+    justify-content: flex-start;
+    max-width: 225px;
+    min-width: 180px;
+}
+
+.bolt-menuitem-cell-secondary {
+    color: $secondary-text;
+}
+
+.bolt-menuitem-divider-content {
+    background-color: $transblack-20;
+    height: 1px;
+    margin: 6px 6px;
+    padding: 0px;
+}
+
+.bolt-menu-spacer {
+    padding: 4px;
+}

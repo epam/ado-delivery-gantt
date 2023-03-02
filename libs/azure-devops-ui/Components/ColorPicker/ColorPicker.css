@@ -1,0 +1,52 @@
+.color-dropdown-callout {
+  padding: 0;
+  max-width: 500px;
+}
+.color-dropdown-callout .bolt-list-cell {
+  border-width: 0 !important;
+}
+.color-dropdown-callout .bolt-table-row {
+  box-shadow: none !important;
+}
+.color-dropdown-callout .bolt-table-row .bolt-table-cell-content {
+  padding: 0;
+}
+.color-dropdown-callout .color-dropdown-table-container {
+  flex-grow: 0 !important;
+  margin-bottom: 2px;
+}
+.color-dropdown-callout .color-button {
+  border-radius: 0;
+  border-width: 0;
+  border-color: rgba( 255, 255, 255 ,  1 ) !important;
+  border-color: rgba( var(--palette-neutral-0,255, 255, 255) ,  1 ) !important;
+  margin: 2px;
+  height: 16px;
+}
+
+.color-dropdown .bolt-textfield .suffix {
+  padding: 0px 4px;
+  margin: 0px 7px;
+}
+
+.bolt-focus-visible .color-button:focus {
+  border-width: 2px;
+  height: 12px;
+}
+
+.color-callout {
+  align-items: center;
+  padding-bottom: 1px;
+}
+.color-callout .bolt-button.icon-only {
+  padding: 0px;
+  background-color: transparent;
+}
+
+.style-rule-font-color-bar {
+  height: 4px;
+  width: 20px;
+  margin-top: -1px;
+}
+
+/*# sourceMappingURL=ColorPicker.css.map */

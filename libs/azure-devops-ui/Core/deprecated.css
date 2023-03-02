@@ -1,0 +1,81 @@
+.flex {
+  display: flex;
+}
+
+.fontSizeXXS {
+  font-size: 0.5625rem;
+}
+
+.fontSizeXS {
+  font-size: 0.625rem;
+}
+
+.fontSizeS {
+  font-size: 0.6875rem;
+}
+
+.fontSize {
+  font-size: 0.75rem;
+}
+
+.fontSizeMS {
+  font-size: 0.8125rem;
+}
+
+.fontSizeM {
+  font-size: 0.875rem;
+}
+
+.fontSizeMM {
+  font-size: 0.9375rem;
+}
+
+.fontSizeML {
+  font-size: 1rem;
+}
+
+.fontSizeL {
+  font-size: 1.125rem;
+}
+
+.fontSizeLL {
+  font-size: 1.5rem;
+}
+
+.fontSizeLLL {
+  font-size: 1.75rem;
+}
+
+.fontSizeXL {
+  font-size: 2.25rem;
+}
+
+.fontSizeXXL {
+  font-size: 2.5rem;
+}
+
+.fontSizeXXXL {
+  font-size: 3.5rem;
+}
+
+.fontSizeXXXXL {
+  font-size: 4.5rem;
+}
+
+.fontWeightLighter {
+  font-weight: 200;
+}
+
+.fontWeightNormal {
+  font-weight: normal;
+}
+
+.fontWeightSemiBold {
+  font-weight: 600;
+}
+
+.fontWeightHeavy {
+  font-weight: bold;
+}
+
+/*# sourceMappingURL=deprecated.css.map */

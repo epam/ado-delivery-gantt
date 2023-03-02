@@ -1,0 +1,52 @@
+@import '../../_coreStyles.scss';
+.vss-ZeroData {
+    flex-wrap: wrap;
+    margin-top: 35px;
+
+    .vss-ZeroDataItem {
+        text-align: center;
+
+        .vss-ZeroDataItem--image,
+        .vss-ZeroDataItem--primary,
+        .vss-ZeroDataItem--secondary {
+            margin-bottom: 15px;
+            /* IE is not smart enough to keep flex items within the bounds of their flex container. */
+            max-width: 100%;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    &.single {
+        .vss-ZeroDataItem {
+            max-width: 520px;
+            /* IE does not respect our max-width unless we also set a min-width. Because reasons. */
+            min-width: 10px;
+
+            .vss-ZeroDataItem--image {
+                height: 160px;
+            }
+
+            .vss-ZeroDataItem--icon-image {
+                font-size: 160px;
+            }
+        }
+    }
+
+    &.multiple {
+        .vss-ZeroDataItem {
+            max-width: 235px;
+            margin: 0 20px;
+
+            .vss-ZeroDataItem--image {
+                height: 75px;
+            }
+
+            .vss-ZeroDataItem--action {
+                margin-top: auto;
+            }
+        }
+    }
+}

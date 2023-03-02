@@ -1,0 +1,49 @@
+@import '../../Core/_platformCommon.scss';
+.bolt-tooltip {
+    max-width: 320px;
+    animation: tooltip-fade-in 300ms ease-in;
+
+    .bolt-callout-content {
+        background-color: transparent;
+    }
+}
+
+.bolt-tooltip-content {
+    background-color: $tooltip-background-color;
+    border-radius: 2px;
+    color: $white;
+    padding: $spacing-8 $spacing-12;
+    text-align: left;
+
+    /* @NOTE: List break-all first and break-word second, IE11/Firefox dont support break-word, they will fallback to break-all */
+    word-break: break-all;
+    word-break: break-word;
+}
+
+.bolt-tooltip-fade-out {
+    animation: tooltip-fade-out 300ms ease-in;
+
+    &.bolt-callout {
+        pointer-events: none;
+    }
+}
+
+@keyframes tooltip-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes tooltip-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}

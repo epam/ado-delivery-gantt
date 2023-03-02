@@ -1,0 +1,182 @@
+.bolt-contextual-menu {
+  border-radius: 4px;
+  max-width: 320px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+@media (forced-colors: active) {
+  .bolt-contextual-menu {
+    border: 1px solid;
+  }
+}
+
+@media screen and (max-width: 599px) {
+  .bolt-contextual-submenu {
+    min-width: 200px;
+  }
+}
+
+.overflow .bolt-contextual-menu {
+  overflow-y: scroll;
+}
+
+.bolt-menu {
+  border-collapse: separate;
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  display: table;
+  table-layout: auto;
+  font-size: 0.875rem;
+}
+
+.bolt-menuitem-row {
+  background-color: transparent;
+  border-radius: 3px;
+  color: inherit;
+  display: table-row;
+  outline: none;
+  overflow: hidden;
+  text-decoration: none;
+  white-space: nowrap;
+}
+@media (forced-colors: active) {
+  .bolt-menuitem-row {
+    border: 1px solid transparent;
+  }
+}
+.bolt-menuitem-row.focused {
+  background-color: transparent;
+  outline: none;
+}
+@media (forced-colors: active) {
+  .bolt-menuitem-row.focused {
+    border-color: windowtext;
+  }
+}
+.bolt-menuitem-row:hover, .bolt-menuitem-row.expanded {
+  background-color: rgba(0, 0, 0, 0.04);
+  background-color: var(--palette-black-alpha-4,rgba(0, 0, 0, 0.04));
+}
+@media (forced-colors: active) {
+  .bolt-menuitem-row.expanded {
+    border-color: windowtext;
+  }
+  .bolt-menuitem-row:hover {
+    background-color: highlight;
+  }
+}
+.bolt-menuitem-row.disabled {
+  color: rgba(0, 0, 0, .38);
+  color: var(--text-disabled-color,rgba(0, 0, 0, .38));
+}
+@media (forced-colors: active) {
+  .bolt-menuitem-row.disabled {
+    color: grayText;
+  }
+}
+.bolt-menuitem-row.disabled:hover {
+  background-color: transparent;
+}
+
+.bolt-focus-visible .bolt-menuitem-row.focused {
+  animation: focus-shadow-pulse-inset 4s ease-in-out infinite;
+  background-color: rgba(0, 0, 0, 0.04);
+  background-color: var(--palette-black-alpha-4,rgba(0, 0, 0, 0.04));
+  outline: none;
+}
+
+a.bolt-menuitem-row:not(.ms-Button),
+a.bolt-menuitem-row:not(.ms-Button):visited,
+a.bolt-menuitem-row:not(.ms-Button):hover {
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  text-decoration: none;
+}
+@media (forced-colors: active) {
+  a.bolt-menuitem-row:not(.ms-Button),
+  a.bolt-menuitem-row:not(.ms-Button):visited,
+  a.bolt-menuitem-row:not(.ms-Button):hover {
+    color: windowtext;
+  }
+}
+
+@media (forced-colors: active) {
+  a.bolt-menuitem-row:not(.ms-Button):hover,
+  a.bolt-menuitem-row:not(.ms-Button):focus {
+    color: highlighttext;
+  }
+}
+
+@media (forced-colors: active) {
+  a.bolt-menuitem-row .bolt-list-cell {
+    border-color: transparent;
+  }
+}
+
+@media (forced-colors: active) {
+  a.bolt-menuitem-row:hover .bolt-list-cell {
+    border-color: highlight;
+  }
+}
+
+@media (forced-colors: active) {
+  .bolt-focus-visible a.bolt-menuitem-row:focus .bolt-list-cell {
+    border-color: highlight;
+  }
+}
+
+.bolt-menuitem-header {
+  font-weight: 600;
+}
+
+.bolt-menuitem-divider:hover,
+.bolt-menuitem-header:hover {
+  background-color: transparent;
+}
+@media (forced-colors: active) {
+  .bolt-menuitem-divider:hover,
+  .bolt-menuitem-header:hover {
+    border: 1px solid transparent;
+  }
+}
+
+.bolt-menuitem-cell {
+  padding: 0;
+  vertical-align: middle;
+}
+.bolt-menuitem-cell:first-child .bolt-menuitem-cell-content {
+  padding-right: 0px;
+}
+.bolt-menuitem-cell:last-child .bolt-menuitem-cell-content {
+  padding-left: 0px;
+}
+
+.bolt-menuitem-cell-content {
+  justify-content: center;
+  padding: 6px;
+}
+
+.bolt-menuitem-cell-text {
+  justify-content: flex-start;
+  max-width: 225px;
+  min-width: 180px;
+}
+
+.bolt-menuitem-cell-secondary {
+  color: rgba(0, 0, 0, .55);
+  color: var(--text-secondary-color,rgba(0, 0, 0, .55));
+}
+
+.bolt-menuitem-divider-content {
+  background-color: rgba(0, 0, 0, 0.20);
+  background-color: var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20));
+  height: 1px;
+  margin: 6px 6px;
+  padding: 0px;
+}
+
+.bolt-menu-spacer {
+  padding: 4px;
+}
+
+/*# sourceMappingURL=Menu.css.map */

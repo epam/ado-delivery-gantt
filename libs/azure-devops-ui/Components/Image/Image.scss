@@ -1,0 +1,11 @@
+.bolt-image {
+    // Fill the parent element's width and adjust height as a percentage of that width
+    &.contain {
+        align-self: center;
+        justify-self: center;
+        
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+}

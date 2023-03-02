@@ -1,0 +1,127 @@
+@import '../../_coreStyles.scss';
+.bolt-filter .bolt-button {
+    border-radius: 120px;
+    color: $secondary-text;
+    background: transparent;
+    border: 1px solid $neutral-20;
+
+    &:hover {
+        background: $neutral-6;
+    }
+
+    &:active {
+        background: $neutral-10;
+    }
+}
+
+.bolt-filter-callout .bolt-actions-container {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.bolt-filter-callout .bolt-dropdown-header-container {
+    border: none;
+}
+
+.bolt-filter-callout.bolt-active-filter .bolt-dropdown-header {
+    padding-left: $spacing-12;
+}
+
+.bolt-filter-reset-button.bolt-button {
+    margin-right: $spacing-8;
+}
+
+.bolt-filter-apply-button.bolt-button {
+    margin-left: auto;
+}
+
+.bolt-filter.bolt-filter-on .bolt-button {
+    color: $communication-shade-20;
+}
+
+.bolt-filter-label {
+    color: $secondary-text;
+
+    &.bolt-filter-label-selected {
+        color: $primary-text;
+    }
+
+    @include ms-high-contrast-override {
+        background-color: window;
+    }
+}
+
+.bolt-filter-item {
+    height: 48px;
+    padding-left: $spacing-16;
+    padding-right: $spacing-12;
+    border-top: 1px solid;
+    border-color: $transblack-6;
+    border-left: 2px solid transparent;
+}
+
+.bolt-filter-listbox-container {
+    padding: 0px;
+}
+
+.bolt-filter-item:hover {
+    background: $neutral-2;
+
+    @include ms-high-contrast-override {
+        background-color: highlight;
+    }
+    border-left: 2px solid $communication-tint-10;
+}
+
+.bolt-filter-item:focus {
+    outline: none;
+    background: $neutral-2;
+
+    @include ms-high-contrast-override {
+        background-color: highlight;
+    }
+    border-left: 2px solid $communication-tint-10;
+}
+
+.bolt-filter-back-button.bolt-button {
+    margin-right: $spacing-12;
+    font-weight: $fontWeightNormal;
+}
+
+.bolt-filter-selection-pill {
+    margin-left: 4px;
+    font-weight: $fontWeightNormal;
+}
+
+.bolt-filter-selected-item-container {
+    overflow: hidden;
+    color: $primary-text;
+    margin-left: $spacing-16;
+    mask-image: linear-gradient(to left, rgba(0, 0, 0, 0), $black 30px);
+    -webkit-mask-image: -webkit-linear-gradient(right, rgba(0, 0, 0, 0), $black 30px);
+}
+
+.bolt-filter-selected-item {
+    margin-right: $spacing-16;
+}
+
+.bolt-filter-selected-text-item {
+    margin-right: $spacing-4;
+}
+
+.bolt-filter-keyword-item {
+    margin: 0 $spacing-16 $spacing-16 $spacing-16;
+}
+
+.bolt-filter-title-container {
+    height: $spacing-20;
+}
+
+.bolt-filter-callout .bolt-filtered-header {
+    padding-top: $spacing-8;
+    color: $secondary-text;
+    font-weight: $fontWeightSemiBold;
+    & .body-m {
+        font-size: $fontSize;
+    }
+}

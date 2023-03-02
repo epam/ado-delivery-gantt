@@ -1,0 +1,65 @@
+{
+    "name": "azure-devops-ui",
+    "version": "2.167.61",
+    "description": "React components for building web UI in Azure DevOps",
+    "author": "Microsoft Corporation",
+    "contributors": [
+        {
+            "email": "trgau@microsoft.com",
+            "name": "Trevor Gau"
+        },
+        {
+            "email": "serkani@microsoft.com",
+            "name": "Serkan Inci"
+        },
+        {
+            "email": "demarcey@microsoft.com",
+            "name": "Derrick Marcey"
+        },
+        {
+            "email": "nickkirc@microsoft.com",
+            "name": "Nick Kirchem"
+        }
+    ],
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Microsoft/azure-devops-ui"
+    },
+    "dependencies": {
+        "array.prototype.find": "~2.0.4",
+        "es6-object-assign": "~1.1.0",
+        "es6-promise": "~4.2.5",
+        "es6-string-polyfills": "~1.0.0",
+        "intersection-observer": "~0.5.1",
+        "tslib": "~1.10.0"
+    },
+    "devDependencies": {
+        "@types/prop-types": "~15.5.8",
+        "@types/react": "^18.0.5",
+        "@types/react-dom": "^18.0.5",
+        "@types/react-transition-group": "^1.1.3",
+        "glob": "~7.2.3",
+        "minimist": "^1.2.0",
+        "node": "^11.0.0",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "react-transition-group": "^1.2.1",
+        "recursive-copy": "~2.0.7",
+        "sass": "^1.56.1",
+        "sassdoc": "^2.7.4",
+        "shelljs": "~0.8.5",
+        "typescript": "^3.8.2",
+        "uglify-js": "~3.17.4"
+    },
+    "overrides": {
+        "glob-parent": "^6.0.2",
+        "got": "^12.0.0",
+        "http-cache-semantics": "^4.1.1",
+        "marked": "^4.2.3",
+        "semver-regex": "^3.1.4"
+    },
+    "scripts": {
+        "build": "node buildpackage.js"
+    }
+}

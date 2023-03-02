@@ -1,0 +1,65 @@
+@import '../../_coreStyles.scss';
+$button-height: 16px;
+
+// calculate margin/padding the same way as textfield
+$textFieldIconHorizontalPadding: $spacing-4;
+$textFieldIconHorizontalMargin: $spacing-12 - $spacingBorder - $textFieldIconHorizontalPadding;
+
+.color-dropdown-callout {
+    padding: 0;
+    max-width: 500px;
+
+    .bolt-list-cell {
+        border-width: 0 !important;
+    }
+
+    .bolt-table-row {
+        box-shadow: none !important;
+        .bolt-table-cell-content {
+            padding: 0;
+        }
+    }
+
+    .color-dropdown-table-container {
+        flex-grow: 0 !important;
+        margin-bottom: 2px;
+    }
+
+    .color-button {
+        border-radius: 0;
+        border-width: 0;
+        border-color: $white !important;
+        margin: 2px;
+        height: $button-height;
+    }
+}
+
+.color-dropdown .bolt-textfield .suffix {
+    padding: 0px $textFieldIconHorizontalPadding;
+    margin: 0px $textFieldIconHorizontalMargin;
+}
+
+.bolt-focus-visible {
+    .color-button {
+        &:focus {
+            $focused-button-border-width: 2px;
+            border-width: $focused-button-border-width;
+            height: $button-height - $focused-button-border-width - $focused-button-border-width;
+        }
+    }
+}
+
+.color-callout {
+    align-items: center;
+    padding-bottom: 1px;
+    .bolt-button.icon-only {
+        padding: 0px;
+        background-color: transparent;
+    }
+}
+
+.style-rule-font-color-bar {
+    height: 4px;
+    width: 20px;
+    margin-top: -1px;
+}

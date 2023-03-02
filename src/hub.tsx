@@ -1,8 +1,7 @@
-import "azure-devops-ui/Core/override.css";
 import "./hub.scss";
 
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 
 import * as SDK from "azure-devops-extension-sdk";
 import { CommonServiceIds, IHostPageLayoutService } from "azure-devops-extension-api";
@@ -72,19 +71,6 @@ export const Hub = () => {
     ];
   };
 
-  const onMessagePromptClick = async () => {
-    const dialogService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
-    dialogService.openMessageDialog("Use large title?", {
-      showCancel: true,
-      title: "Message dialog",
-      onClose: (result) => {
-        setHubState(current => {
-          return { ...current, useLargeTitle: result }
-        });
-      }
-    });
-  }
-
   const onCustomPromptClick = async () => {
     const dialogService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
     const { useCompactPivots } = hubState;
@@ -98,26 +84,6 @@ export const Hub = () => {
         if (result !== undefined) {
           setHubState(current => {
             return { ...current, useCompactPivots: result };
-          });
-        }
-      }
-    });
-  }
-
-  const onPanelClick = async () => {
-    const panelService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
-    const { headerDescription } = hubState;
-    panelService.openPanel<boolean | undefined>(SDK.getExtensionContext().id + ".panel-content", {
-      title: "My Panel",
-      description: "Description of my panel",
-      configuration: {
-        message: "Show header description?",
-        initialValue: !!headerDescription
-      },
-      onClose: (result) => {
-        if (result !== undefined) {
-          setHubState(current => {
-            return { ...current, headerDescription: headerDescription }
           });
         }
       }
@@ -179,4 +145,6 @@ export const Hub = () => {
 
 }
 
-ReactDOM.render(<Hub />, document.getElementById("root"));
+const container = document.getElementById("root");
+const root = createRoot(container!);
+root.render(<Hub />);

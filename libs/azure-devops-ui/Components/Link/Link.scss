@@ -1,0 +1,55 @@
+@import '../../_coreStyles.scss';
+$color-change-duration: 80ms;
+$ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+
+.bolt-link {
+    border-radius: 2px;
+    color: $communication-foreground;
+    cursor: pointer;
+    outline: transparent;
+    text-decoration: none;
+    transition: color $color-change-duration $ease-out-quart, background $color-change-duration linear;
+
+    &:hover {
+        color: $communication-shade-30;
+    }
+
+    &:focus {
+        .bolt-focus-visible & {
+            @include box-shadow-focus-rect(false, true);
+        }
+    }
+
+    &.subtle {
+        border-radius: 4px;
+        color: inherit;
+        padding: 3px 6px;
+
+        &:hover {
+            color: $communication-foreground;
+            background-color: $transblack-6;
+        }
+    }
+
+    &.disabled {
+        cursor: default;
+    }
+
+    &.underline {
+        text-decoration: underline;
+    }
+}
+
+.bolt-focus-visible {
+    .bolt-link.subtle:focus {
+        background-color: $transblack-6;
+        color: $communication-foreground;
+        outline: none;
+    }
+
+    .bolt-link:focus {
+        @include ms-high-contrast-override {
+            outline: 1px solid highlight !important;
+        }
+    }
+}

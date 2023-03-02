@@ -1,0 +1,29 @@
+@import '../../_coreStyles.scss';
+.bolt-colorpip {
+    width: 32px;
+    height: 32px;
+    padding: 8px 8px;
+
+    &:focus {
+        outline: none;
+
+        .bolt-colorpip-content {
+            box-shadow: 0 0 0 2px $white, 0 0 0 5px $neutral-8;
+        }
+    }
+
+    .bolt-colorpip-content {
+        width: 16px;
+        height: 16px;
+
+        border-radius: 10px;
+
+        box-shadow: 0 0 0 2px $white;
+
+        // Also need to override focus styles if it's selected
+        &.selected,
+        &.selected:focus {
+            box-shadow: 0 0 0 2px $white, 0 0 0 5px rgba(0, 120, 215, 0.24);
+        }
+    }
+}

@@ -1,0 +1,111 @@
+@import '../../_PageStyles.scss';
+$pageContentHorizontalPadding: $spacing-32;
+$pageContentVerticalPadding: $spacing-16;
+$pageHeaderMargin: $spacing-12;
+$pageTabbarLeftPadding: $pageContentHorizontalPadding - $spacing-8;
+$pageTabbarRightPadding: $pageContentHorizontalPadding;
+
+.bolt-page {
+    > .bolt-tabbar {
+        padding: 0 $pageTabbarRightPadding 0 $pageTabbarLeftPadding;
+
+        // We dont add extra margin for mobile screen
+        @include xsmall-screen {
+            padding-left: $pageTabbarLeftPadding - $pageHeaderMargin;
+            padding-right: $pageTabbarRightPadding - $pageHeaderMargin;
+        }
+    }
+
+    > .bolt-header {
+        // The header itself will have 20px of right/left padding,
+        // so we just need to add on 12 px of margin on either side to achieve the
+        // desired total of 32px.
+        padding-top: 24px;
+        padding-bottom: 0px;
+
+        margin-left: $pageHeaderMargin;
+        margin-right: $pageHeaderMargin;
+
+        // We dont add extra margin for mobile screen
+        @include xsmall-screen {
+            padding-top: $spacing-16;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        // There isn't any padding bottom on the page header (it is assumed that a TabBar
+        // or different component will provide this content). However, a sticky TabBar has
+        // z-index: 2 in order to appear on top of the content when it is sticky. Without this,
+        // the focus-rect of the buttons in the command bar will be clipped.
+        z-index: 3;
+
+        // Ignore no-right-padding only in the context of a page
+        .bolt-header-commandbar-no-right-padding {
+            padding-right: $header-command-bar-right-padding;
+
+            // We still dont want extra padding for mobile screen
+            @include xsmall-screen {
+                padding-right: 0;
+            }
+        }
+    }
+
+    > .vss-FilterBar {
+        margin-left: $pageContentHorizontalPadding;
+        margin-right: $pageContentHorizontalPadding;
+    }
+
+    /// Apply to your content within a page to get standard left/right/bottom padding.
+    /// @group page|layout
+    .page-content {
+        padding-left: $pageContentHorizontalPadding;
+        padding-right: $pageContentHorizontalPadding;
+        padding-bottom: $pageContentVerticalPadding;
+
+        // full bleed for phones
+        @include xsmall-screen {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
+
+    /// Apply to your content within a page to get standard top paddding
+    /// @group page|layout
+    .page-content-top {
+        padding-top: $pageContentVerticalPadding;
+    }
+
+    /// Apply to your content within a page to get standard bottom paddding
+    /// @group page|layout
+    .page-content-bottom {
+        padding-bottom: $pageContentVerticalPadding;
+    }
+
+    /// Apply to your content within a page to get standard left paddding
+    /// @group page|layout
+    .page-content-left {
+        padding-left: $pageContentHorizontalPadding;
+
+        @include xsmall-screen {
+            padding-left: 0;
+        }
+    }
+
+    /// Apply to your content within a page to get standard right paddding
+    /// @group page|layout
+    .page-content-right {
+        padding-right: $pageContentHorizontalPadding;
+
+        @include xsmall-screen {
+            padding-right: 0;
+        }
+    }
+}
+
+.bolt-page-grey {
+    background-color: $neutral-2;
+}
+
+.bolt-page-white {
+    background-color: $backgroundColor;
+}

@@ -1,0 +1,42 @@
+.vss-ZeroData {
+  flex-wrap: wrap;
+  margin-top: 35px;
+}
+.vss-ZeroData .vss-ZeroDataItem {
+  text-align: center;
+}
+.vss-ZeroData .vss-ZeroDataItem .vss-ZeroDataItem--image,
+.vss-ZeroData .vss-ZeroDataItem .vss-ZeroDataItem--primary,
+.vss-ZeroData .vss-ZeroDataItem .vss-ZeroDataItem--secondary {
+  margin-bottom: 15px;
+  /* IE is not smart enough to keep flex items within the bounds of their flex container. */
+  max-width: 100%;
+}
+.vss-ZeroData .vss-ZeroDataItem .vss-ZeroDataItem--image:last-child,
+.vss-ZeroData .vss-ZeroDataItem .vss-ZeroDataItem--primary:last-child,
+.vss-ZeroData .vss-ZeroDataItem .vss-ZeroDataItem--secondary:last-child {
+  margin-bottom: 0;
+}
+.vss-ZeroData.single .vss-ZeroDataItem {
+  max-width: 520px;
+  /* IE does not respect our max-width unless we also set a min-width. Because reasons. */
+  min-width: 10px;
+}
+.vss-ZeroData.single .vss-ZeroDataItem .vss-ZeroDataItem--image {
+  height: 160px;
+}
+.vss-ZeroData.single .vss-ZeroDataItem .vss-ZeroDataItem--icon-image {
+  font-size: 160px;
+}
+.vss-ZeroData.multiple .vss-ZeroDataItem {
+  max-width: 235px;
+  margin: 0 20px;
+}
+.vss-ZeroData.multiple .vss-ZeroDataItem .vss-ZeroDataItem--image {
+  height: 75px;
+}
+.vss-ZeroData.multiple .vss-ZeroDataItem .vss-ZeroDataItem--action {
+  margin-top: auto;
+}
+
+/*# sourceMappingURL=ZeroData.css.map */

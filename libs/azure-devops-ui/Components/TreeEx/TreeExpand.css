@@ -1,0 +1,18 @@
+.bolt-tree-expand-button {
+  border-radius: 2px;
+  margin-right: 4px;
+  padding: 6px;
+}
+
+.bolt-tree-expand-button:hover {
+  background-color: rgba( 234, 234, 234 ,  1 );
+  background-color: rgba( var(--palette-neutral-8,234, 234, 234) ,  1 );
+}
+
+@media (forced-colors: active) {
+  .bolt-tree-expand-button:not(.disabled):hover {
+    color: HighLight;
+  }
+}
+
+/*# sourceMappingURL=TreeExpand.css.map */

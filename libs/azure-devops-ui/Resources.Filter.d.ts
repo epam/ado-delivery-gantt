@@ -1,0 +1,15 @@
+export declare const AnnounceFilterResultCount = "Showing {0} filtered items.";
+export declare const Apply = "Apply";
+export declare const Back = "Back";
+export declare const BestHit = "Best hit";
+export declare const Clear = "Clear";
+export declare const Filter = "Filter";
+export declare const FilterOn = "Filter on";
+export declare const FilterSelected = "{0} filter selected";
+export declare const FilterTitle = "Filter results";
+export declare const Keyword = "Keyword";
+export declare const KeywordSearchResult = "\"{0}\" keyword";
+export declare const NoFilterResults = "No items matched the supplied filter";
+export declare const Reset = "Reset";
+export declare const ResetAll = "Reset all";
+export declare const SearchKeyword = "Search keyword";

@@ -1,0 +1,108 @@
+@import '../../_coreStyles.scss';
+$header-transition-duration: 0.2s;
+
+.bolt-master-panel {
+    background-color: $neutral-2;
+    border-right: 1px solid $transblack-8;
+
+    @include small-screen() {
+        &:not(.show-on-small-screens) {
+            display: none !important; // We need to override display: flex and ALWAYS want to hide, so override any display styles
+        }
+    }
+
+    @include xlarge-screen() {
+        width: 384px;
+    }
+
+    @include large-screen() {
+        width: 320px;
+    }
+
+    @include medium-screen() {
+        width: 280px;
+    }
+
+    &.full-screen {
+        width: 100%;
+    }
+}
+
+.bolt-master-panel-header {
+    padding-top: $spacing-8;
+    padding-bottom: 24px;
+    transition: padding $header-transition-duration ease 0s;
+
+    // Sticky props
+    position: sticky;
+    top: 0; // Force stickyness on top
+    z-index: 2; // Always render above other non-callout content
+
+    background-color: inherit; // If this isn't set, it's just transparent which is an issue for sticky
+
+    &.hide {
+        visibility: hidden;
+        position: absolute;
+        top: 0;
+    }
+
+    &.has-search {
+        padding-bottom: $spacing-8;
+    }
+
+    &.content-scrolled {
+        border-bottom: 1px solid $transblack-8;
+        padding-bottom: $spacing-8;
+
+        .bolt-master-panel-header-title {
+            font-size: $fontSizeMM;
+        }
+
+        .bolt-master-panel-header-secondary {
+            display: none;
+        }
+
+        .bolt-master-panel-standard-header {
+            padding-top: 0px;
+        }
+    }
+}
+
+// IE11 Props to override sticky
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .bolt-master-panel-header {
+        position: relative;
+        top: auto;
+        z-index: inherit;
+    }
+}
+
+.bolt-master-panel-standard-header {
+    transition: padding $header-transition-duration ease 0s;
+}
+
+.bolt-master-panel-header-title {
+    transition: font-size $header-transition-duration ease 0s;
+}
+
+.bolt-master-panel-header-title,
+.bolt-master-panel-subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bolt-master-panel-search {
+    border-bottom: 1px solid $transblack-8;
+    padding: 9px 21px;
+}
+
+.bolt-master-panel-content {
+    .bolt-list-row.selected {
+        background-color: $neutral-8;
+
+        @include ms-high-contrast-override {
+            background-color: highlight;
+        }
+    }
+}

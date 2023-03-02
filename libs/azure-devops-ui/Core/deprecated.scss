@@ -1,0 +1,100 @@
+@import '../Core/_platformCommon.scss';
+/// deprecated layout style use flex-row
+.flex {
+    display: flex;
+}
+
+/// deprecated font style use font-size-xxs
+.fontSizeXXS {
+    font-size: $fontSizeXXS;
+}
+
+/// deprecated font style use font-size-xs
+.fontSizeXS {
+    font-size: $fontSizeXS;
+}
+
+/// deprecated font style use font-size-s
+.fontSizeS {
+    font-size: $fontSizeS;
+}
+
+/// deprecated font style use font-size
+.fontSize {
+    font-size: $fontSize;
+}
+
+/// deprecated font style use font-size-ms
+.fontSizeMS {
+    font-size: $fontSizeMS;
+}
+
+/// deprecated font style use font-size-m
+.fontSizeM {
+    font-size: $fontSizeM;
+}
+
+/// deprecated font style use font-size-mm
+.fontSizeMM {
+    font-size: $fontSizeMM;
+}
+
+/// deprecated font style use font-size-ml
+.fontSizeML {
+    font-size: $fontSizeML;
+}
+
+/// deprecated font style use font-size-l
+.fontSizeL {
+    font-size: $fontSizeL;
+}
+
+/// deprecated font style use font-size-ll
+.fontSizeLL {
+    font-size: $fontSizeLL;
+}
+
+/// deprecated font style use font-size-lll
+.fontSizeLLL {
+    font-size: $fontSizeLLL;
+}
+
+/// deprecated font style use font-size-xl
+.fontSizeXL {
+    font-size: $fontSizeXL;
+}
+
+/// deprecated font style use font-size-xxl
+.fontSizeXXL {
+    font-size: $fontSizeXXL;
+}
+
+/// deprecated font style use font-size-xxxl
+.fontSizeXXXL {
+    font-size: $fontSizeXXXL;
+}
+
+/// deprecated font style use font-size-xxxxl
+.fontSizeXXXXL {
+    font-size: $fontSizeXXXXL;
+}
+
+/// deprecated font style use font-weight-light
+.fontWeightLighter {
+    font-weight: $fontWeightLighter;
+}
+
+/// deprecated font style use font-weight-normal
+.fontWeightNormal {
+    font-weight: $fontWeightNormal;
+}
+
+/// deprecated font style use font-weight-semibold
+.fontWeightSemiBold {
+    font-weight: $fontWeightSemiBold;
+}
+
+/// deprecated font style use font-weight-heavy
+.fontWeightHeavy {
+    font-weight: $fontWeightHeavy;
+}

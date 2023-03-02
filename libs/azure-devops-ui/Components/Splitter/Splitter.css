@@ -1,0 +1,114 @@
+.vss-Splitter--container {
+  flex-grow: 1;
+  position: relative;
+}
+.vss-Splitter--container .vss-Splitter--pane-fixed {
+  flex-grow: 0;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+.vss-Splitter--container .vss-Splitter--pane-flexible {
+  -webkit-box-flex: 1 1 0%;
+  -webkit-flex: 1 1 0%;
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+}
+.vss-Splitter--container .vss-Splitter--divider {
+  position: relative;
+  user-select: none;
+  -webkit-box-flex: 0 0 4px;
+  -webkit-flex: 0 0 4px;
+  flex: 0 0 4px;
+}
+@media (forced-colors: active) {
+  .vss-Splitter--container .vss-Splitter--divider:after {
+    background-color: windowText;
+  }
+  .vss-Splitter--container .vss-Splitter--divider:focus:after {
+    background-color: highlight;
+  }
+}
+.vss-Splitter--container .vss-Splitter--divider:after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  background-color: rgba(0, 0, 0, .08);
+  background-color: var(--border-subtle-color,rgba(0, 0, 0, .08));
+}
+.vss-Splitter--container .vss-Splitter--drag-placeholder {
+  position: absolute;
+  background-color: rgba(0, 0, 0, .08);
+  background-color: var(--border-subtle-color,rgba(0, 0, 0, .08));
+  z-index: 1000;
+}
+.vss-Splitter--container.vss-Splitter--container-row {
+  display: -webkit-box;
+  -webkit-flex-direction: row;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+.vss-Splitter--container.vss-Splitter--container-row .vss-Splitter--divider {
+  cursor: ew-resize;
+}
+.vss-Splitter--container.vss-Splitter--container-row .vss-Splitter--divider:after {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  left: 50%;
+  transition: 100ms width, 100ms left;
+}
+.vss-Splitter--container.vss-Splitter--container-row .vss-Splitter--divider:not(.vss-Splitter--divider-dragging):hover:after, .vss-Splitter--container.vss-Splitter--container-row .vss-Splitter--divider:focus:after {
+  width: 4px;
+  left: calc(50% - 2px);
+}
+.vss-Splitter--container.vss-Splitter--container-row .vss-Splitter--drag-placeholder {
+  height: 100%;
+  width: 4px;
+  cursor: ew-resize;
+}
+.vss-Splitter--container.vss-Splitter--container-row .vss-splitter-expand-button {
+  margin: auto 4px 8px 4px;
+}
+.vss-Splitter--container.vss-Splitter--container-row .vss-Splitter--pane-flexible {
+  width: 0px;
+}
+.vss-Splitter--container.vss-Splitter--container-column {
+  display: -webkit-box;
+  -webkit-flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+.vss-Splitter--container.vss-Splitter--container-column .vss-Splitter--divider {
+  cursor: ns-resize;
+}
+.vss-Splitter--container.vss-Splitter--container-column .vss-Splitter--divider:after {
+  left: 0;
+  right: 0;
+  height: 1px;
+  top: 50%;
+  transition: 100ms height, 100ms top;
+}
+.vss-Splitter--container.vss-Splitter--container-column .vss-Splitter--divider:not(.vss-Splitter--divider-dragging):hover:after, .vss-Splitter--container.vss-Splitter--container-column .vss-Splitter--divider:focus:after {
+  height: 4px;
+  top: calc(50% - 2px);
+}
+.vss-Splitter--container.vss-Splitter--container-column .vss-Splitter--drag-placeholder {
+  width: 100%;
+  height: 4px;
+  cursor: ns-resize;
+}
+.vss-Splitter--container.vss-Splitter--container-column .vss-splitter-expand-button {
+  margin: 4px 8px 4px auto;
+}
+.vss-Splitter--container.vss-Splitter--container-column .vss-Splitter--pane-flexible {
+  height: 0px;
+}
+.vss-Splitter--container.vss-Splitter--container-dragging iframe {
+  pointer-events: none;
+}
+
+/*# sourceMappingURL=Splitter.css.map */

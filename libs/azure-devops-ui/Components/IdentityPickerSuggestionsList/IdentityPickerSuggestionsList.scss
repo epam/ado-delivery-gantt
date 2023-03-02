@@ -1,0 +1,69 @@
+@import '../../_coreStyles.scss';
+$picker-margin-top-bottom: 3px;
+$picker-icon-height: 24px;
+$picker-margin-left-right: 4px;
+$picker-height: 32px;
+$picker-item-height: 48px;
+$picker-width: 296px;
+
+.bolt-identitypickerdropdown-callout-content {
+    border-radius: 4px;
+    min-width: $picker-width;
+    overflow: hidden;
+}
+
+.bolt-identitypickerdropdown-input {
+    background: transparent;
+}
+
+.bolt-identitypickerdropdown-item {
+    :hover,
+    :focus,
+    &.bolt-suggestions-isSuggested {
+        .bolt-contact-card-button {
+            display: flex;
+        }
+    }
+
+    .bolt-picker-suggesteditem-text {
+        @include ms-high-contrast-override {
+            forced-color-adjust: none;
+            background-color: window;
+            border: 1px solid Highlight;
+            color: windowtext;
+        }
+    }
+
+    .bolt-contact-card-button {
+        display: none;
+    }
+}
+
+.bolt-identitypickerdropdown-noresults {
+    background-color: $neutral-2;
+    border-radius: 4px;
+    color: $primary-text;
+    font-size: $fontSize;
+    height: $picker-height;
+    padding: $picker-margin-left-right $picker-margin-top-bottom;
+
+    @include ms-high-contrast-override {
+        border: 1px solid Highlight;
+    }
+}
+
+.bolt-picker-persona {
+    margin-right: $picker-margin-left-right;
+    min-width: $picker-icon-height;
+    min-height: $picker-icon-height;
+}
+
+.bolt-picker-persona-name {
+    margin-left: $picker-margin-left-right;
+    overflow: hidden;
+}
+
+.bolt-identitypicker-github-icon {
+    font-size: $fontSize;
+    margin-right: $spacing-4;
+}

@@ -1,0 +1,233 @@
+@import '../../_coreStyles.scss';
+$tabRightMargin: $spacing-8;
+$tabButtonRightMargin: 0px;
+$tabButtonPadding: $spacing-8;
+$tabSelectionHeight: 2px;
+
+/**
+ * Generalized focus treatment for components 
+ */
+.focus-treatment:focus {
+    outline: none;
+}
+
+.bolt-focus-visible .bolt-tab.focus-treatment {
+    &:focus,
+    &.focused {
+        border-radius: 3px;
+        @include box-shadow-focus-rect(false, true);
+        @include ms-high-contrast-override {
+            border: 1px solid Highlight;
+            forced-color-adjust: none;
+            color: windowtext;
+            & > * {
+                forced-color-adjust: auto;
+            }
+        }
+    }
+}
+
+.bolt-tab {
+    color: inherit;
+}
+
+@mixin tab-common($tabs-height, $tabs-text-size) {
+    height: $tabs-height;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: transparent;
+    color: $primary-text;
+    display: inline-block;
+
+    .bolt-tab-text {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .bolt-tab-inner-container {
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .bolt-tab-badge {
+        margin-left: $spacing-4;
+        max-width: 80px;
+        cursor: pointer;
+
+        .bolt-pill-focusable {
+            overflow: hidden;
+        }
+    }
+}
+
+@mixin tab-horizontal($tabs-height, $tabs-text-size) {
+    .bolt-tab {
+        @include tab-common($tabs-height, $tabs-text-size);
+        margin-right: $tabButtonRightMargin;
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        padding: 0 $tabButtonPadding;
+        text-align: center;
+        position: relative;
+        border: 0;
+
+        @include ms-high-contrast-override {
+            border: 1px solid transparent;
+        }
+
+        // Fix for focus rect in IE. In all other browsers this is not needed, but without this the default is hidden for IE11.
+        // https://stackoverflow.com/questions/11164634/ie8-and-ie9-before-and-after-elements-position-absolute-are-hidden
+        overflow: visible;
+
+        &:hover {
+            color: inherit;
+            @include ms-high-contrast-override {
+                border-color: Highlight;
+            }
+        }
+
+        .bolt-tab-text::before {
+            content: attr(data-content);
+            display: block;
+            font-weight: $fontWeightNormal;
+            height: 0px;
+            visibility: hidden;
+        }
+
+        .bolt-tab-text::after {
+            content: attr(data-content);
+            display: block;
+            font-weight: $fontWeightSemiBold;
+            height: 0px;
+            visibility: hidden;
+        }
+
+        .bolt-tab-icon + .bolt-tab-text {
+            margin-left: $spacing-4;
+        }
+
+        &.selected {
+            .bolt-tab-inner-container {
+                font-weight: $fontWeightSemiBold;
+                padding-top: $tabSelectionHeight;
+                border-bottom: $tabSelectionHeight solid $communication-background;
+            }
+        }
+    }
+}
+
+.bolt-tabbar {
+    .vss-FilterBar {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: $spacing-8;
+        height: 32px;
+
+        .vss-FilterBar--list {
+            align-items: center;
+
+            .vss-FilterBar--item.vss-FilterBar--item-keyword-container {
+                margin-right: 0px;
+            }
+
+            .vss-FilterBar--right-items .vss-FilterBar--action {
+                display: none;
+            }
+        }
+    }
+}
+
+.bolt-tabbar.sticky {
+    position: sticky;
+    background-color: $backgroundColor;
+    z-index: 2;
+    top: 0px;
+}
+
+.bolt-tabbar-grey.sticky {
+    background-color: $neutral-2;
+}
+
+.bolt-tabbar-on-callout.sticky {
+    background-color: $calloutBackgroundColor;
+}
+
+// @EDGE position: sticky is technically supported by Edge, but there are some strange rendering bugs
+// when using it, so the following selector will detect Edge, and set the position back to relative.
+@supports (-ms-ime-align: auto) {
+    .bolt-tabbar.sticky.sticky {
+        position: relative;
+    }
+}
+
+.bolt-tabbar-tabs {
+    @media screen and (max-width: 600px) {
+        overflow-x: auto;
+    }
+
+    &.compact {
+        @include tab-horizontal(2rem, 0.875rem);
+    }
+    &.tall {
+        @include tab-horizontal(3rem, 0.875rem);
+    }
+    &.large-link {
+        @include tab-horizontal(2.5rem, 1.0625rem);
+    }
+}
+
+@mixin tab-vertical($tabs-height, $tabs-text-size) {
+    .bolt-tab {
+        @include tab-common($tabs-height, $tabs-text-size);
+        padding-left: $spacing-32;
+
+        &.selected {
+            background-color: $neutral-8;
+            @include ms-high-contrast-override {
+                background: highlight;
+                forced-color-adjust: none;
+
+                & .bolt-tab-text {
+                    color: windowtext;
+                    background: window;
+                }
+            }
+        }
+    }
+
+    a.bolt-tab {
+        color: inherit;
+    }
+}
+
+.bolt-tablist {
+    border-right: 1px solid $transblack-20;
+    overflow: auto;
+}
+
+.bolt-tablist-tabs {
+    @include tab-vertical(32px, 15px);
+}
+
+.bolt-tablist-heading {
+    align-items: center;
+    height: 32px;
+    margin-top: $spacing-16;
+    padding-left: $spacing-32;
+}
+
+.bolt-tablist-title {
+    height: 48px;
+    align-items: center;
+    display: flex;
+    padding-left: $spacing-32;
+}
+
+.bolt-tablist-subtitle {
+    padding-left: $spacing-32;
+}

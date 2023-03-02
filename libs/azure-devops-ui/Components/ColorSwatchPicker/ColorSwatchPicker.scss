@@ -1,0 +1,12 @@
+@import '../../_coreStyles.scss';
+.bolt-colorswatchpicker {
+    .bolt-colorpip {
+        cursor: pointer;
+
+        &:hover {
+            .bolt-colorpip-content {
+                box-shadow: 0 0 0 2px $white, 0 0 0 5px $neutral-8;
+            }
+        }
+    }
+}

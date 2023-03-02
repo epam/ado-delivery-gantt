@@ -1,0 +1,106 @@
+@import '../../_coreStyles.scss';
+$spacing-with-border: $spacing-4 - $spacingBorder;
+$pill-vertical-margin: 2px;
+
+.bolt-tag-picker {
+    background-color: $backgroundColor;
+    border: $spacingBorder solid $neutral-20;
+    border-radius: 2px;
+    padding: $spacing-with-border - $pill-vertical-margin $spacing-with-border;
+
+    &.edit {
+        border: $spacingBorder solid $communication-background;
+        @include box-shadow-focus-rect();
+    }
+    &:not(.edit) {
+        cursor: text;
+    }
+}
+
+.bolt-tag-picker-prefix-icon {
+    margin: $pill-vertical-margin 0;
+}
+
+.bolt-tag-picker-pill {
+    // Sets props to allow the pill to shrink
+    min-width: 0px;
+
+    margin: $pill-vertical-margin $spacing-4 $pill-vertical-margin 0;
+    user-select: none;
+}
+
+.bolt-tag-picker-pill-selectable {
+    &:hover {
+        background-color: $neutral-10;
+    }
+}
+
+// override very specific hover for pills.
+.bolt-pill.standard.bolt-tag-picker-pill.bolt-tag-picker-pill-selectable.active {
+    background-color: $communication-tint-20;
+}
+
+.bolt-tag-picker-add-icon-div {
+    margin: $pill-vertical-margin 0px;
+}
+
+.bolt-tag-picker-add-icon {
+    border-radius: 50%;
+    background-color: $neutral-6;
+    padding: $spacing-4;
+
+    &:hover {
+        background-color: $neutral-10;
+    }
+}
+
+.bolt-tag-picker-callout-content {
+    border-radius: 4px;
+}
+
+.bolt-tag-picker-input {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    color: $primary-text;
+    min-width: 120px;
+    margin: 0 $spacing-4;
+
+    &.hide-input {
+        //Don't use display:none since that prevents focus
+        margin: 0;
+        min-width: 0;
+        width: 0;
+    }
+
+    // Keep these separate otherwise the selector will be rejected
+    // because at least one of the pseudo selectors will not be
+    // known by the browser
+    &::placeholder {
+        color: $secondary-text;
+    }
+    &:-ms-input-placeholder {
+        color: $secondary-text;
+    }
+    &::-ms-input-placeholder {
+        color: $secondary-text;
+    }
+    &::-webkit-input-placeholder {
+        color: $secondary-text;
+    }
+    &:-moz-placeholder {
+        color: $secondary-text;
+    }
+
+    /* clears the 'X' from Internet Explorer */
+    &::-ms-clear {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+    &::-ms-reveal {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+}

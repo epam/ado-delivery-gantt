@@ -1,0 +1,94 @@
+@import '../../_coreStyles.scss';
+.bolt-label-autocomplete {
+    position: relative;
+    min-width: 128px;
+    min-height: 20px;
+    flex-shrink: 0;
+
+    input {
+        width: 100%;
+        height: 100%;
+
+        position: absolute;
+        background-color: transparent;
+        z-index: 2;
+
+        &::-ms-clear {
+            display: none;
+        }
+
+        &.suggestion {
+            color: $secondary-text;
+            z-index: 1;
+        }
+    }
+}
+
+.bolt-label-suggestions-callout {
+    border-radius: 4px;
+
+    .bolt-callout-content {
+        width: 248px;
+        border-radius: 4px;
+    }
+}
+
+.bolt-label-suggestions-container {
+    padding: 8px 0px;
+
+    .bolt-colorpip {
+        .bolt-colorpip-content {
+            background-color: $neutral-6; // Default color, will often be overridden by element styles
+        }
+    }
+
+    .bolt-label-suggestions-row {
+        height: 32px;
+
+        &.selected {
+            background-color: $communication-tint-30;
+        }
+
+        &.clickable {
+            cursor: pointer;
+        }
+
+        .bolt-label-suggestions-row--content {
+            display: flex;
+            flex: 1;
+            min-width: 0px; // To allow shrinking
+            height: 32px;
+            align-items: center;
+
+            font-size: $fontSizeM;
+
+            span {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .bolt-label-suggestions-icon {
+            margin: 0px 8px;
+            font-size: $fontSizeML;
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .bolt-suggestions-separator {
+        height: 1px;
+        margin: 7px 12px 8px;
+        background-color: $neutral-10;
+    }
+
+    .bolt-colorswatchpicker.selected {
+        background-color: $communication-tint-30;
+    }
+
+    .bolt-label-suggestions-list {
+        max-height: 208px; // 32 * 6.5
+        overflow-y: auto;
+    }
+}

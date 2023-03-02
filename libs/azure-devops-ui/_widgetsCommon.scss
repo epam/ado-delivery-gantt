@@ -1,0 +1,9 @@
+@import './_coreStyles.scss';
+$list-row-hover-color: var(--component-grid-row-hover-color);
+$list-row-select-color: var(--component-grid-selected-row-color);
+$list-row-select-focus-border-color: var(--component-grid-focus-border-color);
+$list-row-select-link-color: var(--component-grid-link-selected-row-color);
+$list-link-hover-color: var(--component-grid-link-hover-color);
+$list-cell-action-hover-color: var(--component-grid-action-hover-color);
+$list-select-cell-action-hover-color: var(--component-grid-action-selected-cell-hover-color);
+$list-cell-bottom-border-color: var(--component-grid-cell-bottom-border-color);

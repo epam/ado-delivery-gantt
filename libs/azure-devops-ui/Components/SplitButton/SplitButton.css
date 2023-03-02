@@ -1,0 +1,31 @@
+.bolt-split-button-main {
+  border-bottom-right-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.bolt-split-button .bolt-split-button-option {
+  padding: 9px;
+  border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+}
+
+body.bolt-focus-visible .bolt-split-button-main:focus,
+body.bolt-focus-visible .bolt-split-button-option:focus {
+  border-radius: 2px;
+}
+
+.bolt-split-button-divider {
+  background-color: rgba(0, 0, 0, 0.20);
+  background-color: var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20));
+  width: 1px;
+}
+.bolt-split-button-divider.primary {
+  background-color: rgba( 0, 91, 161 ,  1 );
+  background-color: rgba( var(--palette-primary-darkened-10,0, 91, 161) ,  1 );
+}
+.bolt-split-button-divider.disabled {
+  background-color: rgba(0, 0, 0, 0.10);
+  background-color: var(--palette-black-alpha-10,rgba(0, 0, 0, 0.10));
+}
+
+/*# sourceMappingURL=SplitButton.css.map */

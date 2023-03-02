@@ -1,0 +1,144 @@
+@import '../../_coreStyles.scss';
+$label-shadow-size: 2px;
+$free-flow-label-row-spacing: 6px;
+
+$focus-inner-color: var(--focus-pulse-max-color);
+
+$label-default-color: var(--component-label-default-color);
+$label-default-color-hover: var(--component-label-default-color-hover);
+
+.bolt-label {
+    border-radius: 12px;
+    padding: 2px 8px;
+    white-space: nowrap;
+    max-width: 120px;
+    
+
+    background-color: $label-default-color; // Will be overridden by element styles if a color is provided
+    color: $textColor;
+
+    &:hover {
+        background-color: $label-default-color-hover; // Will be overridden by element styles if a color is provided
+    }
+
+    // Using actual black/white since we can't rely on themed text colors
+    // To not clash with arbitrary background colors
+    &.light {
+        color: black;
+    }
+    &.dark {
+        color: white;
+    }
+
+    &.selected,
+    &:focus {
+        background-color: $communication-background;
+        color: $text-on-communication-background;
+
+        outline: none;
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 $label-shadow-size $focus-inner-color;
+    }
+
+    .bolt-label-content {
+        align-items: center;
+        justify-content: center;
+        font-size: $fontSize;
+    }
+}
+
+.bolt-labelgroup-title-wrapper {
+    margin-bottom: 8px;
+    color: $textColor;
+
+    .vss-Icon {
+        margin-left: 8px;
+    }
+}
+
+.bolt-labelgroup-addButton {
+    align-self: flex-start;
+    margin-left: (9px + $label-shadow-size);
+}
+
+.bolt-labelgroup {
+    padding: $label-shadow-size $label-shadow-size;
+
+    &.one-line {
+        flex-wrap: nowrap;
+        overflow: hidden;
+
+        padding: 8px $label-shadow-size;
+
+        &.fade-out {
+            mask-image: linear-gradient(to left, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1) 20px);
+            -webkit-mask-image: -webkit-linear-gradient(right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1) 20px);
+        }
+    }
+
+    &.free-flow {
+        flex-wrap: wrap;
+
+        // These two margins are a slight hack to get gutters working without taking extra space
+        margin-bottom: (-$free-flow-label-row-spacing);
+
+        .bolt-label {
+            margin-bottom: $free-flow-label-row-spacing;
+        }
+    }
+
+    .bolt-label {
+        margin-right: 6px;
+    }
+}
+
+.bolt-labelgroup-editable {
+    padding: $label-shadow-size;
+
+    .bolt-labelgroup-title-wrapper {
+        margin-left: (9px + $label-shadow-size);
+    }
+
+    .bolt-label-autocomplete {
+        margin-bottom: 6px;
+        flex-grow: 1;
+
+        input {
+            border: none;
+
+            &:focus {
+                outline: none;
+            }
+        }
+    }
+
+    .bolt-label {
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    &:hover:not(.edit) {
+        cursor: pointer;
+    }
+}
+
+.bolt-labelgroup--editableWrapper {
+    &.default-padding,
+    &.edit {
+        padding: 7px 9px;
+    }
+
+    border-radius: 2px;
+
+    &.edit {
+        border: 1px solid $communication-background;
+        @include box-shadow-focus-rect();
+    }
+
+    &:hover:not(.edit) {
+        cursor: pointer;
+    }
+}

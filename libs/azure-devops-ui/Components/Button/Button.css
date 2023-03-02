@@ -1,0 +1,276 @@
+.bolt-button {
+  align-items: center;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  justify-content: center;
+  line-height: inherit;
+  outline: none;
+  overflow: visible; /* IE11 needs overflow visible for the focus treatment to show up */
+  padding: 6px 12px;
+  position: relative;
+  transition: background 80ms linear;
+}
+@media (forced-colors: active) {
+  .bolt-button {
+    border: 1px solid windowtext;
+  }
+}
+
+/* This is here to work around Legacy styles setting the heights of all buttons to 30px */
+button.bolt-button {
+  height: auto;
+}
+
+/* Needed to remove the focus-rectangle from FireFox. */
+.bolt-button::-moz-focus-inner {
+  border: 0;
+}
+
+/* Danger modifiers */
+.bolt-button.danger {
+  background-color: rgba(232, 17, 35, 1);
+  background-color: var(--palette-error,rgba(232, 17, 35, 1));
+  color: rgba(255, 255, 255, 1);
+  color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+
+.bolt-button.danger:hover {
+  background-color: rgba(203, 15, 31, 1);
+  background-color: var(--palette-error-6,rgba(203, 15, 31, 1));
+}
+
+.bolt-button.danger:active,
+.bolt-button.danger.active {
+  background-color: rgba(184, 14, 28, 1);
+  background-color: var(--palette-error-10,rgba(184, 14, 28, 1));
+}
+
+/* Primary modifiers */
+.bolt-button.primary {
+  background-color: rgba(0, 120, 212, 1);
+  background-color: var(--communication-background,rgba(0, 120, 212, 1));
+  color: rgba(255, 255, 255, 1);
+  color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+
+.bolt-button.primary:hover {
+  background-color: rgba( 0, 103, 181 ,  1 );
+  background-color: rgba( var(--palette-primary-darkened-6,0, 103, 181) ,  1 );
+}
+
+.bolt-button.primary:active,
+.bolt-button.primary.active {
+  background-color: rgba( 0, 91, 161 ,  1 );
+  background-color: rgba( var(--palette-primary-darkened-10,0, 91, 161) ,  1 );
+}
+
+@media (forced-colors: active) {
+  .bolt-button:not(.disabled):hover {
+    color: HighLight;
+  }
+}
+
+/* Disabled modifiers */
+.bolt-button.disabled,
+.bolt-button.disabled:hover,
+.bolt-button.disabled:focus {
+  background-color: rgba(0, 0, 0, 0.06);
+  background-color: var(--palette-black-alpha-6,rgba(0, 0, 0, 0.06));
+  color: rgba(0, 0, 0, .38);
+  color: var(--text-disabled-color,rgba(0, 0, 0, .38));
+  cursor: default;
+}
+@media (forced-colors: active) {
+  .bolt-button.disabled,
+  .bolt-button.disabled:hover,
+  .bolt-button.disabled:focus {
+    color: GrayText;
+    forced-color-adjust: none;
+  }
+}
+
+/* Subtle modifiers (before standard for overrides) */
+.bolt-button.subtle,
+.bolt-button.subtle.disabled:hover,
+.bolt-button.subtle.disabled:focus {
+  background-color: transparent;
+}
+
+.bolt-button.subtle:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+  background-color: var(--palette-black-alpha-6,rgba(0, 0, 0, 0.06));
+}
+.bolt-button.subtle:active {
+  background-color: rgba(0, 0, 0, 0.20);
+  background-color: var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20));
+}
+
+/* Basic button colors */
+.bolt-button {
+  background-color: rgba(0, 0, 0, 0.06);
+  background-color: var(--palette-black-alpha-6,rgba(0, 0, 0, 0.06));
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  margin: 0;
+}
+
+.bolt-button:focus {
+  z-index: 1;
+}
+
+.bolt-button:hover {
+  background-color: rgba(0, 0, 0, 0.10);
+  background-color: var(--palette-black-alpha-10,rgba(0, 0, 0, 0.10));
+}
+
+.bolt-button:active,
+.bolt-button.active {
+  background-color: rgba(0, 0, 0, 0.20);
+  background-color: var(--palette-black-alpha-20,rgba(0, 0, 0, 0.20));
+}
+
+.bolt-link-button {
+  text-decoration: none;
+}
+
+.bolt-button.icon-only {
+  padding: 8px 22px;
+  font-weight: normal;
+}
+
+.bolt-button.icon-only.subtle {
+  padding: 8px;
+}
+
+.bolt-button:not(.icon-only) > .left-icon {
+  font-weight: normal;
+  padding-right: 10px;
+}
+
+.bolt-button.bolt-link-button {
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+}
+.bolt-button.bolt-link-button:hover {
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  text-decoration: none;
+}
+.bolt-button.bolt-link-button:visited {
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+}
+.bolt-button.bolt-link-button:active, .bolt-button.bolt-link-button.active {
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+}
+.bolt-button.bolt-link-button.disabled {
+  color: rgba(0, 0, 0, .38);
+  color: var(--text-disabled-color,rgba(0, 0, 0, .38));
+}
+@media (forced-colors: active) {
+  .bolt-button.bolt-link-button.disabled {
+    color: GrayText;
+    forced-color-adjust: none;
+  }
+}
+
+.bolt-button.bolt-link-button.primary {
+  color: rgba(255, 255, 255, 1);
+  color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+.bolt-button.bolt-link-button.primary:hover {
+  color: rgba(255, 255, 255, 1);
+  color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+.bolt-button.bolt-link-button.primary:visited {
+  color: rgba(255, 255, 255, 1);
+  color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+.bolt-button.bolt-link-button.primary:active, .bolt-button.bolt-link-button.primary.active {
+  color: rgba(255, 255, 255, 1);
+  color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+
+.bolt-focus-visible .bolt-button.bolt-focus-treatment:focus {
+  animation: ms-focus-shadow-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23));
+  border-color: rgba(0, 120, 212, 1);
+  border-color: var(--focus-border-color,rgba(0, 120, 212, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-button.bolt-focus-treatment:focus {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-button.bolt-focus-treatment:focus {
+    forced-color-adjust: none;
+    border-color: highlight;
+  }
+}
+@media screen and (-ms-high-contrast: black-on-white) {
+  .bolt-focus-visible .bolt-button.bolt-focus-treatment:focus {
+    outline: 1px solid highlight;
+    outline-offset: 1px;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-button.bolt-focus-treatment:focus {
+    background: window;
+    color: windowtext;
+  }
+}
+.bolt-focus-visible .bolt-button.bolt-focus-treatment:focus.primary {
+  animation: ms-focus-shadow-with-border-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23), 0 0 0 1px rgba(0, 120, 212, 1);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23)), 0 0 0 1px var(--focus-border-color,rgba(0, 120, 212, 1));
+  border-color: rgba(255, 255, 255, 1);
+  border-color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-button.bolt-focus-treatment:focus.primary {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-button.bolt-focus-treatment:focus.primary {
+    border-color: highlight;
+    box-shadow: none;
+  }
+}
+.bolt-focus-visible .bolt-button.bolt-focus-treatment:focus.danger {
+  animation: ms-focus-shadow-with-border-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23), 0 0 0 1px rgba(0, 120, 212, 1);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23)), 0 0 0 1px var(--focus-border-color,rgba(0, 120, 212, 1));
+  border-color: rgba(255, 255, 255, 1);
+  border-color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-button.bolt-focus-treatment:focus.danger {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-button.bolt-focus-treatment:focus.danger {
+    border-color: highlight;
+    box-shadow: none;
+  }
+}
+.bolt-focus-visible .bolt-button.bolt-focus-treatment:focus:after {
+  content: none !important;
+}
+
+.ms-Dialog-action .bolt-button {
+  font-size: 0.875rem;
+}
+
+/*# sourceMappingURL=Button.css.map */

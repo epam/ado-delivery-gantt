@@ -1,0 +1,104 @@
+@import '../../Core/_platformCommon.scss';
+.vss-Persona {
+    .vss-Persona-content {
+        border-radius: 50%;
+        width: 100%;
+        height: 100%;
+        display: flex;
+
+        justify-content: center;
+
+        color: white;
+        background-color: $neutral-30; // Default color for unknown personas, will usually be overridden by the component itself
+        user-select: none;
+
+        &.using-image {
+            object-fit: cover;
+            background-color: transparent;
+        }
+
+        // Line-height is kind of a hack here
+        // align-items: center doesn't quite center the text
+        &.extra-extra-small {
+            font-size: $fontSizeS;
+            line-height: 15px;
+        }
+        &.extra-small {
+            font-size: $fontSizeS;
+            line-height: 17px;
+        }
+        &.extra-small-plus {
+            font-size: $fontSizeS;
+            line-height: 19px;
+        }
+        &.small {
+            font-size: $fontSizeS;
+            line-height: 24px;
+        }
+        &.small-plus {
+            font-size: $fontSizeM;
+            line-height: 27px;
+        }
+        &.medium {
+            font-size: $fontSizeM;
+            line-height: 31px;
+        }
+        &.medium-plus {
+            font-size: $fontSizeM;
+            line-height: 39px;
+        }
+        &.large {
+            font-size: 17px;
+            line-height: 46px;
+        }
+        &.extra-large {
+            font-size: $fontSizeLLL;
+            line-height: 70px;
+        }
+        &.extra-extra-large {
+            font-size: $fontSizeXXL;
+            line-height: 98px;
+        }
+    }
+
+    &.extra-extra-small {
+        width: 16px;
+        height: 16px;
+    }
+    &.extra-small {
+        width: 18px;
+        height: 18px;
+    }
+    &.extra-small-plus {
+        width: 20px;
+        height: 20px;
+    }
+    &.small {
+        width: 24px;
+        height: 24px;
+    }
+    &.small-plus {
+        width: 28px;
+        height: 28px;
+    }
+    &.medium {
+        width: 32px;
+        height: 32px;
+    }
+    &.medium-plus {
+        width: 40px;
+        height: 40px;
+    }
+    &.large {
+        width: 48px;
+        height: 48px;
+    }
+    &.extra-large {
+        width: 72px;
+        height: 72px;
+    }
+    &.extra-extra-large {
+        width: 100px;
+        height: 100px;
+    }
+}

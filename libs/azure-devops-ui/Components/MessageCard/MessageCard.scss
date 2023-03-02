@@ -1,0 +1,17 @@
+@import '../../_coreStyles.scss';
+.bolt-messagecard {
+    &.bolt-card {
+        padding: 0;
+    }
+    .bolt-messagebar {
+        padding: 0;
+
+        &.severity-info {
+            background-color: $white;
+        }
+    }
+    .bolt-messagebar-content {
+        padding: $spacing-16 $spacing-20 $spacing-16 $spacing-12;
+        border-radius: 4px;
+    }
+}

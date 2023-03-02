@@ -1,0 +1,265 @@
+@import '../../_coreStyles.scss';
+$textFieldHorizontalPadding: $spacing-12 - $spacingBorder;
+$textFieldIconHorizontalPadding: 4px;
+$textFieldIconHorizontalMargin: $spacing-12 - $spacingBorder - $textFieldIconHorizontalPadding;
+
+.bolt-textfield {
+    color: $primary-text;
+    border-radius: 2px;
+    border: 1px solid $secondary-text;
+    background-color: $backgroundColor;
+    overflow: hidden;
+    min-width: 64px;
+
+    &.disabled {
+        color: $disabled-text;
+        background-color: $neutral-4;
+
+        @include ms-high-contrast-override {
+            color: graytext;
+            background-color: window;
+            forced-color-adjust: none;
+            border: 1px solid graytext;
+
+            & input {
+                background-color: window;
+            }
+        }
+    }
+
+    &.focused.focus-treatment {
+        border-color: $communication-background;
+        @include box-shadow-focus-rect(false, true);
+        @include ms-high-contrast-highlight();
+        @include ms-high-contrast-override {
+            color: windowtext;
+            background-color: window;
+        }
+        & > * {
+            @include ms-high-contrast-override {
+                forced-color-adjust: auto;
+            }
+        }
+    }
+
+    .prefix {
+        padding-left: $textFieldIconHorizontalPadding;
+        margin-left: $textFieldIconHorizontalMargin;
+    }
+
+    .suffix {
+        padding-right: $textFieldIconHorizontalPadding;
+        margin-right: $textFieldIconHorizontalMargin;
+    }
+}
+
+/// Apply the 'subtle' className to your TextField to have a subtle background (inherit rather than forced white/black).
+/// @group textfield|styles
+.subtle.bolt-textfield {
+    &:not(.focused):not(.disabled) {
+        background-color: inherit;
+    }
+}
+
+/// Apply the 'hide-border' className to your TextField to have a border only on hover/focus.
+/// @group textfield|styles
+.hide-border.bolt-textfield {
+    &:not(.focused):not(:hover) {
+        border-color: transparent;
+    }
+}
+
+// If there is a label, then an extra div is introduced and the error class
+// is not on the same div as bolt-textfield, so we use both of these selectors
+// to make sure that both cases are handled.
+.bolt-textfield-error.bolt-textfield,
+.bolt-textfield-error .bolt-textfield {
+    border-color: $error-text;
+}
+
+.bolt-textfield-auto-adjust {
+    overflow: hidden;
+}
+
+.bolt-textfield-auto-adjust-hidden {
+    position: absolute;
+    visibility: hidden;
+    width: 100%;
+}
+
+.bolt-textfield-auto-unresizable {
+    resize: none;
+}
+
+.bolt-textfield-input {
+    border: none;
+    outline: none;
+    background-color: inherit;
+    padding: 5px $textFieldHorizontalPadding;
+    resize: none;
+
+    // Keep these separate otherwise the selector will be rejected
+    // because at least one of the pseudo selectors will not be
+    // known by the browser
+    &::placeholder {
+        color: $secondary-text;
+    }
+    &:-ms-input-placeholder {
+        color: $secondary-text;
+    }
+    &::-ms-input-placeholder {
+        color: $secondary-text;
+    }
+    &::-webkit-input-placeholder {
+        color: $secondary-text;
+    }
+    &:-moz-placeholder {
+        color: $secondary-text;
+    }
+
+    &::-ms-clear {
+        display: none;
+    }
+
+    &:-moz-ui-invalid {
+        box-shadow: none;
+    }
+
+    &.activatable {
+        cursor: pointer;
+
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+
+        &::-moz-selection {
+            background: transparent;
+        }
+        &::selection {
+            background: transparent;
+        }
+    }
+}
+
+.bolt-textfield-input-with-prefix {
+    padding-left: $spacing-8;
+}
+
+.bolt-textfield-input-with-suffix {
+    padding-right: $spacing-8;
+}
+
+.bolt-textfield-no-text {
+    color: $secondary-text;
+}
+
+.bolt-textfield-message {
+    margin-top: $spacing-8;
+    font-size: $fontSize;
+    color: $secondary-text;
+}
+
+.bolt-textfield-message-error {
+    color: $error-text;
+}
+
+.bolt-textfield-label {
+    margin-bottom: $spacing-8;
+}
+
+.bolt-text-filterbaritem {
+    background-color: transparent;
+    border: none;
+}
+
+.bolt-text-filterbaritem-input {
+    background-color: transparent;
+    text-overflow: ellipsis;
+    position: relative;
+
+    // Keep these separate otherwise the selector will be rejected
+    // because at least one of the pseudo selectors will not be
+    // known by the browser
+    &::placeholder {
+        color: $transblack-60;
+    }
+    &:-ms-input-placeholder {
+        color: $transblack-60;
+    }
+    &::-ms-input-placeholder {
+        color: $transblack-60;
+    }
+    &::-webkit-input-placeholder {
+        color: $transblack-60;
+    }
+    &:-moz-placeholder {
+        color: $transblack-60;
+    }
+}
+
+.bolt-text-filterbaritem-clear.bolt-button {
+    &:not(:hover) {
+        background-color: transparent;
+    }
+
+    &.icon-only {
+        padding: 4px;
+        font-size: 1rem;
+        border-color: transparent;
+    }
+}
+
+.bolt-focus-visible .bolt-text-filterbaritem-clear.bolt-button.bolt-focus-treatment:focus {
+    animation: none;
+    box-shadow: none;
+    background-color: $transblack-10;
+}
+
+.bolt-textfield-inline {
+    background-color: $transblack-6;
+
+    &:not(.disabled) {
+        border-color: transparent;
+    }
+
+    .bolt-textfield-input {
+        background-color: transparent;
+    }
+
+    &:hover:not(.disabled):not(.focused) {
+        background-color: $transblack-10;
+    }
+}
+
+.bolt-textfield-inline:hover:not(.disabled) {
+    cursor: text;
+}
+
+.bolt-textfield-default-width {
+    width: 296px;
+}
+
+.bolt-textfield-inline-tabbar-width {
+    width: 244px;
+}
+
+.bolt-inline-keyword-filter-bar {
+    // On small screens these get their own row. Assumes flex-wrap: wrap.
+    @include xsmall-screen {
+        flex-grow: 1;
+        margin-top: $spacing-16;
+    }
+}
+
+.bolt-focus-visible .bolt-textfield.focused.focus-keyboard-only {
+    border-color: $communication-background;
+    @include box-shadow-focus-rect(false, true);
+    @include ms-high-contrast-highlight();
+    @include ms-high-contrast-override {
+        background: window;
+        color: windowtext;
+    }
+}

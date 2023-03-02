@@ -1,0 +1,33 @@
+@import '../../Core/_platformCommon.scss';
+.bolt-split-button-main {
+    border-bottom-right-radius: 0px;
+    border-top-right-radius: 0px;
+}
+
+.bolt-split-button .bolt-split-button-option {
+    padding: 9px;
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+}
+
+body {
+    &.bolt-focus-visible {
+        .bolt-split-button-main:focus,
+        .bolt-split-button-option:focus {
+            border-radius: 2px;
+        }
+    }
+}
+
+.bolt-split-button-divider {
+    background-color: $transblack-20;
+    width: 1px;
+
+    &.primary {
+        background-color: $communication-background-active;
+    }
+
+    &.disabled {
+        background-color: $transblack-10;
+    }
+}

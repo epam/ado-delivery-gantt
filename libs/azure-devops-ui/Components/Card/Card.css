@@ -1,0 +1,83 @@
+.bolt-card {
+  border-radius: 4px;
+  overflow: hidden;
+  padding: 20px 0px;
+}
+@media screen and (min-width: 0\0 ) {
+  .bolt-card {
+    border-radius: 0;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-card {
+    border: solid 1px;
+  }
+}
+@media screen and (max-width: 599px) {
+  .bolt-card {
+    border-radius: 0;
+  }
+}
+
+.bolt-card-with-header {
+  padding-top: 0px;
+}
+
+.bolt-card-content {
+  overflow: auto;
+}
+
+.bolt-card-footer {
+  padding-top: 12px;
+}
+
+.bolt-card-no-vertical-padding {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.bolt-card-white {
+  background-color: rgba(255, 255, 255, 1);
+  background-color: var(--callout-background-color,rgba(255, 255, 255, 1));
+}
+
+.bolt-table-card {
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+.bolt-table-card .bolt-card-header {
+  padding-bottom: 0px;
+}
+.bolt-table-card.no-column-headers .bolt-card-header {
+  padding-bottom: 20px;
+  border-bottom:  1px solid;
+  border-bottom-color: rgba( 234, 234, 234 ,  1 );
+  border-bottom-color: rgba( var(--palette-neutral-8,234, 234, 234) ,  1 );
+}
+.bolt-table-card .bolt-card-content {
+  padding: 0px;
+}
+.bolt-table-card .bolt-header-commandbar {
+  flex: auto;
+  overflow: auto;
+}
+
+.bolt-button.bolt-card-expand-button {
+  margin-left: 12px;
+  margin-top: 16px;
+  margin-right: 4px;
+}
+
+.bolt-card-header-collapsible {
+  padding-left: 8px;
+}
+
+.bolt-card-expandable-header.bolt-card-expandable-header {
+  padding-left: 8px;
+}
+
+.bolt-card-header-collapsed.bolt-card-header-collapsed {
+  padding-bottom: 0px;
+}
+
+/*# sourceMappingURL=Card.css.map */

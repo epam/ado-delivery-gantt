@@ -1,0 +1,12 @@
+.bolt-portal-host {
+    position: fixed;
+
+    /* 1 million used because OF used it and the product has built around this number */
+    z-index: 1000000;
+}
+
+.bolt-portal {
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 10;
+}

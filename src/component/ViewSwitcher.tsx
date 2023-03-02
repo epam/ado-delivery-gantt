@@ -10,10 +10,11 @@ export interface ViewSwitcherProps {
     onViewModeChange: (viewMode: ViewMode) => void;
 };
 
-export const ViewSwitcher = (props: ViewSwitcherProps) => {
-
-    const { isChecked, onViewListChange, onViewModeChange } = props;
-
+export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
+    onViewModeChange,
+    onViewListChange,
+    isChecked,
+  }) => {
     return (
         <div className="ViewContainer">
             <Button onClick={() => onViewModeChange(ViewMode.Day)}>Day</Button>
@@ -23,7 +24,7 @@ export const ViewSwitcher = (props: ViewSwitcherProps) => {
             <Checkbox
                 onChange={() => onViewListChange(!isChecked)}
                 checked={isChecked}
-                label="Show Task List"
+                label="Show Tree"
             />
         </div>
     );

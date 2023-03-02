@@ -1,0 +1,97 @@
+.vss-Persona .vss-Persona-content {
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  color: white;
+  background-color: rgba( 166, 166, 166 ,  1 );
+  background-color: rgba( var(--palette-neutral-30,166, 166, 166) ,  1 );
+  user-select: none;
+}
+.vss-Persona .vss-Persona-content.using-image {
+  object-fit: cover;
+  background-color: transparent;
+}
+.vss-Persona .vss-Persona-content.extra-extra-small {
+  font-size: 0.6875rem;
+  line-height: 15px;
+}
+.vss-Persona .vss-Persona-content.extra-small {
+  font-size: 0.6875rem;
+  line-height: 17px;
+}
+.vss-Persona .vss-Persona-content.extra-small-plus {
+  font-size: 0.6875rem;
+  line-height: 19px;
+}
+.vss-Persona .vss-Persona-content.small {
+  font-size: 0.6875rem;
+  line-height: 24px;
+}
+.vss-Persona .vss-Persona-content.small-plus {
+  font-size: 0.875rem;
+  line-height: 27px;
+}
+.vss-Persona .vss-Persona-content.medium {
+  font-size: 0.875rem;
+  line-height: 31px;
+}
+.vss-Persona .vss-Persona-content.medium-plus {
+  font-size: 0.875rem;
+  line-height: 39px;
+}
+.vss-Persona .vss-Persona-content.large {
+  font-size: 17px;
+  line-height: 46px;
+}
+.vss-Persona .vss-Persona-content.extra-large {
+  font-size: 1.75rem;
+  line-height: 70px;
+}
+.vss-Persona .vss-Persona-content.extra-extra-large {
+  font-size: 2.5rem;
+  line-height: 98px;
+}
+.vss-Persona.extra-extra-small {
+  width: 16px;
+  height: 16px;
+}
+.vss-Persona.extra-small {
+  width: 18px;
+  height: 18px;
+}
+.vss-Persona.extra-small-plus {
+  width: 20px;
+  height: 20px;
+}
+.vss-Persona.small {
+  width: 24px;
+  height: 24px;
+}
+.vss-Persona.small-plus {
+  width: 28px;
+  height: 28px;
+}
+.vss-Persona.medium {
+  width: 32px;
+  height: 32px;
+}
+.vss-Persona.medium-plus {
+  width: 40px;
+  height: 40px;
+}
+.vss-Persona.large {
+  width: 48px;
+  height: 48px;
+}
+.vss-Persona.extra-large {
+  width: 72px;
+  height: 72px;
+}
+.vss-Persona.extra-extra-large {
+  width: 100px;
+  height: 100px;
+}
+
+/*# sourceMappingURL=VssPersona.css.map */

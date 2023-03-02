@@ -1,0 +1,8 @@
+@import '../../_widgetsCommon.scss';
+.bolt-expandable-button .icon-right {
+    padding-left: 10px;
+}
+
+.bolt-expandable-button .subtle.active {
+    background-color: $transblack-20;
+}

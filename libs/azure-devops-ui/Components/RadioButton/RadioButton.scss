@@ -1,0 +1,114 @@
+@import '../../_widgetsCommon.scss';
+.bolt-radio-button {
+    align-items: center;
+    color: $primary-text;
+    display: inline-flex;
+    border-radius: 0.125rem;
+
+    &:focus {
+        outline: none;
+    }
+
+    &:not(.labelled) {
+        border-radius: 50%;
+        margin: 2px;
+        height: 1rem;
+        width: 1rem;
+        justify-content: center;
+    }
+}
+
+.bolt-radio-button.disabled {
+    cursor: default;
+    color: $disabled-text;
+
+    @include ms-high-contrast-override {
+        color: grayText;
+    }
+}
+
+.bolt-radio-button.labelled {
+    padding: 3px 4px 3px 3px;
+}
+
+.bolt-radio-button-label {
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.bolt-radio-button-icon {
+    border: 1px solid $secondary-text;
+    border-radius: 50%;
+    height: 1rem;
+    transition: 80ms border-color linear;
+    width: 1rem;
+    min-width: 1rem;
+}
+
+.bolt-radio-button.checked .bolt-radio-button-icon {
+    border-color: $communication-background;
+    border-width: 0.125rem;
+}
+
+.bolt-radio-button.disabled .bolt-radio-button-icon {
+    border-color: $neutral-20;
+}
+
+.bolt-radio-button-bullet {
+    background-color: transparent;
+    border: 1px solid $white;
+    border-radius: 50%;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-left: 1px;
+    margin-top: 1px;
+    transform: scale(0.1);
+}
+
+.bolt-radio-button.checked .bolt-radio-button-bullet {
+    background-color: $communication-background;
+    margin-left: 0px;
+    margin-top: 0px;
+    transition: transform 80ms ease-out, background 80ms linear;
+    transform: scale(1);
+
+    @include ms-high-contrast-override {
+        background-color: windowtext;
+    }
+}
+
+.bolt-radio-button.checked.disabled .bolt-radio-button-bullet {
+    background-color: $neutral-20;
+}
+
+.bolt-focus-visible .bolt-radio-button.bolt-focus-treatment:not(.labelled):focus {
+    border-radius: 50%;
+
+    .bolt-radio-button-icon {
+        border-color: $communication-background;
+    }
+
+    &.checked .bolt-radio-button-icon {
+        border-width: 0.125rem;
+        box-shadow: 0 0 0 1px $white;
+    }
+
+    @include ms-high-contrast-override {
+        border-radius: 0;
+    }
+}
+
+.bolt-focus-visible .bolt-radio-button.bolt-focus-treatment:focus {
+    @include box-shadow-focus-rect(false, true);
+
+    @include ms-high-contrast-override {
+        border: 1px solid windowtext;
+    }
+}
+
+.bolt-radio-button-group-container {
+    .bolt-formitem-label {
+        padding-left: 3px;
+    }
+}

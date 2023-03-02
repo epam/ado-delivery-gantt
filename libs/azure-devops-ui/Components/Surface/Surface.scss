@@ -1,0 +1,15 @@
+@import '../../_coreStyles.scss';
+.bolt-condensed-horizontal-spacing {
+    padding-left: $condensed-horizontal-spacing;
+    padding-right: $condensed-horizontal-spacing;
+}
+
+.bolt-default-horizontal-spacing {
+    padding-left: $default-horizontal-spacing;
+    padding-right: $default-horizontal-spacing;
+}
+
+.bolt-relaxed-horizontal-spacing {
+    padding-left: $relaxed-horizontal-spacing;
+    padding-right: $relaxed-horizontal-spacing;
+}

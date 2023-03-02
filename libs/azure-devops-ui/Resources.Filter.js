@@ -1,0 +1,15 @@
+export var AnnounceFilterResultCount = "Showing {0} filtered items.";
+export var Apply = "Apply";
+export var Back = "Back";
+export var BestHit = "Best hit";
+export var Clear = "Clear";
+export var Filter = "Filter";
+export var FilterOn = "Filter on";
+export var FilterSelected = "{0} filter selected";
+export var FilterTitle = "Filter results";
+export var Keyword = "Keyword";
+export var KeywordSearchResult = "\"{0}\" keyword";
+export var NoFilterResults = "No items matched the supplied filter";
+export var Reset = "Reset";
+export var ResetAll = "Reset all";
+export var SearchKeyword = "Search keyword";

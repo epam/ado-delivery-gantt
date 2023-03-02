@@ -1,10 +1,9 @@
-import "./component.scss";
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import * as SDK from 'azure-devops-extension-sdk';
 
 import { Gantt, Task, ViewMode } from 'gantt-task-react';
-import 'gantt-task-react/dist/index.css';
+
 import {
   CommonServiceIds,
   getClient,
@@ -39,7 +38,7 @@ const TASK = 'task';
 
 export const GanttChartTab = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [view, setView] = useState<ViewMode>(ViewMode.Week);
+  const [view, setView] = useState<ViewMode>(ViewMode.Day);
   const [isChecked, setIsChecked] = useState(true);
 
   let columnWidth = 60;
@@ -51,6 +50,7 @@ export const GanttChartTab = () => {
 
   useEffect(() => {
     (async () => {
+      await SDK.init();
       await SDK.ready();
       const projectService = await SDK.getService<IProjectPageService>(
         CommonServiceIds.ProjectPageService
@@ -210,17 +210,19 @@ export const GanttChartTab = () => {
     }
   };
 
+
   return (
-    <div>
+    <div className="Wrapper">   
       <ViewSwitcher
-        onViewModeChange={(viewMode: ViewMode) => setView(viewMode)}
+        onViewModeChange={viewMode => setView(viewMode)}
         onViewListChange={setIsChecked}
         isChecked={isChecked}
       />
+          
       {tasks.length && (
         <Gantt
           tasks={tasks}
-          view={view}
+          viewMode={view}
           columnWidth={columnWidth}
           listCellWidth={isChecked ? '200px' : ''}
           onExpanderClick={handleExpanderClick}

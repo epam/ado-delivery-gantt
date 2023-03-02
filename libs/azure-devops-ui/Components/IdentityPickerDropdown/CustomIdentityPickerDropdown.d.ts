@@ -1,0 +1,56 @@
+import "../../CommonImports";
+import "../../Core/core.css";
+import "./IdentityPickerDropdown.css";
+import * as React from "react";
+import { ICustomIdentityPickerDropdownProps } from "./CustomIdentityPickerDropdown.Props";
+import { IIdentity } from "./SharedIdentityPicker.Props";
+interface ICustomIdentityPickerDropdownState {
+    width: number;
+}
+export declare class CustomIdentityPickerDropdown extends React.Component<ICustomIdentityPickerDropdownProps, ICustomIdentityPickerDropdownState> {
+    private cachedResults;
+    private currentPromise;
+    private focusWithin;
+    private inputElement;
+    private itemRefs;
+    private updateIndexTimer;
+    private openedIdentityCard;
+    private outerElement;
+    private lastPickedIdentity;
+    private suggestionsLoading;
+    private isEditing;
+    private selectedIndex;
+    private suggestions;
+    private timerManagement;
+    private textFieldId;
+    constructor(props: ICustomIdentityPickerDropdownProps);
+    render(): JSX.Element;
+    componentDidMount(): void;
+    componentWillUnmount(): void;
+    updateSuggestionsList(suggestions: IIdentity[] | PromiseLike<IIdentity[]>, initialSearchValue?: string): void;
+    private onPickerDismiss;
+    private renderSuggestionItem;
+    private renderCustomSuggestionItem;
+    private renderPersonaCoin;
+    private openPersonaCard;
+    private closePersonaCard;
+    private completeSuggestion;
+    private onBlur;
+    private onClearClicked;
+    private onClearKeyDown;
+    private clear;
+    private onClick;
+    private onFocus;
+    private onKeyDown;
+    private onKeyDownSuggestionItem;
+    private focusContactCardButton;
+    private onResolveSuggestions;
+    private onSearchChange;
+    private onSuggestionClick;
+    private onTextFieldChanged;
+    private selectedPersonaChanged;
+    private setSuggestions;
+    private updateSuggestions;
+    private updateValue;
+}
+export {};

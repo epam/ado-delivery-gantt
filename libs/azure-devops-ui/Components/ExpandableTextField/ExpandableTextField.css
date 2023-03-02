@@ -1,0 +1,6 @@
+.bolt-expandable-textfield-icon:not(.disabled) {
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+}
+
+/*# sourceMappingURL=ExpandableTextField.css.map */

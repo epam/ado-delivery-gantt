@@ -1,0 +1,169 @@
+.bolt-checkbox {
+  border-radius: 4px;
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  display: inline-flex;
+  align-items: center;
+}
+.bolt-checkbox:focus {
+  outline: none;
+}
+@media (forced-colors: active) {
+  .bolt-checkbox:focus {
+    border: 1px solid;
+    border-color: windowtext;
+  }
+}
+.bolt-checkbox.disabled {
+  color: rgba(0, 0, 0, .38);
+  color: var(--text-disabled-color,rgba(0, 0, 0, .38));
+  cursor: default;
+}
+@media (forced-colors: active) {
+  .bolt-checkbox.disabled {
+    forced-color-adjust: none;
+    color: graytext;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-checkbox.disabled .bolt-checkmark {
+    border-color: graytext;
+    color: graytext;
+  }
+}
+.bolt-checkbox.disabled.checked .bolt-checkmark {
+  background-color: rgba( 200, 200, 200 ,  1 );
+  background-color: rgba( var(--palette-neutral-20,200, 200, 200) ,  1 );
+}
+@media (forced-colors: active) {
+  .bolt-checkbox.disabled.checked .bolt-checkmark {
+    background-color: transparent;
+    border-color: graytext;
+  }
+}
+.bolt-checkbox.disabled:not(.checked) .bolt-checkmark {
+  border:  1px solid;
+  border-color: rgba( 200, 200, 200 ,  1 );
+  border-color: rgba( var(--palette-neutral-20,200, 200, 200) ,  1 );
+}
+@media (forced-colors: active) {
+  .bolt-checkbox.disabled:not(.checked) .bolt-checkmark {
+    border-color: graytext;
+  }
+}
+.bolt-checkbox.labelled {
+  padding: 2px 4px 2px 5px;
+}
+.bolt-checkbox:not(.labelled) {
+  margin: 2px;
+}
+.bolt-checkbox.checked .bolt-checkmark {
+  border: 1px solid transparent;
+  background-color: rgba(0, 120, 212, 1);
+  background-color: var(--communication-background,rgba(0, 120, 212, 1));
+  color: rgba(255, 255, 255, 1);
+  color: var(--text-on-communication-background,rgba(255, 255, 255, 1));
+}
+@media (forced-colors: active) {
+  .bolt-checkbox.checked .bolt-checkmark {
+    background-color: transparent;
+  }
+}
+.bolt-checkbox:not(.checked):not(.disabled) .bolt-checkmark {
+  border: 1px solid rgba(0, 0, 0, .55);
+  border: 1px solid var(--text-secondary-color,rgba(0, 0, 0, .55));
+}
+@media (forced-colors: active) {
+  .bolt-checkbox:not(.checked):not(.disabled) .bolt-checkmark {
+    color: windowtext;
+    border-color: windowtext;
+  }
+}
+.bolt-checkbox:not(.checked):not(.disabled) .bolt-checkmark > .fabric-icon {
+  visibility: hidden;
+}
+
+.bolt-checkmark {
+  border-radius: 0.25rem;
+  color: transparent;
+  padding: 1px;
+  height: 1rem;
+  width: 1rem;
+}
+
+.bolt-checkbox-label {
+  padding-left: 10px;
+  padding-bottom: 1px;
+}
+
+.bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus {
+  animation: ms-focus-shadow-with-border-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23), 0 0 0 1px rgba(0, 120, 212, 1);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23)), 0 0 0 1px var(--focus-border-color,rgba(0, 120, 212, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus {
+    animation: none;
+  }
+}
+.bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus:not(.checked):not(.labelled) .bolt-checkmark {
+  border: 1px solid rgba(0, 120, 212, 1);
+  border: 1px solid var(--communication-background,rgba(0, 120, 212, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus:not(.checked):not(.labelled) .bolt-checkmark {
+    forced-color-adjust: none;
+    border-color: highlight;
+  }
+}
+@media screen and (-ms-high-contrast: black-on-white) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus:not(.checked):not(.labelled) .bolt-checkmark {
+    outline: 1px solid highlight;
+    outline-offset: 1px;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus:not(.checked):not(.labelled) .bolt-checkmark {
+    color: windowtext;
+  }
+}
+.bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus.checked:not(.labelled) .bolt-checkmark {
+  border: 1px solid rgba(255, 255, 255, 1);
+  border: 1px solid var(--background-color,rgba(255, 255, 255, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus.checked:not(.labelled) .bolt-checkmark {
+    forced-color-adjust: none;
+    border-color: highlight;
+  }
+}
+@media screen and (-ms-high-contrast: black-on-white) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus.checked:not(.labelled) .bolt-checkmark {
+    outline: 1px solid highlight;
+    outline-offset: 1px;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus.checked:not(.labelled) .bolt-checkmark {
+    color: windowtext;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus .bolt-checkmark {
+    forced-color-adjust: none;
+    border-color: highlight;
+  }
+}
+@media screen and (-ms-high-contrast: black-on-white) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus .bolt-checkmark {
+    outline: 1px solid highlight;
+    outline-offset: 1px;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-checkbox.bolt-focus-treatment:focus .bolt-checkmark {
+    color: windowtext;
+  }
+}
+
+/*# sourceMappingURL=Checkbox.css.map */

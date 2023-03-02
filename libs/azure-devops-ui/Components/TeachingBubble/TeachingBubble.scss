@@ -1,0 +1,164 @@
+@import '../../Core/_platformCommon.scss';
+// Need rotated height to be 20px.  sqrt(14.142^2 + 14.142^2) ≈ 20
+$root-beak-edge-length: 14.142px;
+
+$bubble-root-spacing: $spacing-8;
+$root-beak-secondary: $spacing-16;
+$bubble-border-radius: $spacing-4;
+
+.bolt-bubble-callout {
+    animation: bubble-reveal 400ms cubic-bezier(0.215, 0.61, 0.17, 1.14);
+    border-radius: $bubble-border-radius;
+
+    &.bolt-bubble-fullscreen {
+        margin: 0px;
+        max-height: none;
+        max-width: none;
+        height: auto;
+        width: auto;
+        border-radius: 0px;
+    }
+
+    &.fade-out {
+        animation: bubble-dismiss 200ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
+    }
+
+    &.left-primary {
+        margin-left: $bubble-root-spacing;
+        .bolt-bubble-beak {
+            left: -$root-beak-edge-length / 2;
+        }
+    }
+
+    &.right-primary {
+        margin-right: $bubble-root-spacing;
+        .bolt-bubble-beak {
+            right: -$root-beak-edge-length / 2;
+        }
+    }
+
+    &.top-primary {
+        margin-top: $bubble-root-spacing;
+        .bolt-bubble-beak {
+            top: -$root-beak-edge-length / 2;
+        }
+    }
+
+    &.bottom-primary {
+        margin-bottom: $bubble-root-spacing;
+        .bolt-bubble-beak {
+            bottom: -$root-beak-edge-length / 2;
+        }
+    }
+
+    &.left-secondary .bolt-bubble-beak {
+        left: $root-beak-secondary;
+    }
+
+    &.right-secondary .bolt-bubble-beak {
+        right: $root-beak-secondary;
+    }
+
+    &.top-secondary .bolt-bubble-beak {
+        top: $root-beak-secondary;
+    }
+
+    &.bottom-secondary .bolt-bubble-beak {
+        bottom: $root-beak-secondary;
+    }
+
+    &.center-h .bolt-bubble-beak {
+        left: calc(50% - #{$root-beak-edge-length} / 2);
+    }
+
+    &.center-v .bolt-bubble-beak {
+        top: calc(50% - #{$root-beak-edge-length} / 2);
+    }
+
+    &[class*="left"][class*="top"] {
+        transform-origin: left top;
+    }
+    &[class*="right"][class*="top"] {
+        transform-origin: right top;
+    }
+    &[class*="left"][class*="bottom"] {
+        transform-origin: left bottom;
+    }
+    &[class*="right"][class*="bottom"] {
+        transform-origin: right bottom;
+    }
+
+    &.left-primary.center-v {
+        transform-origin: left center;
+    }
+    &.right-primary.center-v {
+        transform-origin: right center;
+    }
+    &.center-h.top-primary {
+        transform-origin: center top;
+    }
+    &.center-h.bottom-primary {
+        transform-origin: center bottom;
+    }
+}
+
+.bolt-bubble-beak {
+    position: absolute;
+    width: $root-beak-edge-length;
+    height: $root-beak-edge-length;
+
+    background: $calloutBackgroundColor;
+    transform: rotate(45deg);
+}
+
+.bolt-bubble-content {
+    background: $calloutBackgroundColor;
+    border-radius: $spacing-4;
+    max-width: 368px;
+}
+
+.bolt-bubble-text-only {
+    max-width: 240px;
+    padding: $spacing-16;
+}
+
+.bolt-bubble-text {
+    padding-bottom: 0px;
+    &.no-buttons {
+        padding-bottom: 16px;
+    }
+}
+
+.bolt-bubble-description {
+    color: $primary-text;
+}
+
+.bolt-bubble-close.close-button.bolt-button.subtle {
+    top: $spacing-12;
+    right: $spacing-12;
+    position: absolute;
+    font-size: $fontSizeML;
+    padding: $spacing-4 - $spacingBorder;
+}
+
+@keyframes bubble-reveal {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bubble-dismiss {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}

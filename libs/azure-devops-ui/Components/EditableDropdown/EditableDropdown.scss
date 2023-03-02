@@ -1,0 +1,39 @@
+@import '../../_widgetsCommon.scss';
+.bolt-editable-dropdown-with-selection .bolt-textfield-input {
+    &::placeholder {
+        color: $textColor;
+    }
+
+    &::-webkit-input-placeholder {
+        color: $textColor;
+    }
+
+    &::-moz-placeholder {
+        color: $textColor;
+        opacity: 1;
+    }
+
+    &::-ms-input-placeholder {
+        color: $textColor;
+    }
+}
+
+.bolt-editable-dropdown-focused-item {
+    background: $neutral-alpha-4;
+
+    @include ms-high-contrast-override {
+        border-color: Highlight;
+    }
+}
+
+.bolt-list-row.selected .bolt-editable-dropdown-focused-item {
+    background: $communication-tint-20;
+
+    @include ms-high-contrast-override {
+        background: Highlight;
+    }
+}
+
+.bolt-dropdown-expandable-text-field.bolt-editable-dropdown:not(.disabled) .bolt-dropdown-expandable-textfield-input {
+    cursor: text;
+}

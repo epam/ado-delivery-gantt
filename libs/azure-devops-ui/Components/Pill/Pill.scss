@@ -1,0 +1,154 @@
+@import '../../_coreStyles.scss';
+/* 
+    We're using absolute height and negative margins in this file
+    this is because borders make a lot of this logic weird, and the spec calls for overlap of borders
+    between what are logically parent and child elements
+    
+    eg. in Outlined pills, the button focus circle should exactly overlap the pill's outline
+
+    Using negative margin means we need to do less padding management of the container based on
+    what elements it happens to contain, and elements can just intrude on the left-right padding of the parent
+    */
+
+.bolt-pill {
+    border-radius: 120px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+
+    &.clickable {
+        cursor: pointer;
+    }
+
+    // Count font weight
+    &.count {
+        .bolt-pill-content {
+            font-weight: $fontWeightSemiBold; // TODO: Follow up with Vinicius
+        }
+    }
+
+    .bolt-pill-content {
+        margin: 0px 0.5rem;
+        padding: 2px 0;
+    }
+
+    .bolt-pill-icon {
+        margin-left: 0.25rem;
+        margin-right: 0.375rem;
+    }
+
+    // Override content margins in the event we have certain items
+    // Include sizes for greater specificity
+    &.compact,
+    &.regular,
+    &.large {
+        &.has-filled-visual,
+        &.has-icon {
+            .bolt-pill-content {
+                margin-left: 0;
+            }
+        }
+
+        &.has-remove-button {
+            .bolt-pill-content {
+                margin-right: 0.375rem;
+            }
+        }
+    }
+    // Size classes
+    &.compact {
+        font-size: 0.6875rem;
+    }
+
+    &.regular {
+        font-size: 0.75rem;
+
+        .bolt-pill-filled-visual {
+            width: 1.25rem;
+        }
+    }
+
+    &.large {
+        font-size: 0.875rem;
+
+        .bolt-pill-filled-visual {
+            width: 1.5rem;
+        }
+    }
+
+    // Variant classes
+    &.standard {
+        background-color: $neutral-alpha-6;
+
+        &.clickable.hover {
+            background-color: $neutral-alpha-10;
+        }
+    }
+
+    &.themed-standard {
+        background-color: $communication-tint-30;
+        color: $primary-text;
+
+        &.clickable.hover {
+            background-color: $communication-tint-40;
+        }
+    }
+
+    &.outlined {
+        background-color: transparent;
+        border-color: $neutral-alpha-20;
+
+        &.clickable.hover {
+            background-color: $neutral-alpha-6;
+        }
+
+        .bolt-pill-button {
+            border: 1px solid transparent;
+        }
+    }
+
+    &.colored {
+        // Background color will be overridden so we aren't setting one here
+
+        // Using actual black / white so theme colors don't alter our contrast on custom colors
+        &.dark {
+            color: white;
+        }
+
+        &.light {
+            color: black;
+        }
+    }
+}
+
+.bolt-focus-visible .bolt-pill:focus {
+    border-color: $communication-background;
+    @include box-shadow-focus-rect();
+    @include ms-high-contrast-highlight();
+    @include ms-high-contrast-override {
+        background: transparent !important;
+        color: windowtext;
+    }
+    outline: none;
+}
+
+.bolt-pill-icon {
+    padding: 2px;
+}
+
+.bolt-pill-filled-visual {
+    overflow: hidden;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+// High specificity to ensure we override default styles
+button.bolt-pill-button.bolt-button.icon-only {
+    border-radius: 50%;
+    color: inherit;
+    margin-left: auto;
+    padding: 2px;
+
+    &:hover {
+        background-color: $transblack-6;
+    }
+}

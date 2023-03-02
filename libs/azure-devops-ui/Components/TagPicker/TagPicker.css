@@ -1,0 +1,111 @@
+.bolt-tag-picker {
+  background-color: rgba(255, 255, 255, 1);
+  background-color: var(--background-color,rgba(255, 255, 255, 1));
+  border:  1px solid;
+  border-color: rgba( 200, 200, 200 ,  1 );
+  border-color: rgba( var(--palette-neutral-20,200, 200, 200) ,  1 );
+  border-radius: 2px;
+  padding: 1px 3px;
+}
+.bolt-tag-picker.edit {
+  border: 1px solid rgba(0, 120, 212, 1);
+  border: 1px solid var(--communication-background,rgba(0, 120, 212, 1));
+  animation: ms-focus-shadow-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23));
+}
+@media (forced-colors: active) {
+  .bolt-tag-picker.edit {
+    animation: none;
+  }
+}
+.bolt-tag-picker:not(.edit) {
+  cursor: text;
+}
+
+.bolt-tag-picker-prefix-icon {
+  margin: 2px 0;
+}
+
+.bolt-tag-picker-pill {
+  min-width: 0px;
+  margin: 2px 4px 2px 0;
+  user-select: none;
+}
+
+.bolt-tag-picker-pill-selectable:hover {
+  background-color: rgba( 218, 218, 218 ,  1 );
+  background-color: rgba( var(--palette-neutral-10,218, 218, 218) ,  1 );
+}
+
+.bolt-pill.standard.bolt-tag-picker-pill.bolt-tag-picker-pill-selectable.active {
+  background-color: rgba( 199, 224, 244 ,  1 );
+  background-color: rgba( var(--palette-primary-tint-20,199, 224, 244) ,  1 );
+}
+
+.bolt-tag-picker-add-icon-div {
+  margin: 2px 0px;
+}
+
+.bolt-tag-picker-add-icon {
+  border-radius: 50%;
+  background-color: rgba( 239, 239, 239 ,  1 );
+  background-color: rgba( var(--palette-neutral-6,239, 239, 239) ,  1 );
+  padding: 4px;
+}
+.bolt-tag-picker-add-icon:hover {
+  background-color: rgba( 218, 218, 218 ,  1 );
+  background-color: rgba( var(--palette-neutral-10,218, 218, 218) ,  1 );
+}
+
+.bolt-tag-picker-callout-content {
+  border-radius: 4px;
+}
+
+.bolt-tag-picker-input {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  min-width: 120px;
+  margin: 0 4px;
+  /* clears the 'X' from Internet Explorer */
+}
+.bolt-tag-picker-input.hide-input {
+  margin: 0;
+  min-width: 0;
+  width: 0;
+}
+.bolt-tag-picker-input::placeholder {
+  color: rgba(0, 0, 0, .55);
+  color: var(--text-secondary-color,rgba(0, 0, 0, .55));
+}
+.bolt-tag-picker-input:-ms-input-placeholder {
+  color: rgba(0, 0, 0, .55);
+  color: var(--text-secondary-color,rgba(0, 0, 0, .55));
+}
+.bolt-tag-picker-input::-ms-input-placeholder {
+  color: rgba(0, 0, 0, .55);
+  color: var(--text-secondary-color,rgba(0, 0, 0, .55));
+}
+.bolt-tag-picker-input::-webkit-input-placeholder {
+  color: rgba(0, 0, 0, .55);
+  color: var(--text-secondary-color,rgba(0, 0, 0, .55));
+}
+.bolt-tag-picker-input:-moz-placeholder {
+  color: rgba(0, 0, 0, .55);
+  color: var(--text-secondary-color,rgba(0, 0, 0, .55));
+}
+.bolt-tag-picker-input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.bolt-tag-picker-input::-ms-reveal {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/*# sourceMappingURL=TagPicker.css.map */

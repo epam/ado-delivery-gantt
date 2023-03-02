@@ -1,0 +1,102 @@
+.bolt-toast {
+  border-radius: 4px;
+  margin-bottom: 16px;
+  pointer-events: none;
+}
+@media screen and (max-width: 1023px) {
+  .bolt-toast {
+    margin-bottom: 8px;
+  }
+}
+
+@keyframes slideInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translate(0px, 40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0px, 0px);
+  }
+}
+@keyframes slideOutToBottom {
+  0% {
+    opacity: 1;
+    transform: translate(0px, 0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0px, 40px);
+  }
+}
+.bolt-toast-content {
+  width: 356px;
+  background-color: rgba( 51, 51, 51 ,  0.95 );
+  background-color: rgba( var(--palette-neutral-80,51, 51, 51) ,  0.95 );
+  border-radius: 4px;
+  color: rgba( 255, 255, 255 ,  1 );
+  color: rgba( var(--palette-neutral-0,255, 255, 255) ,  1 );
+  padding: 8px 20px;
+  pointer-events: auto;
+  animation: slideInFromBottom 0.5s;
+}
+@media screen and (max-width: 599px) {
+  .bolt-toast-content {
+    width: auto;
+    flex-grow: 1;
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
+.bolt-toast-content.fade-out {
+  animation: slideOutToBottom 0.5s forwards;
+}
+.bolt-toast-content.one-line .bolt-toast-message:not(:last-child) {
+  margin-right: 20px;
+}
+.bolt-toast-content.one-line .bolt-toast-separator {
+  width: 1px;
+  margin-right: 8px;
+}
+.bolt-toast-content.one-line .bolt-toast-call-to-action-container {
+  align-items: center;
+}
+.bolt-toast-content.multi-line .bolt-toast-message {
+  margin-bottom: 8px;
+}
+.bolt-toast-content.multi-line .bolt-toast-separator {
+  height: 1px;
+  margin-bottom: 8px;
+}
+.bolt-toast-content.multi-line .bolt-toast-call-to-action-container {
+  justify-content: flex-end;
+}
+
+.bolt-toast-message {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  word-break: break-word;
+}
+
+.bolt-toast-separator {
+  background-color: rgba( 255, 255, 255 ,  0.38 );
+  background-color: rgba( var(--palette-neutral-0,255, 255, 255) ,  0.38 );
+  justify-content: stretch;
+}
+
+.bolt-toast-call-to-action-container {
+  display: inline-flex;
+  margin-right: -12px;
+}
+
+.bolt-button.bolt-toast-call-to-action {
+  color: rgba( 255, 255, 255 ,  1 );
+  color: rgba( var(--palette-neutral-0,255, 255, 255) ,  1 );
+  white-space: nowrap;
+}
+.bolt-button.bolt-toast-call-to-action:hover {
+  background-color: transparent;
+}
+
+/*# sourceMappingURL=Toast.css.map */

@@ -1,0 +1,20 @@
+@import '../../_widgetsCommon.scss';
+.bolt-pill-group {
+    overflow: hidden;
+
+    &.overflow-wrap > .bolt-pill-group-inner {
+        flex-wrap: wrap;
+        .bolt-pill {
+            margin-bottom: 8px;
+        }
+    }
+
+    &.overflow-fade {
+        mask-image: linear-gradient(to left, rgba(0, 0, 0, 0), $black 30px);
+        -webkit-mask-image: -webkit-linear-gradient(right, rgba(0, 0, 0, 0), $black 30px);
+    }
+}
+
+.bolt-pill-group-inner > :not(:last-child) {
+    margin-right: 8px;
+}

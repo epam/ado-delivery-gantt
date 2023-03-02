@@ -1,0 +1,1 @@
+{"version":3,"sourceRoot":"","sources":["../../../src/Components/IdentityPickerDropdown/IdentityPickerDropdown.scss","../../../src/Core/_platformCommon.scss"],"names":[],"mappings":"AAMA;EACI,WAJW;EAKX,aAPuB;EAQvB,gBARuB;;;AAW3B;EACI,SCiSQ;ED/RR;;AAEA;EACI,kBC+GU;;;AD3GlB;EAII;EACA;;ACkUA;EACI;IDtUA,WApBiB","file":"IdentityPickerDropdown.css"}

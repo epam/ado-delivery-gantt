@@ -1,0 +1,115 @@
+@import '../../_coreStyles.scss';
+.bolt-toast {
+    border-radius: 4px;
+    margin-bottom: $spacing-16;
+    pointer-events: none;
+
+    @include small-screen {
+        margin-bottom: $spacing-8;
+    }
+}
+
+@keyframes slideInFromBottom {
+    0% {
+        opacity: 0;
+        transform: translate(0px, 40px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(0px, 0px);
+    }
+}
+
+@keyframes slideOutToBottom {
+    0% {
+        opacity: 1;
+        transform: translate(0px, 0px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(0px, 40px);
+    }
+}
+
+.bolt-toast-content {
+    width: 356px; // Const width on most screens
+
+    @include xsmall-screen {
+        width: auto;
+        flex-grow: 1;
+        margin-left: $spacing-8;
+        margin-right: $spacing-8;
+    }
+
+    background-color: $tooltip-background-color;
+    border-radius: 4px;
+    color: $white;
+    padding: $spacing-8 $spacing-20;
+
+    pointer-events: auto;
+
+    animation: slideInFromBottom 0.5s;
+
+    &.fade-out {
+        animation: slideOutToBottom 0.5s forwards;
+    }
+
+    &.one-line {
+        .bolt-toast-message:not(:last-child) {
+            margin-right: $spacing-20;
+        }
+
+        .bolt-toast-separator {
+            width: 1px;
+            margin-right: $spacing-8;
+        }
+
+        .bolt-toast-call-to-action-container {
+            align-items: center;
+        }
+    }
+
+    &.multi-line {
+        // Don't need :not(:last-child) because this scenario should never trigger with this by itself
+        .bolt-toast-message {
+            margin-bottom: $spacing-8;
+        }
+
+        .bolt-toast-separator {
+            height: 1px;
+            margin-bottom: $spacing-8;
+        }
+
+        .bolt-toast-call-to-action-container {
+            justify-content: flex-end;
+        }
+    }
+}
+
+.bolt-toast-message {
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    word-break: break-word;
+}
+
+.bolt-toast-separator {
+    background-color: $disabled-text-invert;
+    justify-content: stretch;
+}
+
+.bolt-toast-call-to-action-container {
+    display: inline-flex;
+    margin-right: -12px;
+}
+
+.bolt-button.bolt-toast-call-to-action {
+    color: $white;
+    white-space: nowrap;
+
+    &:hover {
+        background-color: transparent;
+    }
+}

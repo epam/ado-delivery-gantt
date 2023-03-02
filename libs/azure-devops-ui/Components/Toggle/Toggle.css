@@ -1,0 +1,147 @@
+.bolt-toggle-button {
+  align-items: center;
+  color: rgba(0, 0, 0, .9);
+  color: var(--text-primary-color,rgba(0, 0, 0, .9));
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.bolt-toggle-button-pill {
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, .55);
+  border: 1px solid var(--text-secondary-color,rgba(0, 0, 0, .55));
+  border-radius: 0.75rem;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0.2rem;
+  width: 2.5rem;
+}
+.bolt-toggle-button-pill:focus {
+  outline: none;
+}
+@media (forced-colors: active) {
+  .bolt-toggle-button-pill:focus {
+    forced-color-adjust: none;
+    border-color: highlight;
+  }
+}
+@media screen and (-ms-high-contrast: black-on-white) {
+  .bolt-toggle-button-pill:focus {
+    outline: 1px solid highlight;
+    outline-offset: 1px;
+  }
+}
+
+.bolt-toggle-button-icon {
+  background-color: rgba(0, 0, 0, .55);
+  background-color: var(--text-secondary-color,rgba(0, 0, 0, .55));
+  border: 1px solid transparent;
+  border-radius: 50%;
+  height: 0.75rem;
+  left: 0%;
+  position: relative;
+  transition: left 0.1s;
+  width: 0.75rem;
+}
+@media (forced-colors: active) {
+  .bolt-toggle-button-icon {
+    forced-color-adjust: none;
+    border-color: windowtext;
+  }
+}
+
+.bolt-toggle-button.disabled {
+  cursor: default;
+}
+
+.bolt-toggle-button.disabled .bolt-toggle-button-pill {
+  border-color: rgba( 200, 200, 200 ,  1 );
+  border-color: rgba( var(--palette-neutral-20,200, 200, 200) ,  1 );
+}
+@media (forced-colors: active) {
+  .bolt-toggle-button.disabled .bolt-toggle-button-pill {
+    forced-color-adjust: none;
+    border-color: graytext;
+  }
+}
+
+.bolt-toggle-button.disabled .bolt-toggle-button-icon {
+  background-color: rgba( 200, 200, 200 ,  1 );
+  background-color: rgba( var(--palette-neutral-20,200, 200, 200) ,  1 );
+}
+
+.bolt-toggle-button.checked .bolt-toggle-button-pill {
+  background-color: rgba(0, 120, 212, 1);
+  background-color: var(--communication-background,rgba(0, 120, 212, 1));
+  border-color: transparent;
+}
+@media (forced-colors: active) {
+  .bolt-toggle-button.checked .bolt-toggle-button-pill {
+    forced-color-adjust: none;
+    background-color: highlight;
+  }
+}
+
+.bolt-toggle-button.checked .bolt-toggle-button-icon {
+  background-color: rgba( 255, 255, 255 ,  1 );
+  background-color: rgba( var(--palette-neutral-0,255, 255, 255) ,  1 );
+  left: 63%;
+}
+
+.bolt-toggle-button.checked.disabled .bolt-toggle-button-pill {
+  background-color: rgba( 200, 200, 200 ,  1 );
+  background-color: rgba( var(--palette-neutral-20,200, 200, 200) ,  1 );
+}
+@media (forced-colors: active) {
+  .bolt-toggle-button.checked.disabled .bolt-toggle-button-pill {
+    forced-color-adjust: none;
+    background: graytext;
+    border-color: graytext;
+  }
+}
+
+.bolt-toggle-button-text {
+  padding-left: 8px;
+}
+
+.bolt-focus-visible .bolt-toggle-button-pill.bolt-focus-treatment:focus {
+  animation: ms-focus-shadow-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23));
+  border-color: rgba(0, 120, 212, 1);
+  border-color: var(--communication-background,rgba(0, 120, 212, 1));
+  border-radius: 12px;
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-toggle-button-pill.bolt-focus-treatment:focus {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .bolt-toggle-button-pill.bolt-focus-treatment:focus {
+    forced-color-adjust: none;
+    border-color: highlight;
+  }
+}
+
+.bolt-focus-visible .checked .bolt-toggle-button-pill.bolt-focus-treatment:focus {
+  animation: ms-focus-shadow-with-border-pulse 4s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.23), 0 0 0 1px rgba(0, 120, 212, 1);
+  box-shadow: 0 0 0 3px var(--focus-pulse-max-color,rgba(0, 120, 212, 0.23)), 0 0 0 1px var(--focus-border-color,rgba(0, 120, 212, 1));
+  border-color: rgba(255, 255, 255, 1);
+  border-color: var(--background-color,rgba(255, 255, 255, 1));
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .checked .bolt-toggle-button-pill.bolt-focus-treatment:focus {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .bolt-focus-visible .checked .bolt-toggle-button-pill.bolt-focus-treatment:focus {
+    forced-color-adjust: none;
+    border-color: highlight;
+  }
+}
+
+/*# sourceMappingURL=Toggle.css.map */

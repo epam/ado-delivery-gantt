@@ -1,0 +1,106 @@
+@import '../../_coreStyles.scss';
+$component-status-success: var(--component-status-success);
+$component-status-error: var(--component-status-error);
+$component-status-warning: var(--component-status-warning);
+$component-status-info: var(--component-status-info);
+$component-status-neutral: var(--component-status-neutral);
+
+@keyframes runningAnimation {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@mixin status-fill-with-high-contrast($color) {
+    color: $color;
+
+    @include ms-high-contrast-override {
+        fill: $color;
+    }
+}
+
+.bolt-status {
+    fill: currentColor;
+
+    &.success {
+        @include status-fill-with-high-contrast($component-status-success);
+    }
+
+    &.failed {
+        @include status-fill-with-high-contrast($component-status-error);
+    }
+
+    &.warning {
+        @include status-fill-with-high-contrast($component-status-warning);
+    }
+
+    &.active {
+        @include status-fill-with-high-contrast($component-status-info);
+    }
+
+    &.neutral {
+        @include status-fill-with-high-contrast($component-status-neutral);
+    }
+
+    &.animate {
+        animation: runningAnimation 8s infinite linear;
+    }
+
+    &.small-animate {
+        animation: runningAnimation 4s infinite linear;
+    }
+
+    &.rotate {
+        transform: rotate(180deg);
+    }
+}
+
+.bolt-status-text {
+    padding-right: $spacing-12;
+    padding-top: 3px;
+    padding-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.xl {
+        padding-right: $spacing-16;
+        padding-top: 5px;
+        padding-bottom: 7px;
+    }
+}
+
+.bolt-status-text-extra-padding {
+    padding-left: $spacing-8;
+}
+
+.bolt-status-extended {
+    color: $white;
+    height: 24px;
+    border-radius: 15px;
+
+    &.xl {
+        border-radius: 48px;
+        height: 32px;
+    }
+
+    &.success {
+        background-color: $component-status-success;
+    }
+
+    &.failed {
+        background-color: $component-status-error;
+    }
+
+    &.warning {
+        background-color: $component-status-warning;
+    }
+
+    &.active {
+        background-color: $component-status-info;
+    }
+
+    &.neutral {
+        background-color: $component-status-neutral;
+    }
+}
