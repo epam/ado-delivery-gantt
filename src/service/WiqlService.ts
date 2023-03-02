@@ -1,21 +1,11 @@
-import { TeamSettingsIteration, WorkRestClient } from 'azure-devops-extension-api/Work';
-import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
+import { WorkRestClient } from 'azure-devops-extension-api/Work';
+import { WebApiTeam } from 'azure-devops-extension-api/Core';
 import {
   WorkItemTrackingRestClient,
-  WorkItemExpand,
-  WorkItemErrorPolicy,
-  WorkItem,
-  IWorkItemFormNavigationService,
-  WorkItemTrackingServiceIds,
   WorkItemLink,
-  WorkItemQueryResult,
 } from 'azure-devops-extension-api/WorkItemTracking';
 
-import {
-  CommonServiceIds,
-  getClient,
-  IProjectPageService,
-} from 'azure-devops-extension-api';
+import { getClient } from 'azure-devops-extension-api';
 
 
 const clients = {
@@ -117,7 +107,7 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<{ id: 
   });
 }
 
-export const fethcTeamWorkItems = async (team: WebApiTeam): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
+export const fetchTeamWorkItems = async (team: WebApiTeam): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
   const { projectName, projectId, id, name } = team;
 
   return clients.workClient.getTeamFieldValues({
