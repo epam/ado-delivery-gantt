@@ -10,7 +10,7 @@ import { Header, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
-import { LayoutTab, StatesTab, WorkItemTab } from "./component"
+import { LayoutTab } from "./component"
 import { useEffect, useState } from "react";
 
 interface IHubState {
@@ -40,12 +40,6 @@ export const Hub = () => {
     const { selectedTabId } = hubState;
     if (selectedTabId === "layout") {
       return <LayoutTab />;
-    }
-    else if (selectedTabId === "states") {
-      return <StatesTab />;
-    }
-    else if (selectedTabId === "work-item") {
-      return <WorkItemTab />;
     }
   }
 
@@ -122,7 +116,7 @@ export const Hub = () => {
   return (
     <Page className="sample-hub flex-grow">
 
-      <Header title="Sample Hub"
+      <Header title="Dilivery Status"
         commandBarItems={getCommandBarItems()}
         description={headerDescription}
         titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />
@@ -134,9 +128,6 @@ export const Hub = () => {
         tabSize={useCompactPivots ? TabSize.Compact : TabSize.Tall}>
 
         <Tab name="Layout" id="layout" />
-        <Tab name="States" id="states" />
-        <Tab name="WorkItem" id="work-item" />
-        <Tab name="GanttChart" id="gantt-chart" />
       </TabBar>
 
       {getPageContent()}

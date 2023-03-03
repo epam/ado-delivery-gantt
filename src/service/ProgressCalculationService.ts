@@ -5,7 +5,7 @@ interface ProgressInterface {
     parentId: number;
     subtaskProgress: number;
     timelineProgress?: number;
-    status?: string;
+    status?: Styles;
     type: string;
 }
 
@@ -26,6 +26,20 @@ export function getProgressMap(teams: WebApiTeam[], map: Map<String, WorkItem[]>
     });
 
     return progressMap
+}
+
+export const statusStyles = {
+    NOT_STARTED: { backgroundColor: "rgba(215,217,223,255)", backgroundSelectedColor: "rgba(215,217,223,255)", progressColor: "rgba(215,217,223,255)", progressSelectedColor: "rgba(215,217,223,255)" },//grey
+    ON_TRACK: { backgroundColor: "rgba(218,239,169,255)", backgroundSelectedColor: "rgba(218,239,169,255)", progressColor: "rgba(103,163,3,255)", progressSelectedColor: "rgba(103,163,3,255)" }, //green
+    AT_RISK: { backgroundColor: "rgba(255,230,153,255)", backgroundSelectedColor: "rgba(255,230,153,255)", progressColor: "rgba(235,144,54,255)", progressSelectedColor: "rgba(235,144,54,255)" },//orange
+    OFF_TRACK: { backgroundColor: "rgba(254,215,215,255)", backgroundSelectedColor: "rgba(254,215,215,255)", progressColor: "rgba(250,75,76,255)", progressSelectedColor: "rgba(250,75,76,255)" }//red
+}
+
+interface Styles {
+    backgroundColor?: string;
+    backgroundSelectedColor?: string;
+    progressColor?: string;
+    progressSelectedColor?: string;
 }
 
 function calculateSimpleItems(id: string, items: WorkItem[], progressMap: Map<string, ProgressInterface>) {
@@ -72,7 +86,7 @@ function getParentId(item: WorkItem) {
         : null;
 }
 
-function calculateProgress(startDate: Date, endDate: Date, subtasks: number[]): [storyProgress: number, timelineProgress: number, status: string] {
+function calculateProgress(startDate: Date, endDate: Date, subtasks: number[]): [storyProgress: number, timelineProgress: number, status: Styles] {
     const today = new Date();
     const totalDays = dateDiff(startDate, endDate);
     const remainingDays = dateDiff(today, endDate);
@@ -82,13 +96,16 @@ function calculateProgress(startDate: Date, endDate: Date, subtasks: number[]): 
     const subtaskProgress = totalSubtasks > 0 ? completedSubtasks / totalSubtasks : 0;
     const timelineProgress = totalDays > 0 ? (remainingDays / totalDays) : 0;
 
-    let status;
+    let status: Styles;
+    if (subtaskProgress === 0) {
+        status = statusStyles.NOT_STARTED;
+    }
     if (subtaskProgress >= (1 - timelineProgress * 1.25)) {
-        status = "green";
+        status = statusStyles.ON_TRACK;
     } else if ((subtaskProgress >= (1 - timelineProgress * 1.5)) && (subtaskProgress < (1 - timelineProgress * 1.25))) {
-        status = "yellow"
+        status = statusStyles.AT_RISK;
     } else {
-        status = "red";
+        status = statusStyles.OFF_TRACK;
     } return [subtaskProgress, timelineProgress, status];
 }
 

@@ -18,7 +18,7 @@ const clients = {
 }
 
 const queries = {
-  taskHierarchy(areas: string[]) {
+  taskHierarchy(areas: string[], workItems?: string[]) {
     return `
         SELECT
             [System.Id],
@@ -31,18 +31,18 @@ const queries = {
             (
                 [Source].[System.AreaPath] IN (${areas})
                 AND [Source].[System.TeamProject] = @project
-                AND [Source].[System.WorkItemType] <> ''
+                AND [Source].[System.WorkItemType] ${workItems && workItems.length > 0 ? `IN (${workItems})` : `<> ''`}
                 AND [Source].[System.State] <> ''
             )
             AND ([System.Links.LinkType] = 'System.LinkTypes.Hierarchy-Forward')
             AND (
                 [Target].[System.TeamProject] = @project
-                AND [Target].[System.WorkItemType] <> ''
+                AND [Target].[System.WorkItemType] ${workItems && workItems.length > 0 ? `IN (${workItems})` : `<> ''`}
             )
         MODE (Recursive)
         `;
   },
-  taskHierarchyByTeamIteration(areas: string[], projectName: string, teamName: string) {
+  taskHierarchyByTeamIteration(areas: string[], projectName: string, teamName: string, workItems?: string[]) {
     return `
         SELECT
             [System.Id],
@@ -55,14 +55,14 @@ const queries = {
             (
                 [Source].[System.AreaPath] IN (${areas})
                 AND [Source].[System.TeamProject] = @project
-                AND [Source].[System.WorkItemType] <> ''
+                AND [Source].[System.WorkItemType] ${workItems && workItems.length > 0 ? `IN (${workItems})` : `<> ''`}
                 AND [Source].[System.State] <> ''
             )
             AND ([System.Links.LinkType] = 'System.LinkTypes.Hierarchy-Forward')
             AND (
                 [Target].[System.IterationPath] = @currentIteration('[${projectName}]\\${teamName}')
                 AND [Target].[System.TeamProject] = @project
-                AND [Target].[System.WorkItemType] <> ''
+                AND [Target].[System.WorkItemType] ${workItems && workItems.length > 0 ? `in (${workItems})` : `<> ''`}
             )
         MODE (Recursive)
         `;
@@ -107,7 +107,7 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<{ id: 
   });
 }
 
-export const fetchTeamWorkItems = async (team: WebApiTeam): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
+export const fetchTeamWorkItems = async (team: WebApiTeam, workItems?: string[]): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
   const { projectName, projectId, id, name } = team;
 
   return clients.workClient.getTeamFieldValues({
@@ -117,11 +117,11 @@ export const fetchTeamWorkItems = async (team: WebApiTeam): Promise<{ id: string
     teamId: id,
   }).then(({ values }) => {
     const areas = values.map(({ value }) => `'${value}'`);
-
+    const _types = workItems?.map( value => `'${value}'`);
     return clients.workItemsClient
       .queryByWiql(
         {
-          query: queries.taskHierarchy(areas),
+          query: queries.taskHierarchy(areas, _types),
         },
         projectId,
         id
