@@ -1,9 +1,0 @@
-.bolt-colorswatchpicker .bolt-colorpip {
-  cursor: pointer;
-}
-.bolt-colorswatchpicker .bolt-colorpip:hover .bolt-colorpip-content {
-  box-shadow: 0 0 0 2px rgba( 255, 255, 255 ,  1 ), 0 0 0 5px rgba( 234, 234, 234 ,  1 );
-  box-shadow: 0 0 0 2px rgba( var(--palette-neutral-0,255, 255, 255) ,  1 ), 0 0 0 5px rgba( var(--palette-neutral-8,234, 234, 234) ,  1 );
-}
-
-/*# sourceMappingURL=ColorSwatchPicker.css.map */

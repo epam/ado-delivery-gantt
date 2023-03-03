@@ -18,6 +18,21 @@ The repository depends on a few Azure DevOps packages:
 - [azure-devops-extension-api](https://github.com/Microsoft/azure-devops-extension-api): Contains REST client libraries for the various Azure DevOps feature areas.
 - [azure-devops-ui](https://developer.microsoft.com/azure-devops): UI library containing the React components used in the Azure DevOps web UI.
 
+# Project notes on `azure-devops-ui` usage pattern:
+
+In terms of current repo above library will be installed from local/customized zipped tarball containing changes which are necessary to being adapted to the 18th version of React upstream library and prevent peer dependencies conflicts with the latest `gantt-task-react` version.
+Zipped archive was added to reduce overall amount of `azure-devops-ui` library files.
+For example, if you got exception like this:
+
+```
+TS2769: No overload matches this call. Overload 1 of 2, '(props: I*Props | Readonly<I*Props>): *', gave the following error.
+Type '{ children: (Element | undefined)[]; className: string; }' is not assignable to type 'IntrinsicAttributes & IntrinsicClassAttributes<*> & Readonly<I*Props>'.
+```
+You have to 
+- unzip archive;
+- provide required updates (for example - find I*Props file add field `children?: React.ReactNode;`);
+- create fresh tarball from local unzipped folder with the latest updates - `tar zcvf azure-devops-ui.tar.gz azure-devops-ui`.
+
 Some external dependencies:
 - `React` - Is used to render the UI.
 - `TypeScript` - It written in TypeScript and compiled to JavaScript
