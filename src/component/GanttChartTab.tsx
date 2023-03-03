@@ -34,26 +34,27 @@ const USER_STORY = 'User Story';
 const TASK_ITEM = 'Task';
 const TASK = 'task';
 
+const columnWidthByViewMode: { [key: string]: number } = {
+	[ViewMode.QuarterDay]: 30,
+	[ViewMode.Day]: 60,
+	[ViewMode.Week]: 250,
+	[ViewMode.Month]: 300,
+	[ViewMode.Year]: 400,
+};
+
 export const GanttChartTab = () => {
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [view, setView] = useState<ViewMode>(ViewMode.Day);
 	const [isChecked, setIsChecked] = useState(true);
 	const [chartLoad, setChartLoad] = useState(true);
 
-	let columnWidth = 60;
-	if (view === ViewMode.Month) {
-		columnWidth = 300;
-	} else if (view === ViewMode.Week) {
-		columnWidth = 250;
-	}
-
-  useEffect(() => {
-    (async () => {
-      await SDK.ready();
-      const projectService = await SDK.getService<IProjectPageService>(
-        CommonServiceIds.ProjectPageService
-      );
-      const project = await projectService.getProject();
+	useEffect(() => {
+		(async () => {
+			await SDK.ready();
+			const projectService = await SDK.getService<IProjectPageService>(
+				CommonServiceIds.ProjectPageService
+			);
+			const project = await projectService.getProject();
 
 			if (project) {
 				const { name: projectName } = project;
@@ -203,19 +204,20 @@ export const GanttChartTab = () => {
 			WorkItemTrackingServiceIds.WorkItemFormNavigationService
 		);
 
-    const taskId = task.id;
-    if (isSelected && Number(taskId)) {
-      navSvc.openWorkItem(parseInt(taskId));
-    }
-  };
+		const taskId = task.id;
+		if (isSelected && Number(taskId)) {
+			navSvc.openWorkItem(parseInt(taskId));
+		}
+	};
 
 
 	return (
 		<div>
 			<ViewSwitcher
-				onViewModeChange={(viewMode: ViewMode) => setView(viewMode)}
+				onViewModeChange={setView}
 				onViewListChange={setIsChecked}
 				isChecked={isChecked}
+				viewMode={view}
 			/>
 			<div className="flex-column" style={{ marginTop: 10 }}>
 
@@ -223,7 +225,7 @@ export const GanttChartTab = () => {
 					<Gantt
 						tasks={tasks}
 						viewMode={view}
-						columnWidth={columnWidth}
+						columnWidth={columnWidthByViewMode[view || ViewMode.Day]}
 						listCellWidth={isChecked ? '200px' : ''}
 						onExpanderClick={handleExpanderClick}
 						onSelect={handleSelectClick}

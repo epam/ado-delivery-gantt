@@ -101,7 +101,7 @@ export const Hub = () => {
   }
 
   const onToggleFullScreenMode = async () => {
-    const { fullScreenMode } = hubState;
+    const fullScreenMode = !hubState.fullScreenMode!;
     setHubState(current => {
       return { ...current, fullScreenMode: fullScreenMode }
     });
