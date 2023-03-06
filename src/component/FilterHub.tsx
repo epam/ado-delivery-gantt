@@ -9,7 +9,7 @@ import { WebApiTeam } from "azure-devops-extension-api/Core/Core";
 import { IProjectInfo } from "azure-devops-extension-api";
 /* --- */
 import { getClient } from "azure-devops-extension-api";
-import { WorkItemTrackingRestClient } from "azure-devops-extension-api/WorkItemTracking";
+import { WorkItemTrackingRestClient, WorkItemTypeReference } from "azure-devops-extension-api/WorkItemTracking";
 import { DropdownMultiSelection } from "azure-devops-ui/Utilities/DropdownSelection";
 import { localeIgnoreCaseComparer } from "azure-devops-ui/Core/Util/String";
 
@@ -35,12 +35,19 @@ export const MultiFilterHub: Filter = ({
         const loadWorkItemTypes = async (): Promise<void> => {
             if (project) {
                 const client = getClient(WorkItemTrackingRestClient);
-                const _types = await client.getWorkItemTypes(project.name);
-                workItemTypes.push(..._types
-                    .map(t => t.name)
+                const _types = await client.getWorkItemTypeCategories(project.name);
+                const _hidden = _types.filter(t => t.referenceName == "Microsoft.HiddenCategory")
+                    .reduce((acc, { workItemTypes = [] }) => [...acc, ...workItemTypes], [] as WorkItemTypeReference[])
+                    .map(t => t.name);
+                const _typesNames = _types
+                    .filter(t => t.referenceName != "Microsoft.HiddenCategory")
+                    .map(t => t.defaultWorkItemType.name)
+                    .filter(t => _hidden.indexOf(t) < 0);
+                workItemTypes.push(..._typesNames
                     .sort(localeIgnoreCaseComparer)
                     .map(item => ({ id: item, data: item, text: item })));
-                multiSelection.select(0, _types.length, true, true);
+
+                multiSelection.select(0, _typesNames.length, true, true);
             }
         }
 

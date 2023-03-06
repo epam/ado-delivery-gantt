@@ -19,9 +19,10 @@ import {
 	WorkItemTrackingServiceIds,
 	WorkItemLink,
 } from 'azure-devops-extension-api/WorkItemTracking';
-import { getProgressMap } from "../service/ProgressCalculationService";
+import { ProgressInterface, getProgressMap } from "../service/ProgressCalculationService";
 import { ViewSwitcher } from './ViewSwitcher';
 import { FilterHub, MultiFilterHub } from './FilterHub';
+import { GanttHeader, ganttTableBuilder } from './table';
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { fetchTeamWorkItems, fetchIterationDefinition } from '../service/WiqlService';
 
@@ -54,7 +55,7 @@ export const GanttChartTab = () => {
 	const [project, setProject] = useState<IProjectInfo>();
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [view, setView] = useState<ViewMode>(ViewMode.Day);
-	const [team, setTeam] = useState<WebApiTeam>(allTeam);
+	const [progressMap, setProgressMap] = useState<Map<string, ProgressInterface>>(new Map<string, ProgressInterface>());
 	const [isChecked, setIsChecked] = useState(true);
 	const [chartLoad, setChartLoad] = useState(true);
 	const [filterContext, setFilterContext] = useState({} as FilterInterface);
@@ -76,7 +77,6 @@ export const GanttChartTab = () => {
 
 	const handleExpanderClick = (task: Task): void => {
 		setTasks(tasks.map((t) => (t.id === task.id ? task : t)));
-		console.log('On expander click Id:' + task.id);
 	};
 
 	const handleSelectClick = async (
@@ -87,9 +87,9 @@ export const GanttChartTab = () => {
 			WorkItemTrackingServiceIds.WorkItemFormNavigationService
 		);
 
-		const taskId = task.id;
+		const taskId = task.id.split("_").pop();
 		if (isSelected && Number(taskId)) {
-			navSvc.openWorkItem(parseInt(taskId));
+			navSvc.openWorkItem(parseInt(taskId!));
 		}
 	};
 
@@ -125,14 +125,11 @@ export const GanttChartTab = () => {
 		}, new Map<String, WorkItem[]>());
 
 		const progressMap = getProgressMap(teams, map);
-
 		type TeamDictionaryValue = { connections: { [key: string]: WorkItemLink[]; }, map: Map<string, WorkItem> };
 
 		const teamDictionary = new Map<string, TeamDictionaryValue>(projectItems.map(({ id, items, connections }) => [id, { connections, map: new Map(items.map(item => [`${item.id}`, item])) }]));
 
 		teams.forEach(team => {
-			console.log("Team---", team);
-
 			const teamId = team.id;
 			const iteration = teamIterations.get(teamId);
 			const { start, end } = iteration as { start: Date, end: Date };
@@ -158,27 +155,27 @@ export const GanttChartTab = () => {
 				.forEach(item => {
 					const { target: { id } } = item;
 					const workItem = map.get(`${id}`) as WorkItem;
-					const progress = progressMap.get(team.id + workItem.id);
+					const progress = progressMap.get(`${teamId}_${workItem.id}`);
 					const hasChild = workItem?.relations?.some(({ attributes = {} }) => attributes.name === 'Child');
-
+					const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}`
 					ganttTasks.push({
 						//displayOrder: latestOrder,
 						start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
 						end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
 						name: workItem.fields[ITEM_TITLE],
-						id: workItem.id + '',
-						progress: progress?.timelineProgress || 0,
+						id: `${teamId}_${workItem.id}`,
+						progress: hasChild ? progress?.timelineProgress || 0 : progress?.subtaskProgress || 0,
 						styles: {
-              backgroundColor: progress?.status?.backgroundColor,
-              backgroundSelectedColor: progress?.status?.backgroundSelectedColor,
-              progressColor: progress?.status?.progressColor,
-              progressSelectedColor: progress?.status?.progressSelectedColor
-            },
+							backgroundColor: progress?.status?.backgroundColor,
+							backgroundSelectedColor: progress?.status?.backgroundSelectedColor,
+							progressColor: progress?.status?.progressColor,
+							progressSelectedColor: progress?.status?.progressSelectedColor
+						},
 						type: hasChild && PROJECT || TASK,
-						project: `${item?.source?.id || teamId}`,
+						project: parentId,
 						hideChildren: true,
 						// isDisabled:
-						dependencies: [`${item?.source?.id || teamId}`]
+						dependencies: [parentId]
 					});
 				});
 
@@ -203,34 +200,34 @@ export const GanttChartTab = () => {
 				.forEach(item => {
 					const { target: { id } } = item;
 					const workItem = map.get(`${id}`) as WorkItem;
-					const progress = progressMap.get(team.id + workItem.id);
+					const progress = progressMap.get(`${teamId}_${workItem.id}`);
 					const hasChild = workItem?.relations?.some(({ attributes = {} }) => attributes.name === 'Child');
+					const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}_others`
 
 					ganttTasks.push({
 						//displayOrder: latestOrder,
 						start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
 						end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
 						name: workItem.fields[ITEM_TITLE],
-						id: workItem.id + '',
-						progress: progress?.timelineProgress || 0,
+						id: `${teamId}_${workItem.id}`,
+						progress: hasChild ? progress?.timelineProgress || 0 : progress?.subtaskProgress || 0,
 						styles: {
-              backgroundColor: progress?.status?.backgroundColor,
-              backgroundSelectedColor: progress?.status?.backgroundSelectedColor,
-              progressColor: progress?.status?.progressColor,
-              progressSelectedColor: progress?.status?.progressSelectedColor
-            },
+							backgroundColor: progress?.status?.backgroundColor,
+							backgroundSelectedColor: progress?.status?.backgroundSelectedColor,
+							progressColor: progress?.status?.progressColor,
+							progressSelectedColor: progress?.status?.progressSelectedColor
+						},
 						type: hasChild && PROJECT || TASK,
-						project: `${item?.source?.id || othersId}`,
+						project: parentId,
 						hideChildren: true,
 						// isDisabled:
-						dependencies: [`${item?.source?.id || othersId}`]
+						dependencies: [parentId]
 					});
 				});
 		});
 
-		console.log("Tasks ----", ganttTasks);
-		// teams.push({ id: "all", name: "All" } as WebApiTeam);
 		setTasks(ganttTasks);
+		setProgressMap(progressMap);
 		setChartLoad(false);
 	};
 
@@ -257,7 +254,7 @@ export const GanttChartTab = () => {
 				<div className="flex-row">
 					<FilterHub
 						project={project!}
-						item={team}
+						item={allTeam}
 						itemsFn={(project) => fetchTeams(project).then(items => [allTeam, ...items])}
 						onChange={onTeamChange}
 					/>
@@ -273,10 +270,12 @@ export const GanttChartTab = () => {
 			<div className="flex-column" style={{ marginTop: 10 }}>
 				{!chartLoad ? (
 					<Gantt
+						TaskListHeader={GanttHeader}
+						TaskListTable={ganttTableBuilder.build(progressMap)}
 						tasks={tasks}
 						viewMode={view}
 						columnWidth={columnWidthByViewMode[view || ViewMode.Day]}
-						listCellWidth={isChecked ? '200px' : ''}
+						listCellWidth={isChecked ? '100px' : ''}
 						onExpanderClick={handleExpanderClick}
 						onSelect={handleSelectClick}
 					/>

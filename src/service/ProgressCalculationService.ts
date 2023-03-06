@@ -1,12 +1,13 @@
 import { WebApiTeam } from "azure-devops-extension-api/Core";
 import { WorkItem } from "azure-devops-extension-api/WorkItemTracking";
 
-interface ProgressInterface {
+export interface ProgressInterface {
     parentId: number;
     subtaskProgress: number;
     timelineProgress?: number;
     status?: Styles;
     type: string;
+    state: string;
 }
 
 export function getProgressMap(teams: WebApiTeam[], map: Map<String, WorkItem[]>): Map<string, ProgressInterface> {
@@ -46,13 +47,14 @@ function calculateSimpleItems(id: string, items: WorkItem[], progressMap: Map<st
     items.forEach(item => {
         let itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 1 : 0;
         let parentId = getParentId(item);
-        if (parentId != null) {
-            progressMap.set(id + item.id, {
+        // if (parentId != null) {
+            progressMap.set(`${id}_${item.id}`, {
                 parentId: parentId ? parseInt(parentId) : 0,
                 subtaskProgress: itemProgress,
-                type: item.fields["System.WorkItemType"]
+                type: item.fields["System.WorkItemType"],
+                state: item.fields["System.State"]
             });
-        }
+        // }
     });
 }
 
@@ -66,15 +68,16 @@ function calculateTimelineProgressItems(id: string, items: WorkItem[], progressM
                 .map(subItem => subItem.subtaskProgress);
             let itemProgress = calculateProgress(startDate, endDate, subitemProgress);
             let parentId = getParentId(item);
-            if (parentId != null || item.fields["System.WorkItemType"] === 'Epic') {
-                progressMap.set(id + item.id, {
+            // if (parentId != null || item.fields["System.WorkItemType"] === 'Epic') {
+                progressMap.set(`${id}_${item.id}`, {
                     parentId: parentId ? parseInt(parentId) : 0,
                     subtaskProgress: itemProgress[0],
                     timelineProgress: itemProgress[1],
                     status: itemProgress[2],
-                    type: item.fields["System.WorkItemType"]
+                    type: item.fields["System.WorkItemType"],
+                    state: item.fields["System.State"]
                 });
-            }
+            // }
         }
     });
 }
