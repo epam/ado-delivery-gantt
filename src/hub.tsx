@@ -53,36 +53,9 @@ export const Hub = () => {
           iconName: fullScreenMode ? "BackToWindow" : "FullScreen"
         },
         onActivate: () => { onToggleFullScreenMode() }
-      },
-      {
-        id: "customDialog",
-        text: "Custom Dialog",
-        onActivate: () => { onCustomPromptClick() },
-        tooltipProps: {
-          text: "Open a dialog with custom extension content"
-        }
       }
     ];
   };
-
-  const onCustomPromptClick = async () => {
-    const dialogService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
-    const { useCompactPivots } = hubState;
-    dialogService.openCustomDialog<boolean | undefined>(SDK.getExtensionContext().id + ".panel-content", {
-      title: "Custom dialog",
-      configuration: {
-        message: "Use compact pivots?",
-        initialValue: useCompactPivots
-      },
-      onClose: (result) => {
-        if (result !== undefined) {
-          setHubState(current => {
-            return { ...current, useCompactPivots: result };
-          });
-        }
-      }
-    });
-  }
 
   const initializeFullScreenState = async () => {
     const layoutService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
@@ -116,7 +89,7 @@ export const Hub = () => {
   return (
     <Page className="sample-hub flex-grow">
 
-      <Header title="Dilivery Status"
+      <Header title="Delivery Gantt"
         commandBarItems={getCommandBarItems()}
         description={headerDescription}
         titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />

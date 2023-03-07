@@ -1,8 +1,8 @@
 {
   "manifestVersion": 1,
-  "version": "0.1.0",
-  "name": "ADO Planner Plugin",
-  "description": "Use for enchace Delivery plan",
+  "version": "0.1.1",
+  "name": "Delivery Gantt",
+  "description": "Effortlessly track team progress with a hierarchical Gantt chart displaying Epics, Features, and Stories issue types.",
   "publisher": "{INSERT_PUBLISHER}",
   "demands": ["api-version/3.0"],
   "categories": ["Azure Boards"],
@@ -31,15 +31,15 @@
   ],
   "contributions": [
     {
-      "id": "ado-palnner-plugin",
+      "id": "ado-planner-plugin",
       "type": "ms.vss-web.hub",
-      "description": "Ado Palnner plugin",
+      "description": "ADO Planner plugin",
       "targets": ["ms.vss-work-web.work-hub-group"],
       "properties": {
-        "name": "Delivery Plan",
+        "name": "Delivery Gantt",
         "icon": {
-          "dark": "img/calendar.png",
-          "light": "img/calendar.png"
+          "dark": "img/calendar_dark.png",
+          "light": "img/calendar_light.png"
         },
         "uri": "dist/hub.html"
       }
