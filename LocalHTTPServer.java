@@ -94,7 +94,6 @@ public class LocalHTTPServer {
 
         var cookie = System.getenv("X_COOKIE");
         var method = exchange.getRequestMethod();
-
         HttpRequest.Builder reqBuilder = HttpRequest.newBuilder(URI.create(uri))
                 .timeout(Duration.ofMillis(30000))
                 .method(method.toUpperCase(), !method.equalsIgnoreCase("GET") ? HttpRequest.BodyPublishers.ofInputStream(exchange::getRequestBody): HttpRequest.BodyPublishers.noBody())

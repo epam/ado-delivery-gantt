@@ -35,7 +35,7 @@ export const ganttTooltipContentBuilder: GanttTooltipContentBuilder = {
             return (
                 <div className="tooltipDefaultContainer" style={{ fontSize, fontFamily }}>
                     <span style={{ fontSize: fontSize }}>{context ? taskId || "" : ""} {task.name}</span>
-                    <b>&nbsp;{toLocaleDateString(task.start)} - {toLocaleDateString(task.end)}</b>
+                    <b>&nbsp;{context ? `${toLocaleDateString(task.start)} - ${toLocaleDateString(task.end)}` : ""}</b>
                     <span>&nbsp;{context ? context.state || "" : ""}</span>
                     <b style={{ fontSize: fontSize }}>&nbsp;{context ? `${task.progress} %` : ""}</b>
                 </div>

@@ -35,6 +35,7 @@ export function getProgressMap(teams: WebApiTeam[], map: Map<String, WorkItem[]>
 }
 
 enum ItemStatus {
+    DONE = "Done",
     NOT_STARTED = "Not Started",
     ON_TRACK = "On Track",
     AT_RISK = "At Risk",
@@ -42,6 +43,7 @@ enum ItemStatus {
 }
 
 export const statusStyles = {
+    [ItemStatus.DONE]: { backgroundColor: "rgba(103,163,3,255)", backgroundSelectedColor: "rgba(103,163,3,255)", progressColor: "rgba(103,163,3,255)", progressSelectedColor: "rgba(103,163,3,255)" },
     [ItemStatus.NOT_STARTED]: { backgroundColor: "rgba(215,217,223,255)", backgroundSelectedColor: "rgba(215,217,223,255)", progressColor: "rgba(215,217,223,255)", progressSelectedColor: "rgba(215,217,223,255)" },//grey
     [ItemStatus.ON_TRACK]: { backgroundColor: "rgba(218,239,169,255)", backgroundSelectedColor: "rgba(218,239,169,255)", progressColor: "rgba(103,163,3,255)", progressSelectedColor: "rgba(103,163,3,255)" }, //green
     [ItemStatus.AT_RISK]: { backgroundColor: "rgba(255,230,153,255)", backgroundSelectedColor: "rgba(255,230,153,255)", progressColor: "rgba(235,144,54,255)", progressSelectedColor: "rgba(235,144,54,255)" },//orange
@@ -58,42 +60,37 @@ interface Styles {
 
 function calculateSimpleItems(id: string, items: WorkItem[], progressMap: Map<string, ProgressInterface>) {
     items.forEach(item => {
-        let itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 1 : 0;
+        let itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 100 : 0;
         let parentId = getParentId(item);
-        // if (parentId != null) {
         progressMap.set(`${id}_${item.id}`, {
             parentId: parentId ? parseInt(parentId) : 0,
             subtaskProgress: itemProgress,
+            status: itemProgress > 0 ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : { ...statusStyles[ItemStatus.NOT_STARTED], name: ItemStatus.NOT_STARTED },
             type: item.fields["System.WorkItemType"],
             state: item.fields["System.State"],
             description: stripHTML(item.fields["System.Description"])
         });
-        // }
     });
 }
 
 function calculateTimelineProgressItems(id: string, items: WorkItem[], progressMap: Map<string, ProgressInterface>) {
     items.forEach(item => {
-        if (item.fields['Microsoft.VSTS.Scheduling.StartDate'] && item.fields['Microsoft.VSTS.Scheduling.TargetDate']) {
-            const startDate = new Date(item.fields['Microsoft.VSTS.Scheduling.StartDate']);
-            const endDate = new Date(item.fields['Microsoft.VSTS.Scheduling.TargetDate']);
-            let subitemProgress = Array.from(progressMap.values())
-                .filter(subItem => subItem.parentId === item.id)
-                .map(subItem => subItem.subtaskProgress);
-            let itemProgress = calculateProgress(startDate, endDate, subitemProgress);
-            let parentId = getParentId(item);
-            // if (parentId != null || item.fields["System.WorkItemType"] === 'Epic') {
-            progressMap.set(`${id}_${item.id}`, {
-                parentId: parentId ? parseInt(parentId) : 0,
-                subtaskProgress: itemProgress[0],
-                timelineProgress: itemProgress[1],
-                status: itemProgress[2],
-                type: item.fields["System.WorkItemType"],
-                state: item.fields["System.State"],
-                description: stripHTML(item.fields["System.Description"])
-            });
-            // }
-        }
+        const startDate = new Date(item.fields['Microsoft.VSTS.Scheduling.StartDate']);
+        const endDate = new Date(item.fields['Microsoft.VSTS.Scheduling.TargetDate']);
+        let subitemProgress = Array.from(progressMap.values())
+            .filter(subItem => subItem.parentId === item.id)
+            .map(subItem => subItem.subtaskProgress);
+        let itemProgress = calculateProgress(startDate, endDate, subitemProgress);
+        let parentId = getParentId(item);
+
+        progressMap.set(`${id}_${item.id}`, {
+            parentId: parentId ? parseInt(parentId) : 0,
+            subtaskProgress: item.fields["System.State"] === 'Closed' ? 100 : itemProgress[0],
+            status: item.fields["System.State"] === 'Closed' ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : itemProgress[1],
+            type: item.fields["System.WorkItemType"],
+            state: item.fields["System.State"],
+            description: stripHTML(item.fields["System.Description"])
+        });
     });
 }
 
@@ -104,12 +101,12 @@ function getParentId(item: WorkItem) {
         : null;
 }
 
-function calculateProgress(startDate: Date, endDate: Date, subtasks: number[]): [storyProgress: number, timelineProgress: number, status: Styles] {
+function calculateProgress(startDate: Date, endDate: Date, subtasks: number[]): [storyProgress: number, status: Styles] {
     const today = new Date();
     const totalDays = dateDiff(startDate, endDate);
-    const remainingDays = dateDiff(today, endDate);
+    const remainingDays = dateDiff(today, endDate) > 0 ? dateDiff(today, endDate) : 0;
     const totalSubtasks = subtasks.length;
-    const completedSubtasks = subtasks.filter((t) => t === 1).length;
+    const completedSubtasks = subtasks.filter((t) => t === 100).length;
 
     const subtaskProgress = totalSubtasks > 0 ? completedSubtasks / totalSubtasks : 0;
     const timelineProgress = totalDays > 0 ? (remainingDays / totalDays) : 0;
@@ -124,7 +121,7 @@ function calculateProgress(startDate: Date, endDate: Date, subtasks: number[]): 
         status = ItemStatus.AT_RISK;
     } else {
         status = ItemStatus.OFF_TRACK;
-    } return [subtaskProgress, timelineProgress, { ...statusStyles[status], name: status }];
+    } return [parseInt((subtaskProgress * 100).toFixed(2)), { ...statusStyles[status], name: status }];
 }
 
 function dateDiff(startDate: Date, endDate: Date) {

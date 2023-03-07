@@ -141,6 +141,7 @@ export const GanttChartTab = () => {
 				name: team.name,
 				// project: team.id,
 				id: teamId,
+				styles: { backgroundColor: "white", backgroundSelectedColor: "white", progressColor: "white", progressSelectedColor: "white" },
 				progress: 0,
 				type: PROJECT,
 				hideChildren: true,
@@ -164,7 +165,7 @@ export const GanttChartTab = () => {
 						end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
 						name: workItem.fields[ITEM_TITLE],
 						id: `${teamId}_${workItem.id}`,
-						progress: hasChild ? progress?.timelineProgress || 0 : progress?.subtaskProgress || 0,
+						progress: progress?.subtaskProgress || 0,
 						styles: {
 							backgroundColor: progress?.status?.backgroundColor,
 							backgroundSelectedColor: progress?.status?.backgroundSelectedColor,
@@ -188,6 +189,7 @@ export const GanttChartTab = () => {
 				name: 'Others',
 				project: team.id,
 				id: othersId,
+				styles: { backgroundColor: "white", backgroundSelectedColor: "white", progressColor: "white", progressSelectedColor: "white" },
 				progress: 0,
 				type: PROJECT,
 				hideChildren: true,
@@ -210,7 +212,7 @@ export const GanttChartTab = () => {
 						end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
 						name: workItem.fields[ITEM_TITLE],
 						id: `${teamId}_${workItem.id}`,
-						progress: hasChild ? progress?.timelineProgress || 0 : progress?.subtaskProgress || 0,
+						progress: progress?.subtaskProgress || 0,
 						styles: {
 							backgroundColor: progress?.status?.backgroundColor,
 							backgroundSelectedColor: progress?.status?.backgroundSelectedColor,
@@ -267,7 +269,7 @@ export const GanttChartTab = () => {
 					/>
 				</div>
 			</div>
-			<div className="flex-column" style={{ marginTop: 10 }}>
+			<div className="flex-column Wrapper" style={{ marginTop: 10 }}>
 				{!chartLoad ? (
 					<Gantt
 						TaskListHeader={GanttHeader}
