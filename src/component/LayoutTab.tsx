@@ -4,7 +4,7 @@ import * as React from "react";
 import * as SDK from "azure-devops-extension-sdk";
 
 import { CommonServiceIds, IProjectPageService } from "azure-devops-extension-api";
-import { GanttChartTab } from "./GanttChartTab";
+import { GanttChartTab } from "./gantt";
 import { useEffect, useState } from "react";
 
 interface IOverviewTabState {

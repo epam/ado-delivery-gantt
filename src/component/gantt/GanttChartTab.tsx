@@ -19,12 +19,12 @@ import {
 	WorkItemTrackingServiceIds,
 	WorkItemLink,
 } from 'azure-devops-extension-api/WorkItemTracking';
-import { ProgressInterface, getProgressMap } from "../service/ProgressCalculationService";
+import { ProgressInterface, getProgressMap } from "../../service/ProgressCalculationService";
 import { ViewSwitcher } from './ViewSwitcher';
-import { FilterHub, MultiFilterHub } from './FilterHub';
-import { GanttHeader, ganttTableBuilder } from './table';
+import { FilterHub, MultiFilterHub } from '../FilterHub';
+import { GanttHeader, ganttTableBuilder, ganttTooltipContentBuilder } from './table';
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
-import { fetchTeamWorkItems, fetchIterationDefinition } from '../service/WiqlService';
+import { fetchTeamWorkItems, fetchIterationDefinition } from '../../service/WiqlService';
 
 interface FilterInterface {
 	team?: WebApiTeam | undefined;
@@ -272,6 +272,7 @@ export const GanttChartTab = () => {
 					<Gantt
 						TaskListHeader={GanttHeader}
 						TaskListTable={ganttTableBuilder.build(progressMap)}
+						TooltipContent={ganttTooltipContentBuilder.build(progressMap)}
 						tasks={tasks}
 						viewMode={view}
 						columnWidth={columnWidthByViewMode[view || ViewMode.Day]}

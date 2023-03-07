@@ -8,7 +8,12 @@ export interface ProgressInterface {
     status?: Styles;
     type: string;
     state: string;
+    description: string;
 }
+
+const htmlPattern = /<(?:.|\s)*?>/g;
+
+const stripHTML = (data: any) => (`${data || ""}`).replace(/<(?:.|\s)*?>/g, "");
 
 export function getProgressMap(teams: WebApiTeam[], map: Map<String, WorkItem[]>): Map<string, ProgressInterface> {
     let progressMap = new Map<string, ProgressInterface>();
@@ -29,11 +34,18 @@ export function getProgressMap(teams: WebApiTeam[], map: Map<String, WorkItem[]>
     return progressMap
 }
 
+enum ItemStatus {
+    NOT_STARTED = "Not Started",
+    ON_TRACK = "On Track",
+    AT_RISK = "At Risk",
+    OFF_TRACK = "Off Track"
+}
+
 export const statusStyles = {
-    NOT_STARTED: { backgroundColor: "rgba(215,217,223,255)", backgroundSelectedColor: "rgba(215,217,223,255)", progressColor: "rgba(215,217,223,255)", progressSelectedColor: "rgba(215,217,223,255)" },//grey
-    ON_TRACK: { backgroundColor: "rgba(218,239,169,255)", backgroundSelectedColor: "rgba(218,239,169,255)", progressColor: "rgba(103,163,3,255)", progressSelectedColor: "rgba(103,163,3,255)" }, //green
-    AT_RISK: { backgroundColor: "rgba(255,230,153,255)", backgroundSelectedColor: "rgba(255,230,153,255)", progressColor: "rgba(235,144,54,255)", progressSelectedColor: "rgba(235,144,54,255)" },//orange
-    OFF_TRACK: { backgroundColor: "rgba(254,215,215,255)", backgroundSelectedColor: "rgba(254,215,215,255)", progressColor: "rgba(250,75,76,255)", progressSelectedColor: "rgba(250,75,76,255)" }//red
+    [ItemStatus.NOT_STARTED]: { backgroundColor: "rgba(215,217,223,255)", backgroundSelectedColor: "rgba(215,217,223,255)", progressColor: "rgba(215,217,223,255)", progressSelectedColor: "rgba(215,217,223,255)" },//grey
+    [ItemStatus.ON_TRACK]: { backgroundColor: "rgba(218,239,169,255)", backgroundSelectedColor: "rgba(218,239,169,255)", progressColor: "rgba(103,163,3,255)", progressSelectedColor: "rgba(103,163,3,255)" }, //green
+    [ItemStatus.AT_RISK]: { backgroundColor: "rgba(255,230,153,255)", backgroundSelectedColor: "rgba(255,230,153,255)", progressColor: "rgba(235,144,54,255)", progressSelectedColor: "rgba(235,144,54,255)" },//orange
+    [ItemStatus.OFF_TRACK]: { backgroundColor: "rgba(254,215,215,255)", backgroundSelectedColor: "rgba(254,215,215,255)", progressColor: "rgba(250,75,76,255)", progressSelectedColor: "rgba(250,75,76,255)" }//red
 }
 
 interface Styles {
@@ -41,6 +53,7 @@ interface Styles {
     backgroundSelectedColor?: string;
     progressColor?: string;
     progressSelectedColor?: string;
+    name: ItemStatus;
 }
 
 function calculateSimpleItems(id: string, items: WorkItem[], progressMap: Map<string, ProgressInterface>) {
@@ -48,12 +61,13 @@ function calculateSimpleItems(id: string, items: WorkItem[], progressMap: Map<st
         let itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 1 : 0;
         let parentId = getParentId(item);
         // if (parentId != null) {
-            progressMap.set(`${id}_${item.id}`, {
-                parentId: parentId ? parseInt(parentId) : 0,
-                subtaskProgress: itemProgress,
-                type: item.fields["System.WorkItemType"],
-                state: item.fields["System.State"]
-            });
+        progressMap.set(`${id}_${item.id}`, {
+            parentId: parentId ? parseInt(parentId) : 0,
+            subtaskProgress: itemProgress,
+            type: item.fields["System.WorkItemType"],
+            state: item.fields["System.State"],
+            description: stripHTML(item.fields["System.Description"])
+        });
         // }
     });
 }
@@ -69,14 +83,15 @@ function calculateTimelineProgressItems(id: string, items: WorkItem[], progressM
             let itemProgress = calculateProgress(startDate, endDate, subitemProgress);
             let parentId = getParentId(item);
             // if (parentId != null || item.fields["System.WorkItemType"] === 'Epic') {
-                progressMap.set(`${id}_${item.id}`, {
-                    parentId: parentId ? parseInt(parentId) : 0,
-                    subtaskProgress: itemProgress[0],
-                    timelineProgress: itemProgress[1],
-                    status: itemProgress[2],
-                    type: item.fields["System.WorkItemType"],
-                    state: item.fields["System.State"]
-                });
+            progressMap.set(`${id}_${item.id}`, {
+                parentId: parentId ? parseInt(parentId) : 0,
+                subtaskProgress: itemProgress[0],
+                timelineProgress: itemProgress[1],
+                status: itemProgress[2],
+                type: item.fields["System.WorkItemType"],
+                state: item.fields["System.State"],
+                description: stripHTML(item.fields["System.Description"])
+            });
             // }
         }
     });
@@ -99,17 +114,17 @@ function calculateProgress(startDate: Date, endDate: Date, subtasks: number[]): 
     const subtaskProgress = totalSubtasks > 0 ? completedSubtasks / totalSubtasks : 0;
     const timelineProgress = totalDays > 0 ? (remainingDays / totalDays) : 0;
 
-    let status: Styles;
+    let status: ItemStatus;
     if (subtaskProgress === 0) {
-        status = statusStyles.NOT_STARTED;
+        status = ItemStatus.NOT_STARTED;
     }
     if (subtaskProgress >= (1 - timelineProgress * 1.25)) {
-        status = statusStyles.ON_TRACK;
+        status = ItemStatus.ON_TRACK;
     } else if ((subtaskProgress >= (1 - timelineProgress * 1.5)) && (subtaskProgress < (1 - timelineProgress * 1.25))) {
-        status = statusStyles.AT_RISK;
+        status = ItemStatus.AT_RISK;
     } else {
-        status = statusStyles.OFF_TRACK;
-    } return [subtaskProgress, timelineProgress, status];
+        status = ItemStatus.OFF_TRACK;
+    } return [subtaskProgress, timelineProgress, { ...statusStyles[status], name: status }];
 }
 
 function dateDiff(startDate: Date, endDate: Date) {

@@ -2,25 +2,7 @@ import * as React from "react";
 import { useMemo } from "react";
 import { Task } from 'gantt-task-react';
 import { ProgressInterface } from "service/ProgressCalculationService";
-
-const localeDateStringCache: { [key: string]: any } = {};
-const toLocaleDateStringFactory =
-  (locale: string) =>
-    (date: Date, dateTimeOptions: Intl.DateTimeFormatOptions) => {
-      const key = date.toString();
-      let lds = localeDateStringCache[key];
-      if (!lds) {
-        lds = date.toLocaleDateString(locale, dateTimeOptions);
-        localeDateStringCache[key] = lds;
-      }
-      return lds;
-    };
-const dateTimeOptions: Intl.DateTimeFormatOptions = {
-  weekday: "short",
-  year: "2-digit",
-  month: "2-digit",
-  day: "numeric",
-};
+import { toLocaleDateStringFactory } from "./common";
 
 type GanttTableProps = {
   rowHeight: number;
@@ -118,7 +100,7 @@ const ganttTableBuilder: GanttTableBuilder = {
                     textAlign: "center"
                   }}
                 >
-                  &nbsp;{status ? status.state || "" : ""}
+                  &nbsp;{status ? status.status?.name || "" : ""}
                 </div>
                 <div
                   className={"ganttTable_HeaderSeparator"}
@@ -135,7 +117,7 @@ const ganttTableBuilder: GanttTableBuilder = {
                     textAlign: "center"
                   }}
                 >
-                  &nbsp;{status ? `${status.timelineProgress || 0} %` : ""}
+                  &nbsp;{status ? `${t.progress} %` : ""}
                 </div>
                 <div
                   className={"ganttTable_HeaderSeparator"}
@@ -151,7 +133,7 @@ const ganttTableBuilder: GanttTableBuilder = {
                     maxWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
                   }}
                 >
-                  &nbsp;{toLocaleDateString(t.start, dateTimeOptions)} - {toLocaleDateString(t.end, dateTimeOptions)}
+                  &nbsp;{toLocaleDateString(t.start)} - {toLocaleDateString(t.end)}
                 </div>
               </div>
             );
