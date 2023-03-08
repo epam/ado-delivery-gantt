@@ -12,13 +12,16 @@ import { getClient } from "azure-devops-extension-api";
 import { WorkItemTrackingRestClient, WorkItemTypeReference } from "azure-devops-extension-api/WorkItemTracking";
 import { DropdownMultiSelection } from "azure-devops-ui/Utilities/DropdownSelection";
 import { localeIgnoreCaseComparer } from "azure-devops-ui/Core/Util/String";
+import { TeamSettingsIteration } from "azure-devops-extension-api/Work";
+import { fetchIterationDefinition } from "../service/WiqlService";
 
 
 export interface FilterProps<T> {
     project: IProjectInfo,
+    team?: WebApiTeam,
     item?: T,
     itemsFn?: (project: IProjectInfo) => Promise<T[]>;
-    onChange: (project: IProjectInfo, team: T | T[]) => void;
+    onChange: (project: IProjectInfo, item: T | T[]) => void;
 };
 type Filter<T = any> = React.FC<FilterProps<T>>
 
@@ -76,7 +79,7 @@ export const MultiFilterHub: Filter = ({
                     items={workItemTypes}
                     minCalloutWidth={300}
                     showFilterBox={true}
-                    onCollapse={() => { onChange(project, [...selectedItems]); }}
+                    onCollapse={() => { onChange!(project, [...selectedItems]); }}
                     renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
                     onSelect={(_, { id }) => { !selectedItems.has(id) && selectedItems.add(id) || selectedItems.delete(id); }}
                     selection={multiSelection}
@@ -103,7 +106,6 @@ export const FilterHub: Filter = ({
                 const arr = await itemsFn!(project);
                 const itemsOptions: Array<IListBoxItem<any>> = arr.map(it => ({ id: it.id, text: it.name, data: it } as IListBoxItem<any>));
                 items.push(...itemsOptions);
-                const selectedItem = new ObservableValue<any>(item);
             }
         })();
     }, [project]);
@@ -118,7 +120,6 @@ export const FilterHub: Filter = ({
     return (
         <Observer selectedItem={selectedItem}>
             {() => (
-
                 <Dropdown
                     ariaLabel={"Button Dropdown " + selectedItem.value.name + " selected"}
                     className="scale-dropdown"
@@ -134,3 +135,77 @@ export const FilterHub: Filter = ({
         </Observer>
     );
 };
+
+const iterationFilterHubSelection = new DropdownSelection();
+const iterationsOptions = new ObservableArray<IListBoxItem<any>>();
+let iterationNames: TeamSettingsIteration[] = [];
+
+export const IterationFilterHub: Filter = ({
+    project,
+    team,
+    onChange
+}) => {
+
+    const selectedItem = new ObservableValue<TeamSettingsIteration | any>({});
+
+    useEffect(() => {
+        const fetchTeamIteration = async () => {
+            if (team) {
+                const { iterations, currentIteration } = await fetchIterationDefinition(team!)
+                    .then(definition => {
+                        return {
+                            iterations: definition.iterations,
+                            currentIteration: definition.currentIteration
+                        }
+                    });
+                iterationNames = addShiftsToIterations(iterations, currentIteration);
+
+                const itemsOptions: Array<IListBoxItem<string>> = iterationNames.map(it => ({ id: it.id, text: it.name, data: it.path } as IListBoxItem<string>));
+                iterationsOptions.removeAll();
+                iterationsOptions.push(...itemsOptions);
+                
+                const index = itemsOptions.findIndex(it => it.text === currentIteration)
+                selectedItem.value = currentIteration;
+                iterationFilterHubSelection.clear();
+                iterationFilterHubSelection.select(index);
+            }
+        };
+
+        fetchTeamIteration()
+            .catch(console.error);
+    }, [team, project]);
+
+    const addShiftsToIterations = (iterations: TeamSettingsIteration[], currentIterationName?: string) => {
+        const currentIteration = iterations.filter(it => it.name === currentIterationName).pop();
+        if (currentIteration) {
+            const i = iterations.indexOf(currentIteration)
+            return iterations.map((e, j) => {
+                return { ...e, path: String(j - i) };
+            });
+        }
+        return iterations;
+    }
+
+    const onSelect = (event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<string>) => {
+        const _item = iterationNames.find(e => e.id === item.id);
+        console.log("onSelect [Iteration]: ", _item?.name);
+        onChange!(project, _item!);
+    };
+
+    return (
+        <Observer selectedItem={selectedItem}>
+            {() => (
+                <Dropdown<string>
+                    ariaLabel={"Button Dropdown " + selectedItem.value?.name + " selected"}
+                    className="scale-dropdown"
+                    placeholder={selectedItem.value?.name}
+                    items={iterationsOptions}
+                    selection={iterationFilterHubSelection}
+                    showFilterBox={true}
+                    minCalloutWidth={140}
+                    renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
+                    onSelect={onSelect} />
+            )}
+        </Observer>
+    );
+}

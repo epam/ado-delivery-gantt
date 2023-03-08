@@ -1,4 +1,4 @@
-import { WorkRestClient } from 'azure-devops-extension-api/Work';
+import { TeamSettingsIteration, WorkRestClient } from 'azure-devops-extension-api/Work';
 import { WebApiTeam } from 'azure-devops-extension-api/Core';
 import {
   WorkItemTrackingRestClient,
@@ -6,6 +6,7 @@ import {
 } from 'azure-devops-extension-api/WorkItemTracking';
 
 import { getClient } from 'azure-devops-extension-api';
+import { FilterInterface } from 'component/gantt/GanttChartTab';
 
 
 const clients = {
@@ -18,54 +19,47 @@ const clients = {
 }
 
 const queries = {
-  taskHierarchy(areas: string[], workItems?: string[]) {
+  taskHierarchy(areas: string[], workItems?: string[], tags?: string[], shift?: number) {
     return `
         SELECT
             [System.Id],
             [System.Title],
             [System.State],
-            [Source].[System.IterationPath],
-            [Target].[System.WorkItemType]
+            [System.IterationPath],
+            [System.WorkItemType],
+            [System.Tags]
         FROM workitemLinks
         WHERE
             (
                 [Source].[System.AreaPath] IN (${areas})
                 AND [Source].[System.TeamProject] = @project
-                AND [Source].[System.WorkItemType] ${workItems && workItems.length > 0 ? `IN (${workItems})` : `<> ''`}
+                ${shift ? `AND [Source].[System.IterationPath] = @CurrentIteration ${shift >= 0 ? ` + ${shift}` : ` - ${shift}`} ` : ``}
                 AND [Source].[System.State] <> ''
+                ${tags?.map((tag) => `AND [Source].[System.Tags] CONTAINS '${tag}'`).join(' ') ?? ''}
+                AND [Source].[System.WorkItemType] ${workItems && workItems.length > 0 ? `in (${workItems})` : `<> ''`}
             )
             AND ([System.Links.LinkType] = 'System.LinkTypes.Hierarchy-Forward')
             AND (
                 [Target].[System.TeamProject] = @project
-                AND [Target].[System.WorkItemType] ${workItems && workItems.length > 0 ? `IN (${workItems})` : `<> ''`}
-            )
-        MODE (Recursive)
-        `;
-  },
-  taskHierarchyByTeamIteration(areas: string[], projectName: string, teamName: string, workItems?: string[]) {
-    return `
-        SELECT
-            [System.Id],
-            [System.Title],
-            [System.State],
-            [Source].[System.IterationPath],
-            [Target].[System.WorkItemType]
-        FROM workitemLinks
-        WHERE
-            (
-                [Source].[System.AreaPath] IN (${areas})
-                AND [Source].[System.TeamProject] = @project
-                AND [Source].[System.WorkItemType] ${workItems && workItems.length > 0 ? `IN (${workItems})` : `<> ''`}
-                AND [Source].[System.State] <> ''
-            )
-            AND ([System.Links.LinkType] = 'System.LinkTypes.Hierarchy-Forward')
-            AND (
-                [Target].[System.IterationPath] = @currentIteration('[${projectName}]\\${teamName}')
-                AND [Target].[System.TeamProject] = @project
                 AND [Target].[System.WorkItemType] ${workItems && workItems.length > 0 ? `in (${workItems})` : `<> ''`}
             )
         MODE (Recursive)
         `;
+  },
+  currentIterationName() {
+    return `
+        SELECT
+          [System.Id],
+          [System.Title],
+          [System.State],
+          [System.IterationPath]
+        FROM WorkItems
+        WHERE
+            (
+              [System.TeamProject] = @project
+              AND [System.IterationPath] = @CurrentIteration
+            )
+    `;
   },
   get iterationDefinition() {
     return `
@@ -78,9 +72,21 @@ const queries = {
   }
 };
 
-export const fetchIterationDefinition = async (team: WebApiTeam): Promise<{ id: string, start: Date, end: Date }> => {
+export const fetchIterationDefinition = async (team: WebApiTeam): Promise<{ teamId: string, currentIteration?: string, iterations: TeamSettingsIteration[], start: Date, end: Date }> => {
   const { projectName, projectId, id, name } = team;
-
+  
+  const iterationName = await clients.workItemsClient.queryByWiql(
+    {
+      query: queries.currentIterationName()
+    },
+    projectId,
+    id
+  ).then(async value => {
+    const response = await clients.workItemsClient.getWorkItem(value?.workItems?.[0].id, projectName, ["System.IterationPath"]);
+    console.log("response ", response);
+    const path: string = response?.fields?.["System.IterationPath"];
+    return path?.substring(path.lastIndexOf("\\") + 1);
+  });
   return clients.workClient.getTeamIterations({
     project: projectName,
     projectId,
@@ -100,14 +106,16 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<{ id: 
     );
 
     return {
-      id,
+      teamId: id,
+      iterations,
+      currentIteration: iterationName,
       start: iterations[0]?.attributes?.startDate || start,
       end: iterations[iterations.length - 1]?.attributes?.finishDate || end
     }
   });
 }
 
-export const fetchTeamWorkItems = async (team: WebApiTeam, workItems?: string[]): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
+export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterface): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
   const { projectName, projectId, id, name } = team;
 
   return clients.workClient.getTeamFieldValues({
@@ -117,11 +125,11 @@ export const fetchTeamWorkItems = async (team: WebApiTeam, workItems?: string[])
     teamId: id,
   }).then(({ values }) => {
     const areas = values.map(({ value }) => `'${value}'`);
-    const _types = workItems?.map( value => `'${value}'`);
+    const _types = filter?.workTypes?.map(value => `'${value}'`);
     return clients.workItemsClient
       .queryByWiql(
         {
-          query: queries.taskHierarchy(areas, _types),
+          query: queries.taskHierarchy(areas, _types, filter?.tags, filter?.shift)
         },
         projectId,
         id

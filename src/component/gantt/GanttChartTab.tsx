@@ -1,3 +1,5 @@
+import "./gantt.scss";
+
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import * as SDK from 'azure-devops-extension-sdk';
@@ -21,14 +23,17 @@ import {
 } from 'azure-devops-extension-api/WorkItemTracking';
 import { ProgressInterface, getProgressMap } from "../../service/ProgressCalculationService";
 import { ViewSwitcher } from './ViewSwitcher';
-import { FilterHub, MultiFilterHub } from '../FilterHub';
+import { FilterHub, IterationFilterHub, MultiFilterHub } from '../FilterHub';
 import { GanttHeader, ganttTableBuilder, ganttTooltipContentBuilder } from './table';
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 import { fetchTeamWorkItems, fetchIterationDefinition } from '../../service/WiqlService';
+import { TeamSettingsIteration } from 'azure-devops-extension-api/Work';
 
-interface FilterInterface {
+export interface FilterInterface {
 	team?: WebApiTeam | undefined;
-	workTypes?: string[]
+	workTypes?: string[],
+	tags?: string[],
+	shift?: number;
 }
 
 const VSTS_SCHEDULING_START_DATE = 'Microsoft.VSTS.Scheduling.StartDate';
@@ -55,9 +60,11 @@ export const GanttChartTab = () => {
 	const [project, setProject] = useState<IProjectInfo>();
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [view, setView] = useState<ViewMode>(ViewMode.Day);
+	const [team, setTeam] = useState<WebApiTeam>(allTeam);
 	const [progressMap, setProgressMap] = useState<Map<string, ProgressInterface>>(new Map<string, ProgressInterface>());
 	const [isChecked, setIsChecked] = useState(true);
 	const [chartLoad, setChartLoad] = useState(true);
+	const [teamSelected, setTeamSelected] = useState(false);
 	const [filterContext, setFilterContext] = useState({} as FilterInterface);
 
 
@@ -105,8 +112,8 @@ export const GanttChartTab = () => {
 		const workItemsClient = getClient(WorkItemTrackingRestClient);
 		const teams = await fetchTeams(project, filter);
 
-		const teamWorkItems = await Promise.all(teams.map(it => fetchTeamWorkItems(it, filter?.workTypes!)));
-		const teamIterations = new Map((await Promise.all(teams.map(fetchIterationDefinition))).map(({ id, ...rest }) => [id, rest]));
+		const teamWorkItems = await Promise.all(teams.map(it => fetchTeamWorkItems(it, filter)));
+		const teamIterations = new Map((await Promise.all(teams.map(fetchIterationDefinition))).map(({ teamId, ...rest }) => [teamId, rest]));
 		const projectItems = await Promise.all(teamWorkItems.map(({ id, ids, connections }) => ids.length > 0 ? workItemsClient.getWorkItemsBatch({
 			$expand: WorkItemExpand.All,
 			asOf: new Date(),
@@ -241,7 +248,9 @@ export const GanttChartTab = () => {
 
 
 	const onTeamChange = (project: IProjectInfo, team: WebApiTeam): void => {
-		const _teamFilter = team.id !== 'all' ? { team } : { team: undefined };
+		const _teamFilter = team.id !== 'all' ? { team } : { team: undefined, shift: undefined };
+		setTeam(team);
+		setTeamSelected(team.id !== 'all');
 		onFilterContextChange(project, { ...filterContext, ..._teamFilter });
 	};
 
@@ -250,10 +259,21 @@ export const GanttChartTab = () => {
 		onFilterContextChange(project, { ...filterContext, ..._workTypesFilter });
 	};
 
+	const onIterationChange = (project: IProjectInfo, iteration: TeamSettingsIteration) => {
+		onFilterContextChange(project, { ...filterContext, shift: Number(iteration?.path) });
+	};
+
 	return (
 		<div>
 			<div className="ViewContainer">
 				<div className="flex-row">
+					{teamSelected && (
+						<IterationFilterHub
+							project={project!}
+							team={team}
+							onChange={onIterationChange}
+						/>
+					)}
 					<FilterHub
 						project={project!}
 						item={allTeam}
