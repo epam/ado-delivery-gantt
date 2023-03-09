@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Dropdown, DropdownExpandableButton } from "azure-devops-ui/Dropdown";
 import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observable";

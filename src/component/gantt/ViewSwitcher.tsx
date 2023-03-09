@@ -19,8 +19,10 @@ const scaleOptions: Array<IListBoxItem<ViewMode>> = [
 export interface ViewSwitcherProps {
     isChecked: boolean;
     viewMode: ViewMode;
+    isChartLoad: boolean;
     onViewListChange: (isChecked: boolean) => void;
     onViewModeChange: (viewMode: ViewMode) => void;
+    onCurrentPosition: () => void;
 };
 
 const selection = new DropdownSelection();
@@ -28,8 +30,10 @@ const selection = new DropdownSelection();
 export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
     onViewModeChange,
     onViewListChange,
+    onCurrentPosition,
     isChecked,
-    viewMode
+    viewMode,
+    isChartLoad
 }) => {
 
     const selectedItem = new ObservableValue<ViewMode>(viewMode);
@@ -53,7 +57,6 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
         onViewModeChange(scaleOptions[newIndex].data!);
     };
 
-
     return (
         <div className="flex-row">
             <Observer selectedItem={selectedItem}>
@@ -68,7 +71,6 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
                             minCalloutWidth={140}
                             renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
                             onSelect={onSelect} />
-                        <div className="flex-wrap">
                             <Button
                                 ariaLabel="Scale Up"
                                 iconProps={{ iconName: "Add" }}
@@ -81,8 +83,14 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
                                 disabled={selectedItem === scaleOptions[scaleOptions.length - 1].data}
                                 onClick={() => scaleDown(selectedItem)}
                             />
-                        </div>
+                            <Button
+                                ariaLabel="Today"
+                                text="Today"
+                                disabled={isChartLoad}
+					            onClick={onCurrentPosition} 
+					        />
                     </div>
+                        
                 )}
             </Observer>
 

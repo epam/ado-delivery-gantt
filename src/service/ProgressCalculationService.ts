@@ -34,7 +34,7 @@ export function getProgressMap(teams: WebApiTeam[], map: Map<String, WorkItem[]>
     return progressMap
 }
 
-enum ItemStatus {
+export enum ItemStatus {
     DONE = "Done",
     NOT_STARTED = "Not Started",
     ON_TRACK = "On Track",

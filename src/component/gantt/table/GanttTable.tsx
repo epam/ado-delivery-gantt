@@ -1,8 +1,9 @@
 import * as React from "react";
 import { useMemo } from "react";
 import { Task } from 'gantt-task-react';
-import { ProgressInterface } from "service/ProgressCalculationService";
+import { ItemStatus, ProgressInterface } from "../../../service/ProgressCalculationService";
 import { toLocaleDateStringFactory } from "./common";
+import { Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 
 type GanttTableProps = {
   rowHeight: number;
@@ -38,6 +39,30 @@ const ganttTableBuilder: GanttTableBuilder = {
         [locale]
       );
       const _rowWidth = parseInt(rowWidth);
+
+      const StatusCircle = ({status}: {status: ItemStatus}) => {
+        const statusPropsArray = [
+          { statusValue: ItemStatus.DONE, statusProps: { ...Statuses.Success } },
+          { statusValue: ItemStatus.NOT_STARTED, statusProps: { ...Statuses.Queued } },
+          { statusValue: ItemStatus.ON_TRACK, statusProps: { ...Statuses.Running } },
+          { statusValue: ItemStatus.AT_RISK, statusProps: { ...Statuses.Warning } },
+          { statusValue: ItemStatus.OFF_TRACK, statusProps: { ...Statuses.Failed } },
+        ];
+
+        const { statusProps } = statusPropsArray.find(
+          (statusObj) => statusObj.statusValue === status
+        ) || { statusProps: { ...Statuses.Waiting } };
+
+        return (
+          <Status
+            {...statusProps}
+            size={StatusSize.s}
+            className="status flex-self-center"
+          />
+        );
+      }
+
+      const getStatusCircle = (progress: ProgressInterface) => progress.status ? <StatusCircle status={progress.status.name} /> : "";
 
       return map && (
         <div
@@ -95,12 +120,16 @@ const ganttTableBuilder: GanttTableBuilder = {
                 <div
                   className={"taskListCell"}
                   style={{
-                    minWidth: isNaN(_rowWidth) ? rowWidth : 0.75 * _rowWidth,
-                    maxWidth: isNaN(_rowWidth) ? rowWidth : 0.75 * _rowWidth,
+                    minWidth: isNaN(_rowWidth) ? rowWidth : 1 * _rowWidth,
+                    maxWidth: isNaN(_rowWidth) ? rowWidth : 1 * _rowWidth,
                     textAlign: "center"
                   }}
                 >
-                  &nbsp;{status ? status.status?.name || "" : ""}
+                  &nbsp;
+                  {status ? getStatusCircle(status) : ""}
+                  &nbsp;
+                  {status ? status.status?.name || "" : ""}
+                  &nbsp;
                 </div>
                 <div
                   className={"ganttTable_HeaderSeparator"}
@@ -131,6 +160,7 @@ const ganttTableBuilder: GanttTableBuilder = {
                   style={{
                     minWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
                     maxWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
+                    textAlign: "center"
                   }}
                 >
                   &nbsp;{toLocaleDateString(t.start)} - {toLocaleDateString(t.end)}

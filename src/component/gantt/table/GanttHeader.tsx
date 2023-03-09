@@ -41,7 +41,7 @@ export const GanttHeader: React.FC<{
         <div
           className={"ganttTable_HeaderItem"}
           style={{
-            minWidth: isNaN(_rowWidth) ? rowWidth : 0.75 * _rowWidth,
+            minWidth: isNaN(_rowWidth) ? rowWidth : 1 * _rowWidth,
           }}
         >
           &nbsp;Status

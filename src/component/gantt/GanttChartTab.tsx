@@ -1,7 +1,7 @@
 import "./gantt.scss";
 
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import * as SDK from 'azure-devops-extension-sdk';
 
 import { Gantt, Task, ViewMode } from 'gantt-task-react';
@@ -46,6 +46,7 @@ const FEATURE = 'Feature';
 const USER_STORY = 'User Story';
 const TASK_ITEM = 'Task';
 const TASK = 'task';
+const DEFAULT_CURRENT_PERIOD_COLOR = '#F3EFEF'
 
 const columnWidthByViewMode: { [key: string]: number } = {
 	[ViewMode.QuarterDay]: 30,
@@ -66,6 +67,27 @@ export const GanttChartTab = () => {
 	const [chartLoad, setChartLoad] = useState(true);
 	const [teamSelected, setTeamSelected] = useState(false);
 	const [filterContext, setFilterContext] = useState({} as FilterInterface);
+	const [currentPeriodColor] = useState(DEFAULT_CURRENT_PERIOD_COLOR);
+
+	const wrapperRef = useRef<HTMLDivElement>(null);
+
+	const onCurrentPosition = useCallback(() => {
+		if (wrapperRef.current) {
+			const currentPosition = wrapperRef.current.querySelector(".today > rect");
+			const horizontalView = currentPosition?.closest("div[dir]");
+			const horizontalScroll = currentPosition?.closest("div[tabindex]")?.nextSibling as HTMLElement;
+
+			const current_x = +(currentPosition?.getAttribute("x") || 0);
+			const current_width = +(currentPosition?.getAttribute("width") || 0);
+			const horizontal_scroll_width = Math.max(horizontalScroll?.clientWidth || 0, horizontalScroll?.offsetWidth || 0);
+
+			const offset = current_x - Math.ceil((horizontal_scroll_width - current_width) / 2);
+
+			horizontalView?.scrollTo(offset, 0);
+			horizontalScroll?.scrollTo(offset, 0);
+			horizontalScroll?.dispatchEvent(new CustomEvent("scroll"));
+		}
+	}, [wrapperRef]);
 
 
 	useEffect(() => {
@@ -284,12 +306,14 @@ export const GanttChartTab = () => {
 					<ViewSwitcher
 						onViewModeChange={setView}
 						onViewListChange={setIsChecked}
+						onCurrentPosition={onCurrentPosition}
+						isChartLoad={chartLoad}
 						isChecked={isChecked}
 						viewMode={view}
 					/>
 				</div>
 			</div>
-			<div className="flex-column Wrapper" style={{ marginTop: 10 }}>
+			<div className="flex-column Wrapper" style={{ marginTop: 10 }} ref={wrapperRef}>
 				{!chartLoad ? (
 					<Gantt
 						TaskListHeader={GanttHeader}
@@ -301,6 +325,8 @@ export const GanttChartTab = () => {
 						listCellWidth={isChecked ? '100px' : ''}
 						onExpanderClick={handleExpanderClick}
 						onSelect={handleSelectClick}
+						todayColor={currentPeriodColor}
+						barFill={50}
 					/>
 				) : (
 					<div style={{ marginTop: 50 }}>
