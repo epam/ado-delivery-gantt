@@ -74,7 +74,6 @@ const queries = {
 
 export const fetchIterationDefinition = async (team: WebApiTeam): Promise<{ teamId: string, currentIteration?: string, iterations: TeamSettingsIteration[], start: Date, end: Date }> => {
   const { projectName, projectId, id, name } = team;
-  
   const iterationName = await clients.workItemsClient.queryByWiql(
     {
       query: queries.currentIterationName()
@@ -83,7 +82,6 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<{ team
     id
   ).then(async value => {
     const response = await clients.workItemsClient.getWorkItem(value?.workItems?.[0].id, projectName, ["System.IterationPath"]);
-    console.log("response ", response);
     const path: string = response?.fields?.["System.IterationPath"];
     return path?.substring(path.lastIndexOf("\\") + 1);
   });

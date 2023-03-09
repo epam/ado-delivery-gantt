@@ -59,7 +59,6 @@ export const MultiFilterHub: Filter = ({
     }, [project]);
 
     return (
-
         <Observer selection={multiSelection}>
             {() => (
                 <Dropdown
@@ -88,50 +87,60 @@ export const MultiFilterHub: Filter = ({
     );
 };
 
-const selection = new DropdownSelection();
-const items = new ObservableArray<IListBoxItem<any>>();
+const teamMultiSelection = new DropdownMultiSelection();
+const teamItemTypes = new ObservableArray<IListBoxItem<WebApiTeam>>();
+const teamsSelected = new Set<WebApiTeam>();
 
-export const FilterHub: Filter = ({
+export const TeamFilterHub: Filter = ({
     project,
     item,
     itemsFn,
     onChange,
 }) => {
 
-    const selectedItem = new ObservableValue<any>(item);
-
     useEffect(() => {
-        (async () => {
+        const loadTeamsTypeOptions = async () => {
             if (project) {
                 const arr = await itemsFn!(project);
-                const itemsOptions: Array<IListBoxItem<any>> = arr.map(it => ({ id: it.id, text: it.name, data: it } as IListBoxItem<any>));
-                items.push(...itemsOptions);
+                const itemsOptions: Array<IListBoxItem<WebApiTeam>> = arr.map(it => ({ id: it.id, text: it.name, data: it } as IListBoxItem<WebApiTeam>));
+                return itemsOptions;
             }
-        })();
+            return [];
+        };
+
+        loadTeamsTypeOptions()
+            .then(teamOptions => {
+                teamItemTypes.push(...teamOptions);
+            })
+            .catch(console.error);
     }, [project]);
 
-
-    const onSelect = (event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<WebApiTeam>) => {
-        const _item = items.value.find(e => e.id === item.data?.id);
-        console.log("onSelect---", _item?.data!);
-        onChange!(project, _item?.data!);
-    };
-
     return (
-        <Observer selectedItem={selectedItem}>
+        <Observer selection={teamMultiSelection}>
             {() => (
                 <Dropdown
-                    ariaLabel={"Button Dropdown " + selectedItem.value.name + " selected"}
                     className="scale-dropdown"
-                    placeholder={selectedItem.value.name}
-                    items={items}
-                    selection={selection}
+                    actions={[
+                        {
+                            className: "bolt-dropdown-action-right-button",
+                            disabled: teamMultiSelection.selectedCount === 0,
+                            iconProps: { iconName: "Clear" },
+                            text: "Clear",
+                            onClick: () => {
+                                teamMultiSelection.clear();
+                                teamsSelected.clear();
+                            }
+                        }
+                    ]}
+                    items={teamItemTypes}
+                    minCalloutWidth={300}
+                    placeholder="Teams"
                     showFilterBox={true}
-                    minCalloutWidth={140}
+                    onCollapse={() => { onChange!(project, [...teamsSelected]); }}
                     renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
-                    onSelect={onSelect} />
-
-            )}
+                    onSelect={(_, team) => { !teamsSelected.has(team.data!) && teamsSelected.add(team.data!) || teamsSelected.delete(team.data!); }}
+                    selection={teamMultiSelection}
+                />)}
         </Observer>
     );
 };
