@@ -72,7 +72,9 @@ const queries = {
   }
 };
 
-export const fetchIterationDefinition = async (team: WebApiTeam): Promise<{ teamId: string, currentIteration?: string, iterations: TeamSettingsIteration[], start: Date, end: Date }> => {
+export type TeamIteration = { teamId: string, currentIteration?: string, iterations: TeamSettingsIteration[], start: Date, end: Date };
+
+export const fetchIterationDefinition = async (team: WebApiTeam): Promise<TeamIteration> => {
   const { projectName, projectId, id, name } = team;
   const iterationName = await clients.workItemsClient.queryByWiql(
     {

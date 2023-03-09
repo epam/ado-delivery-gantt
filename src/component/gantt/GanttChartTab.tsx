@@ -21,12 +21,15 @@ import {
 	WorkItemTrackingServiceIds,
 	WorkItemLink,
 } from 'azure-devops-extension-api/WorkItemTracking';
-import { ProgressInterface, getProgressMap } from "../../service/ProgressCalculationService";
+import {
+	WorkItemTrackingProcessRestClient,
+} from 'azure-devops-extension-api/WorkItemTrackingProcess';
+import { ProgressInterface, TeamDictionaryValue, getProgressMap } from "../../service/ProgressCalculationService";
 import { ViewSwitcher } from './ViewSwitcher';
 import { TeamFilterHub, IterationFilterHub, MultiFilterHub } from '../FilterHub';
 import { GanttHeader, ganttTableBuilder, ganttTooltipContentBuilder } from './table';
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
-import { fetchTeamWorkItems, fetchIterationDefinition } from '../../service/WiqlService';
+import { fetchTeamWorkItems, fetchIterationDefinition, TeamIteration } from '../../service/WiqlService';
 import { TeamSettingsIteration } from 'azure-devops-extension-api/Work';
 
 export interface FilterInterface {
@@ -34,6 +37,7 @@ export interface FilterInterface {
 	workTypes?: string[],
 	tags?: string[],
 	shift?: number;
+	states: Set<string>;
 }
 
 const VSTS_SCHEDULING_START_DATE = 'Microsoft.VSTS.Scheduling.StartDate';
@@ -47,6 +51,7 @@ const USER_STORY = 'User Story';
 const TASK_ITEM = 'Task';
 const TASK = 'task';
 const DEFAULT_CURRENT_PERIOD_COLOR = '#F3EFEF'
+const PROJECT_PROCESS_TEMPLATE_ID = "System.ProcessTemplateType";
 
 const columnWidthByViewMode: { [key: string]: number } = {
 	[ViewMode.QuarterDay]: 30,
@@ -56,18 +61,35 @@ const columnWidthByViewMode: { [key: string]: number } = {
 	[ViewMode.Year]: 400,
 };
 
+type Context = { project: IProjectInfo, rootCategory: string };
+
+type TeamItems = ({
+	id: string;
+	items: WorkItem[];
+	connections: {
+		[key: string]: WorkItemLink[];
+	};
+} | {
+	id: string;
+	items: never[];
+	connections: {};
+});
+
 export const GanttChartTab = () => {
 	const allTeam = { id: "all", name: "All" } as WebApiTeam;
-	const [project, setProject] = useState<IProjectInfo>();
+	const [context, setContext] = useState<Context>();
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [view, setView] = useState<ViewMode>(ViewMode.Day);
 	const [teams, setTeams] = useState<WebApiTeam[]>([allTeam]);
 	const [progressMap, setProgressMap] = useState<Map<string, ProgressInterface>>(new Map<string, ProgressInterface>());
 	const [isChecked, setIsChecked] = useState(true);
+	const [isCheckedViewLinks, setIsCheckedViewLinks] = useState(true);
 	const [chartLoad, setChartLoad] = useState(true);
 	const [teamSelected, setTeamSelected] = useState(false);
-	const [filterContext, setFilterContext] = useState({} as FilterInterface);
+	const [filterContext, setFilterContext] = useState({ states: new Set() } as FilterInterface);
 	const [currentPeriodColor] = useState(DEFAULT_CURRENT_PERIOD_COLOR);
+
+	const { project, rootCategory = '' } = context || {};
 
 	const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -98,11 +120,48 @@ export const GanttChartTab = () => {
 			);
 			const project = await projectService.getProject();
 			if (project) {
-				setProject(project);
-				await reloadTasks(project);
+
+				const coreClient = getClient(CoreRestClient);
+				const projectProperties = await coreClient.getProjectProperties(project.id, [PROJECT_PROCESS_TEMPLATE_ID]);
+				const [{ value: processId }] = projectProperties.filter(({ name = "" }) => name == PROJECT_PROCESS_TEMPLATE_ID);
+				const workItemsProcessClient = getClient(WorkItemTrackingProcessRestClient);
+				const process = await workItemsProcessClient.getProcessBehaviors(processId);
+
+				const [{ name: rootCategory }] = process.sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1);
+				setContext({ project, rootCategory });
+
+				const teams = await fetchTeams(project);
+				const teamDictionary = await collectTeamDictionary({ project, rootCategory }, teams);
+				const teamIterations = await Promise.all(teams.map(fetchIterationDefinition));
+
+				const progressMap = buildProgressMap(teams, teamDictionary);
+				setProgressMap(progressMap);
+
+				loadTasks(rootCategory, progressMap, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
 			}
 		})();
 	}, []);
+
+	const reloadTasks = async (filterContext: FilterInterface) => {
+		console.log("*****reloadTasks****")
+		const { states, shift } = filterContext;
+		const teams = await fetchTeams(project!, filterContext);
+		const teamDictionary = await collectTeamDictionary(context!, teams, filterContext);
+		const teamIterations = await Promise.all(teams.map(fetchIterationDefinition));
+
+		const _progressMap = states.size === 0 && !shift ? buildProgressMap(teams, teamDictionary) : progressMap;
+		setProgressMap(_progressMap);
+
+		loadTasks(rootCategory, progressMap, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
+	}
+
+	const onViewLinksChange = (value: boolean) => {
+		setIsCheckedViewLinks(value);
+		if (wrapperRef.current) {
+			const arrows = wrapperRef.current.querySelector(".arrows")
+			value? arrows?.removeAttribute("display") : arrows?.setAttribute("display", "none");
+		}
+	};
 
 	const handleExpanderClick = (task: Task): void => {
 		setTasks(tasks.map((t) => (t.id === task.id ? task : t)));
@@ -129,47 +188,44 @@ export const GanttChartTab = () => {
 			.then(teams => teams.filter(({id}) => filter?.teams?.some(it => it.id === id) ?? true));
 	}
 
-	const reloadTasks = async (project: IProjectInfo, filter?: FilterInterface) => {
-		const ganttTasks: Task[] = [];
+	const buildProgressMap = (teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>) => {
+		return getProgressMap(teams, teamDictionary);
+	}
+
+	const collectTeamDictionary = async (context: Context, teams: WebApiTeam[],  filter?: FilterInterface): Promise<Map<string, TeamDictionaryValue>> => {
+
+		const { project, rootCategory } = context;
 
 		const workItemsClient = getClient(WorkItemTrackingRestClient);
-		const teams = await fetchTeams(project, filter);
-		console.log("teams", teams);
+
+		console.log(" rootCategory ", rootCategory);
+
 		const teamWorkItems = await Promise.all(teams.map(it => fetchTeamWorkItems(it, filter)));
-		const teamIterations = new Map((await Promise.all(teams.map(fetchIterationDefinition))).map(({ teamId, ...rest }) => [teamId, rest]));
-		const projectItems = await Promise.all(teamWorkItems.map(({ id, ids, connections }) => ids.length > 0 ? workItemsClient.getWorkItemsBatch({
+
+		const projectItems: Map<string, TeamDictionaryValue>[] = await Promise.all(teamWorkItems.map(({ id, ids, connections }) => ids.length > 0 ? workItemsClient.getWorkItemsBatch({
 			$expand: WorkItemExpand.All,
 			asOf: new Date(),
 			errorPolicy: WorkItemErrorPolicy.Omit,
 			fields: [],
 			ids
-		}).then((items) => ({ id, items: Array.isArray(items) ? items : [], connections }))
-			: Promise.resolve({ id, items: [], connections: {} })));
+		}).then((items = []) => new Map<string, TeamDictionaryValue>([[id, { connections, map: new Map(items.map(item => [`${item.id}`, item])) }]]))
+			: Promise.resolve(new Map<string, TeamDictionaryValue>([[id, { connections: {}, map: new Map() }]]))));
 
-		const map = projectItems.reduce((acc, { id, items }) => {
-			acc.set(id + EPIC, items.filter((item) => item.fields[WORK_ITEM_TYPE] === EPIC));
-			acc.set(id + USER_STORY, items.filter((item) => item.fields[WORK_ITEM_TYPE] === USER_STORY));
-			acc.set(id + FEATURE, items.filter((item) => item.fields[WORK_ITEM_TYPE] === FEATURE));
-			acc.set(id + TASK_ITEM, items.filter((item) => item.fields[WORK_ITEM_TYPE] === TASK_ITEM));
-			return acc;
-		}, new Map<String, WorkItem[]>());
+		return projectItems.reduce((acc, next) => new Map([...acc, ...next]), new Map());
+	};
 
-		const progressMap = getProgressMap(teams, map);
-		type TeamDictionaryValue = { connections: { [key: string]: WorkItemLink[]; }, map: Map<string, WorkItem> };
-
-		const teamDictionary = new Map<string, TeamDictionaryValue>(projectItems.map(({ id, items, connections }) => [id, { connections, map: new Map(items.map(item => [`${item.id}`, item])) }]));
-
+	const loadTasks = (rootCategory: string,  progressMap: Map<string, ProgressInterface>, teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, teamIterations: Map<string, TeamIteration>) => {
+		const ganttTasks: Task[] = [];
+		console.log(" loadTasks teamDictionary", teamDictionary);
 		teams.forEach(team => {
 			const teamId = team.id;
 			const iteration = teamIterations.get(teamId);
 			const { start, end } = iteration as { start: Date, end: Date };
 
 			ganttTasks.push({
-				//displayOrder: latestOrder,
 				start,
 				end,
 				name: team.name,
-				// project: team.id,
 				id: teamId,
 				styles: { backgroundColor: "white", backgroundSelectedColor: "white", progressColor: "white", progressSelectedColor: "white" },
 				progress: 0,
@@ -179,8 +235,21 @@ export const GanttChartTab = () => {
 
 			const { connections, map } = teamDictionary.get(teamId) as TeamDictionaryValue;
 
+			const rootCategoryChildItems = Object.keys(connections)
+				.filter(itemId => {
+					const itemType = map.get(itemId)?.fields[WORK_ITEM_TYPE];
+					return itemType === rootCategory || rootCategory.startsWith(itemType);
+				})
+				.map(itemId => connections[itemId])
+				.reduce((acc, next) => new Set([...acc, ...next.map(({ target: { id } }) => id)]), new Set());
+
+			console.log(" rootCategoryChildItems ", rootCategoryChildItems);
+
 			Object.keys(connections)
-				.filter(itemId => map.get(itemId)?.fields[WORK_ITEM_TYPE] === EPIC)
+				.filter(itemId => {
+					const itemType = map.get(itemId)?.fields[WORK_ITEM_TYPE];
+					return itemType === rootCategory || rootCategory.startsWith(itemType);
+				})
 				.map(itemId => connections[itemId])
 				.reduce((acc, next) => [...acc, ...next], [])
 				.forEach(item => {
@@ -190,7 +259,6 @@ export const GanttChartTab = () => {
 					const hasChild = workItem?.relations?.some(({ attributes = {} }) => attributes.name === 'Child');
 					const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}`
 					ganttTasks.push({
-						//displayOrder: latestOrder,
 						start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
 						end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
 						name: workItem.fields[ITEM_TITLE],
@@ -205,7 +273,6 @@ export const GanttChartTab = () => {
 						type: hasChild && PROJECT || TASK,
 						project: parentId,
 						hideChildren: true,
-						// isDisabled:
 						dependencies: [parentId]
 					});
 				});
@@ -213,7 +280,6 @@ export const GanttChartTab = () => {
 			const othersId = `${teamId}_others`;
 
 			ganttTasks.push({
-				//displayOrder: latestOrder,
 				start,
 				end,
 				name: 'Others',
@@ -226,9 +292,9 @@ export const GanttChartTab = () => {
 			});
 
 			Object.keys(connections)
-				.filter(itemId => map.get(itemId)?.fields[WORK_ITEM_TYPE] !== EPIC)
 				.map(itemId => connections[itemId])
 				.reduce((acc, next) => [...acc, ...next], [])
+				.filter(({ target: { id } }) => !rootCategoryChildItems.has(id))
 				.forEach(item => {
 					const { target: { id } } = item;
 					const workItem = map.get(`${id}`) as WorkItem;
@@ -237,7 +303,6 @@ export const GanttChartTab = () => {
 					const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}_others`
 
 					ganttTasks.push({
-						//displayOrder: latestOrder,
 						start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
 						end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
 						name: workItem.fields[ITEM_TITLE],
@@ -252,37 +317,38 @@ export const GanttChartTab = () => {
 						type: hasChild && PROJECT || TASK,
 						project: parentId,
 						hideChildren: true,
-						// isDisabled:
-						dependencies: [parentId]
+						dependencies: [parentId],
 					});
 				});
 		});
 
 		setTasks(ganttTasks);
-		setProgressMap(progressMap);
 		setChartLoad(false);
 	};
 
 	const onFilterContextChange = (project: IProjectInfo, context: FilterInterface): void => {
 		setChartLoad(true);
-		reloadTasks(project, context)
+		reloadTasks(context)
 			.then(() => setFilterContext(context));
 	};
 
-
-	const onTeamChange = (project: IProjectInfo, teams: WebApiTeam[]): void => {
+	const onTeamChange = (project: IProjectInfo, teams: WebApiTeam[], isDefaultState: boolean): void => {
 		const _teamFilter = teams && teams.length > 0 ? { teams: teams } : { teams: undefined, shift: undefined };
+		const { states } = filterContext;
+		!isDefaultState && states.add("team") || states.delete("team");
 		setTeams(teams);
 		setTeamSelected(teams && teams.length === 1);
-		onFilterContextChange(project, { ...filterContext, ..._teamFilter });
+		onFilterContextChange(project, { ...filterContext, ..._teamFilter, states });
 	};
 
-	const onWorkTypes = (project: IProjectInfo, items: string[]): void => {
+	const onWorkTypes = (project: IProjectInfo, items: string[], isDefaultState: boolean): void => {
 		const _workTypesFilter = { workTypes: items };
-		onFilterContextChange(project, { ...filterContext, ..._workTypesFilter });
+		const { states } = filterContext;
+		!isDefaultState && states.add("work_type") || states.delete("work_type");
+		onFilterContextChange(project, { ...filterContext, ..._workTypesFilter, states });
 	};
 
-	const onIterationChange = (project: IProjectInfo, iteration: TeamSettingsIteration) => {
+	const onIterationChange = (project: IProjectInfo, iteration: TeamSettingsIteration, isDefaultState: boolean) => {
 		onFilterContextChange(project, { ...filterContext, shift: Number(iteration?.path) });
 	};
 
@@ -307,9 +373,11 @@ export const GanttChartTab = () => {
 					<ViewSwitcher
 						onViewModeChange={setView}
 						onViewListChange={setIsChecked}
+						onViewLinksChange={onViewLinksChange}
 						onCurrentPosition={onCurrentPosition}
 						isChartLoad={chartLoad}
 						isChecked={isChecked}
+						isCheckedViewLinks={isCheckedViewLinks}
 						viewMode={view}
 					/>
 				</div>
@@ -328,6 +396,7 @@ export const GanttChartTab = () => {
 						onSelect={handleSelectClick}
 						todayColor={currentPeriodColor}
 						barFill={50}
+						arrowColor={isCheckedViewLinks ? 'black': ''}
 					/>
 				) : (
 					<div style={{ marginTop: 50 }}>

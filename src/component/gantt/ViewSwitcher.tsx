@@ -18,9 +18,11 @@ const scaleOptions: Array<IListBoxItem<ViewMode>> = [
 
 export interface ViewSwitcherProps {
     isChecked: boolean;
+    isCheckedViewLinks: boolean,
     viewMode: ViewMode;
     isChartLoad: boolean;
     onViewListChange: (isChecked: boolean) => void;
+    onViewLinksChange: (isCheckedLinksView: boolean) => void;
     onViewModeChange: (viewMode: ViewMode) => void;
     onCurrentPosition: () => void;
 };
@@ -30,8 +32,10 @@ const selection = new DropdownSelection();
 export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
     onViewModeChange,
     onViewListChange,
+    onViewLinksChange,
     onCurrentPosition,
     isChecked,
+    isCheckedViewLinks,
     viewMode,
     isChartLoad
 }) => {
@@ -98,6 +102,11 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
                 onChange={() => onViewListChange(!isChecked)}
                 checked={isChecked}
                 label="Show Tree"
+            />
+            <Checkbox
+                onChange={() => onViewLinksChange(!isCheckedViewLinks)}
+                checked={isCheckedViewLinks}
+                label="Show Links"
             />
         </div>
     );

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Dropdown, DropdownExpandableButton } from "azure-devops-ui/Dropdown";
 import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observable";
@@ -21,7 +21,7 @@ export interface FilterProps<T> {
     team?: WebApiTeam,
     item?: T,
     itemsFn?: (project: IProjectInfo) => Promise<T[]>;
-    onChange: (project: IProjectInfo, item: T | T[]) => void;
+    onChange: (project: IProjectInfo, item: T | T[], isDefaultState: boolean) => void;
 };
 type Filter<T = any> = React.FC<FilterProps<T>>
 
@@ -34,22 +34,27 @@ export const MultiFilterHub: Filter = ({
     onChange,
 }) => {
 
+    const [selectedCount, setSelectedCount] = useState<number>(0);
+
     useEffect(() => {
         const loadWorkItemTypes = async (): Promise<void> => {
             if (project) {
-                const client = getClient(WorkItemTrackingRestClient);
-                const _types = await client.getWorkItemTypeCategories(project.name);
-                const _hidden = _types.filter(t => t.referenceName == "Microsoft.HiddenCategory")
+                const client = 
+                getClient(WorkItemTrackingRestClient);
+                const _types = await client.getWorkItemTypeCategories(project.name); 
+                const _types_1 = await client.getWorkItemTypes(project.name); 
+                const _hidden = _types
+                    .filter(t => t.referenceName == "Microsoft.HiddenCategory")
                     .reduce((acc, { workItemTypes = [] }) => [...acc, ...workItemTypes], [] as WorkItemTypeReference[])
                     .map(t => t.name);
-                const _typesNames = _types
-                    .filter(t => t.referenceName != "Microsoft.HiddenCategory")
-                    .map(t => t.defaultWorkItemType.name)
-                    .filter(t => _hidden.indexOf(t) < 0);
+
+                const _typesNames = _types_1.map(t => t.name).filter(t => _hidden.indexOf(t) < 0);
+
                 workItemTypes.push(..._typesNames
                     .sort(localeIgnoreCaseComparer)
                     .map(item => ({ id: item, data: item, text: item })));
 
+                setSelectedCount(_typesNames.length);
                 multiSelection.select(0, _typesNames.length, true, true);
             }
         }
@@ -78,7 +83,7 @@ export const MultiFilterHub: Filter = ({
                     items={workItemTypes}
                     minCalloutWidth={300}
                     showFilterBox={true}
-                    onCollapse={() => { onChange!(project, [...selectedItems]); }}
+                    onCollapse={() => { onChange!(project, [...selectedItems], selectedCount === multiSelection.selectedCount); }}
                     renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
                     onSelect={(_, { id }) => { !selectedItems.has(id) && selectedItems.add(id) || selectedItems.delete(id); }}
                     selection={multiSelection}
@@ -98,6 +103,8 @@ export const TeamFilterHub: Filter = ({
     onChange,
 }) => {
 
+    const [selectedCount, setSelectedCount] = useState<number>(0);
+
     useEffect(() => {
         const loadTeamsTypeOptions = async () => {
             if (project) {
@@ -110,7 +117,9 @@ export const TeamFilterHub: Filter = ({
 
         loadTeamsTypeOptions()
             .then(teamOptions => {
+                setSelectedCount(teamOptions.length);
                 teamItemTypes.push(...teamOptions);
+                teamMultiSelection.select(0, teamOptions.length, true, true);
             })
             .catch(console.error);
     }, [project]);
@@ -136,7 +145,7 @@ export const TeamFilterHub: Filter = ({
                     minCalloutWidth={300}
                     placeholder="Teams"
                     showFilterBox={true}
-                    onCollapse={() => { onChange!(project, [...teamsSelected]); }}
+                    onCollapse={() => { onChange!(project, [...teamsSelected], selectedCount === teamMultiSelection.selectedCount); }}
                     renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
                     onSelect={(_, team) => { !teamsSelected.has(team.data!) && teamsSelected.add(team.data!) || teamsSelected.delete(team.data!); }}
                     selection={teamMultiSelection}
@@ -172,7 +181,7 @@ export const IterationFilterHub: Filter = ({
                 const itemsOptions: Array<IListBoxItem<string>> = iterationNames.map(it => ({ id: it.id, text: it.name, data: it.path } as IListBoxItem<string>));
                 iterationsOptions.removeAll();
                 iterationsOptions.push(...itemsOptions);
-                
+
                 const index = itemsOptions.findIndex(it => it.text === currentIteration)
                 selectedItem.value = currentIteration;
                 iterationFilterHubSelection.clear();
@@ -198,7 +207,7 @@ export const IterationFilterHub: Filter = ({
     const onSelect = (event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<string>) => {
         const _item = iterationNames.find(e => e.id === item.id);
         console.log("onSelect [Iteration]: ", _item?.name);
-        onChange!(project, _item!);
+        onChange!(project, _item!, false);
     };
 
     return (

@@ -1,5 +1,5 @@
 import { WebApiTeam } from "azure-devops-extension-api/Core";
-import { WorkItem } from "azure-devops-extension-api/WorkItemTracking";
+import { WorkItem, WorkItemLink } from "azure-devops-extension-api/WorkItemTracking";
 
 export interface ProgressInterface {
     parentId: number;
@@ -11,27 +11,47 @@ export interface ProgressInterface {
     description: string;
 }
 
+export type TeamDictionaryValue = { connections: { [key: string]: WorkItemLink[]; }, map: Map<string, WorkItem> };
+
 const htmlPattern = /<(?:.|\s)*?>/g;
 
 const stripHTML = (data: any) => (`${data || ""}`).replace(/<(?:.|\s)*?>/g, "");
 
-export function getProgressMap(teams: WebApiTeam[], map: Map<String, WorkItem[]>): Map<string, ProgressInterface> {
+export function getProgressMap(teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>): Map<string, ProgressInterface> {
     let progressMap = new Map<string, ProgressInterface>();
+
     teams.forEach(team => {
+        const { connections, map } = {...teamDictionary.get(team.id)!};
 
-        let tasks = map.get(team.id + 'Task');
-        let stories = map.get(team.id + 'User Story');
-        let features = map.get(team.id + 'Feature');
-        let epics = map.get(team.id + 'Epic');
+        Object.keys(connections)
+            .map(itemId => connections[itemId])
+            .filter(it => it.length === 1)
+            .reduce((acc, next) => [...acc, ...next], [])
+            .forEach(it => calculateSimpleItems(team.id, map.get(`${it.target.id}`)!, progressMap));
 
-        calculateSimpleItems(team.id, tasks || [], progressMap);
-        calculateSimpleItems(team.id, stories || [], progressMap);
-        calculateTimelineProgressItems(team.id, features || [], progressMap);
-        calculateTimelineProgressItems(team.id, epics || [], progressMap);
-        return progressMap;
+        const set = new Set<string>();
+
+        const itemsWithChild = Object.keys(connections)
+            .map(itemId => connections[itemId])
+            .filter(it => it.length > 1)
+            .reduce((acc, next) => [...acc, ...next], [])
+
+        const parentsId = new Set(itemsWithChild.filter(it => it.source).map(it => it.source.id))
+        itemsWithChild
+            .filter(it => !parentsId.has(it.target.id))
+            .forEach(it => calculateSimpleItems(team.id, map.get(`${it.target.id}`)!, progressMap));
+
+        Object.keys(connections)
+            .map(itemId => connections[itemId])
+            .filter(it => it.length > 1)
+            .forEach(it => {
+                it.slice().reverse()
+                    .filter(it => parentsId.has(it.target.id))
+                    .forEach(e => calculateTimelineProgressItems(team.id, map.get(`${e.target.id}`)!, progressMap))
+            });
     });
-
-    return progressMap
+    console.log("getProgressMap progressMap", JSON.stringify(progressMap));
+    return progressMap;
 }
 
 export enum ItemStatus {
@@ -58,40 +78,40 @@ interface Styles {
     name: ItemStatus;
 }
 
-function calculateSimpleItems(id: string, items: WorkItem[], progressMap: Map<string, ProgressInterface>) {
-    items.forEach(item => {
-        let itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 100 : 0;
-        let parentId = getParentId(item);
-        progressMap.set(`${id}_${item.id}`, {
-            parentId: parentId ? parseInt(parentId) : 0,
-            subtaskProgress: itemProgress,
-            status: itemProgress > 0 ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : { ...statusStyles[ItemStatus.NOT_STARTED], name: ItemStatus.NOT_STARTED },
-            type: item.fields["System.WorkItemType"],
-            state: item.fields["System.State"],
-            description: stripHTML(item.fields["System.Description"])
-        });
+function calculateSimpleItems(id: string, item: WorkItem, progressMap: Map<string, ProgressInterface>) {
+    //items.forEach(item => {
+    let itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 100 : 0;
+    let parentId = getParentId(item);
+    progressMap.set(`${id}_${item.id}`, {
+        parentId: parentId ? parseInt(parentId) : 0,
+        subtaskProgress: itemProgress,
+        status: itemProgress > 0 ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : { ...statusStyles[ItemStatus.NOT_STARTED], name: ItemStatus.NOT_STARTED },
+        type: item.fields["System.WorkItemType"],
+        state: item.fields["System.State"],
+        description: stripHTML(item.fields["System.Description"])
     });
+    //});
 }
 
-function calculateTimelineProgressItems(id: string, items: WorkItem[], progressMap: Map<string, ProgressInterface>) {
-    items.forEach(item => {
-        const startDate = new Date(item.fields['Microsoft.VSTS.Scheduling.StartDate']);
-        const endDate = new Date(item.fields['Microsoft.VSTS.Scheduling.TargetDate']);
-        let subitemProgress = Array.from(progressMap.values())
-            .filter(subItem => subItem.parentId === item.id)
-            .map(subItem => subItem.subtaskProgress);
-        let itemProgress = calculateProgress(startDate, endDate, subitemProgress);
-        let parentId = getParentId(item);
+function calculateTimelineProgressItems(id: string, item: WorkItem, progressMap: Map<string, ProgressInterface>) {
+    //items.forEach(item => {
+    const startDate = new Date(item.fields['Microsoft.VSTS.Scheduling.StartDate']);
+    const endDate = new Date(item.fields['Microsoft.VSTS.Scheduling.TargetDate']);
+    let subitemProgress = Array.from(progressMap.values())
+        .filter(subItem => subItem.parentId === item.id)
+        .map(subItem => subItem.subtaskProgress);
+    let itemProgress = calculateProgress(startDate, endDate, subitemProgress);
+    let parentId = getParentId(item);
 
-        progressMap.set(`${id}_${item.id}`, {
-            parentId: parentId ? parseInt(parentId) : 0,
-            subtaskProgress: item.fields["System.State"] === 'Closed' ? 100 : itemProgress[0],
-            status: item.fields["System.State"] === 'Closed' ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : itemProgress[1],
-            type: item.fields["System.WorkItemType"],
-            state: item.fields["System.State"],
-            description: stripHTML(item.fields["System.Description"])
-        });
+    progressMap.set(`${id}_${item.id}`, {
+        parentId: parentId ? parseInt(parentId) : 0,
+        subtaskProgress: item.fields["System.State"] === 'Closed' ? 100 : itemProgress[0],
+        status: item.fields["System.State"] === 'Closed' ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : itemProgress[1],
+        type: item.fields["System.WorkItemType"],
+        state: item.fields["System.State"],
+        description: stripHTML(item.fields["System.Description"])
     });
+    //});
 }
 
 function getParentId(item: WorkItem) {
