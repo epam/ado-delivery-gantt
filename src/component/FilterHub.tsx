@@ -206,7 +206,6 @@ export const IterationFilterHub: Filter = ({
 
     const onSelect = (event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<string>) => {
         const _item = iterationNames.find(e => e.id === item.id);
-        console.log("onSelect [Iteration]: ", _item?.name);
         onChange!(project, _item!, false);
     };
 

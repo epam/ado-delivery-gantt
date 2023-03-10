@@ -1,4 +1,5 @@
 import "./hub.scss";
+import "azure-devops-ui/Core/override.css";
 
 import * as React from "react";
 import { createRoot } from "react-dom/client";

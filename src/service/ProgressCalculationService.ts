@@ -21,7 +21,7 @@ export function getProgressMap(teams: WebApiTeam[], teamDictionary: Map<string, 
     let progressMap = new Map<string, ProgressInterface>();
 
     teams.forEach(team => {
-        const { connections, map } = {...teamDictionary.get(team.id)!};
+        const { connections, map } = { ...teamDictionary.get(team.id)! };
 
         Object.keys(connections)
             .map(itemId => connections[itemId])
@@ -50,7 +50,6 @@ export function getProgressMap(teams: WebApiTeam[], teamDictionary: Map<string, 
                     .forEach(e => calculateTimelineProgressItems(team.id, map.get(`${e.target.id}`)!, progressMap))
             });
     });
-    console.log("getProgressMap progressMap", JSON.stringify(progressMap));
     return progressMap;
 }
 
@@ -79,7 +78,6 @@ interface Styles {
 }
 
 function calculateSimpleItems(id: string, item: WorkItem, progressMap: Map<string, ProgressInterface>) {
-    //items.forEach(item => {
     let itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 100 : 0;
     let parentId = getParentId(item);
     progressMap.set(`${id}_${item.id}`, {
@@ -90,7 +88,6 @@ function calculateSimpleItems(id: string, item: WorkItem, progressMap: Map<strin
         state: item.fields["System.State"],
         description: stripHTML(item.fields["System.Description"])
     });
-    //});
 }
 
 function calculateTimelineProgressItems(id: string, item: WorkItem, progressMap: Map<string, ProgressInterface>) {
@@ -111,7 +108,6 @@ function calculateTimelineProgressItems(id: string, item: WorkItem, progressMap:
         state: item.fields["System.State"],
         description: stripHTML(item.fields["System.Description"])
     });
-    //});
 }
 
 function getParentId(item: WorkItem) {

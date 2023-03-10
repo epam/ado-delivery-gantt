@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
-  "version": "1.0.0",
-  "name": "Delivery Gantt",
+  "version": "1.0.1",
+  "name": "[Dev] Delivery Gantt",
   "description": "Effortlessly track team progress with a hierarchical Gantt chart displaying Epics, Features, and Stories issue types.",
   "publisher": "{INSERT_PUBLISHER}",
   "demands": [
@@ -9,10 +9,6 @@
   ],
   "categories": [
     "Azure Boards"
-  ],
-  "scopes": [
-    "vso.work",
-    "vso.code"
   ],
   "targets": [
     {
@@ -46,7 +42,7 @@
         "ms.vss-work-web.work-hub-group"
       ],
       "properties": {
-        "name": "Delivery Gantt",
+        "name": "[Dev] Delivery Gantt",
         "icon": {
           "dark": "img/calendar_dark.png",
           "light": "img/calendar_light.png"

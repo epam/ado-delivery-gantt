@@ -43,7 +43,6 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
     const selectedItem = new ObservableValue<ViewMode>(viewMode);
 
     const onSelect = (event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<ViewMode>) => {
-        console.log("ViewMode", item);
         onViewModeChange(scaleOptions.find(e => e.data === item.data)?.data!);
     };
 

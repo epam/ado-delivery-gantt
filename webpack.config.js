@@ -1,16 +1,14 @@
 const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const PATHS = {  src: path.join(__dirname, 'src'),  output: path.join(__dirname, 'dist')};
+const PATHS = { src: path.join(__dirname, 'src'), output: path.join(__dirname, 'dist') };
 const dev_suffix = ":dev";
 const dev_entry = [path.join(PATHS.src, 'interceptors.ts')];
-
 const assembleEntries = (entries) => Object.keys(entries)
   .map(key => ({ key, value: entries[key] }))
   .map(({ key, value }, index) => ({ [key]: !index ? [...dev_entry, ...(Array.isArray(value) && value || [value])] : value }))
   .reduce((acc, next) => ({ ...acc, ...next }), {});
-
 const devEntriesResolver = (entries) => (process.env.npm_lifecycle_event.endsWith(dev_suffix)) ? assembleEntries(entries) : entries;
-
 module.exports = {
   entry: devEntriesResolver({ hub: [path.join(PATHS.src, 'hub.tsx')] }),
   devtool: "inline-source-map",
@@ -26,6 +24,9 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [{ from: "**/*.html", context: "src" }],
     }),
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+    })
   ],
   module: {
     rules: [
@@ -36,16 +37,30 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        use: [MiniCssExtractPlugin.loader, {
+          loader: "css-loader",
+          options: {
+            import: true,
+          },
+        }],
       },
       {
-        test: /\.s[ac]ss$/i,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        test: /\.s[ca]ss$/i,
+        use: [MiniCssExtractPlugin.loader, {
+          loader: "css-loader",
+          options: {
+            import: false,
+          },
+        }, "sass-loader"],
       },
       {
-        test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
-        type: "asset",
-      },
+        test: /\.(png|jpg|jpeg|woff|woff2|eot|ttf|svg)$/,
+        type: "asset/inline", generator: {
+          dataUrl: content => {
+            return `data:application/font-woff;base64,${content.toString("base64")}`
+          }
+        }
+      }
     ],
   },
   resolve: {

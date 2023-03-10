@@ -59,7 +59,17 @@ Once you are logged in to Azure DevOps, your extension should be running. Set a 
     - version
     - publisher
 2. npm run package:dev  
-3. tfx extension publish --manifest-globs vss-extension.json --overrides-file configs/dev.json --token {YOUR_TOKEN}
+3. tfx extension publish --manifest-globs vss-extension-dev.json --overrides-file configs/dev.json --token {YOUR_TOKEN}
+
+### Release
+1. Uprates vss-extension.json
+    - version
+    - publisher
+2. npm run package  
+3. tfx extension publish --manifest-globs vss-extension.json --overrides-file configs/release.json --token {YOUR_TOKEN}
 
 ## Icons
 [Material design icon](https://github.com/google/material-design-icons) was used, which is redistributed under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0.html). The color of the icon for dark theme was modified.
+
+## License
+[MIT](./LICENSE.md)
