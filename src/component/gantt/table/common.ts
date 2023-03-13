@@ -1,10 +1,10 @@
 const localeDateStringCache: { [key: string]: any } = {};
 const defaultDateTimeOptions: Intl.DateTimeFormatOptions = {
-    weekday: "short",
-    year: "2-digit",
-    month: "2-digit",
-    day: "numeric",
-  };
+  weekday: "short",
+  year: "2-digit",
+  month: "2-digit",
+  day: "numeric",
+};
 
 export const toLocaleDateStringFactory =
   (locale: string) =>

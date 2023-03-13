@@ -11,8 +11,8 @@ import { Header, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
-import { LayoutTab } from "./component"
 import { useEffect, useState } from "react";
+import { LayoutTab } from "./component"
 
 interface IHubState {
   selectedTabId: string;
@@ -22,7 +22,7 @@ interface IHubState {
   useCompactPivots?: boolean;
 }
 
-export const Hub = () => {
+export function Hub() {
 
   const [hubState, setHubState] = useState<IHubState>({ fullScreenMode: false, selectedTabId: 'layout' });
 
@@ -62,26 +62,20 @@ export const Hub = () => {
     const layoutService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
     const fullScreenMode = await layoutService.getFullScreenMode();
     if (fullScreenMode !== hubState.fullScreenMode) {
-      setHubState(current => {
-        return { ...current, fullScreenMode: fullScreenMode }
-      });
+      setHubState(current => ({ ...current, fullScreenMode }));
     }
   }
 
   const onToggleFullScreenMode = async () => {
     const fullScreenMode = !hubState.fullScreenMode!;
-    setHubState(current => {
-      return { ...current, fullScreenMode: fullScreenMode }
-    });
+    setHubState(current => ({ ...current, fullScreenMode }));
 
     const layoutService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
     layoutService.setFullScreenMode(fullScreenMode);
   }
 
   const onSelectedTabChanged = (newTabId: string) => {
-    setHubState(current => {
-      return { ...current, selectedTabId: newTabId }
-    });
+    setHubState(current => ({ ...current, selectedTabId: newTabId }));
   }
 
 

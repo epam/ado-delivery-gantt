@@ -10,21 +10,21 @@ export const GanttHeader: React.FC<{
   
   return (
     <div
-      className={"ganttTable"}
+      className="ganttTable"
       style={{
-        fontFamily: fontFamily,
-        fontSize: fontSize,
+        fontFamily,
+        fontSize,
         textAlign: "center"
       }}
     >
       <div
-        className={"ganttTable_Header"}
+        className="ganttTable_Header"
         style={{
           height: headerHeight - 2,
         }}
       >
         <div
-          className={"ganttTable_HeaderItem"}
+          className="ganttTable_HeaderItem"
           style={{
             minWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
           }}
@@ -32,14 +32,14 @@ export const GanttHeader: React.FC<{
           &nbsp;Name
         </div>
         <div
-          className={"ganttTable_HeaderSeparator"}
+          className="ganttTable_HeaderSeparator"
           style={{
             height: headerHeight * 0.5,
             marginTop: headerHeight * 0.2,
           }}
         />
         <div
-          className={"ganttTable_HeaderItem"}
+          className="ganttTable_HeaderItem"
           style={{
             minWidth: isNaN(_rowWidth) ? rowWidth : 1 * _rowWidth,
           }}
@@ -47,14 +47,14 @@ export const GanttHeader: React.FC<{
           &nbsp;Status
         </div>
         <div
-          className={"ganttTable_HeaderSeparator"}
+          className="ganttTable_HeaderSeparator"
           style={{
             height: headerHeight * 0.5,
             marginTop: headerHeight * 0.25,
           }}
         />
         <div
-          className={"ganttTable_HeaderItem"}
+          className="ganttTable_HeaderItem"
           style={{
             minWidth: isNaN(_rowWidth) ? rowWidth : 0.75 * _rowWidth,
           }}
@@ -62,14 +62,14 @@ export const GanttHeader: React.FC<{
           &nbsp;Progress
         </div>
         <div
-          className={"ganttTable_HeaderSeparator"}
+          className="ganttTable_HeaderSeparator"
           style={{
             height: headerHeight * 0.5,
             marginTop: headerHeight * 0.25,
           }}
         />
         <div
-          className={"ganttTable_HeaderItem"}
+          className="ganttTable_HeaderItem"
           style={{
             minWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
           }}

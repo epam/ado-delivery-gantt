@@ -9,64 +9,64 @@ import { DropdownSelection } from "azure-devops-ui/Utilities/DropdownSelection";
 import { Observer } from "azure-devops-ui/Observer";
 
 const scaleOptions: Array<IListBoxItem<ViewMode>> = [
-    { id: ViewMode.QuarterDay, text: ViewMode.QuarterDay, data: ViewMode.QuarterDay },
-    { id: ViewMode.Day, text: ViewMode.Day, data: ViewMode.Day },
-    { id: ViewMode.Week, text: ViewMode.Week, data: ViewMode.Week },
-    { id: ViewMode.Month, text: ViewMode.Month, data: ViewMode.Month },
-    { id: ViewMode.Year, text: ViewMode.Year, data: ViewMode.Year }
+  { id: ViewMode.QuarterDay, text: ViewMode.QuarterDay, data: ViewMode.QuarterDay },
+  { id: ViewMode.Day, text: ViewMode.Day, data: ViewMode.Day },
+  { id: ViewMode.Week, text: ViewMode.Week, data: ViewMode.Week },
+  { id: ViewMode.Month, text: ViewMode.Month, data: ViewMode.Month },
+  { id: ViewMode.Year, text: ViewMode.Year, data: ViewMode.Year }
 ];
 
 export interface ViewSwitcherProps {
-    isChecked: boolean;
-    isCheckedViewLinks: boolean,
-    viewMode: ViewMode;
-    isChartLoad: boolean;
-    onViewListChange: (isChecked: boolean) => void;
-    onViewLinksChange: (isCheckedLinksView: boolean) => void;
-    onViewModeChange: (viewMode: ViewMode) => void;
-    onCurrentPosition: () => void;
-};
+  isChecked: boolean;
+  isCheckedViewLinks: boolean,
+  viewMode: ViewMode;
+  isChartLoad: boolean;
+  onViewListChange: (isChecked: boolean) => void;
+  onViewLinksChange: (isCheckedLinksView: boolean) => void;
+  onViewModeChange: (viewMode: ViewMode) => void;
+  onCurrentPosition: () => void;
+}
 
 const selection = new DropdownSelection();
 
 export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
-    onViewModeChange,
-    onViewListChange,
-    onViewLinksChange,
-    onCurrentPosition,
-    isChecked,
-    isCheckedViewLinks,
-    viewMode,
-    isChartLoad
+  onViewModeChange,
+  onViewListChange,
+  onViewLinksChange,
+  onCurrentPosition,
+  isChecked,
+  isCheckedViewLinks,
+  viewMode,
+  isChartLoad
 }) => {
 
-    const selectedItem = new ObservableValue<ViewMode>(viewMode);
+  const selectedItem = new ObservableValue<ViewMode>(viewMode);
 
-    const onSelect = (event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<ViewMode>) => {
-        onViewModeChange(scaleOptions.find(e => e.data === item.data)?.data!);
-    };
+  const onSelect = (event: React.SyntheticEvent<HTMLElement>, item: IListBoxItem<ViewMode>) => {
+    onViewModeChange(scaleOptions.find(e => e.data === item.data)?.data!);
+  };
 
-    const scaleUp = (view: ViewMode) => {
-        const index = scaleOptions.map(e => e.data).indexOf(view);
-        const newIndex = index <= 0 ? 0 : index - 1;
-        selection.select(newIndex);
-        onViewModeChange(scaleOptions[newIndex].data!);
-    };
+  const scaleUp = (view: ViewMode) => {
+    const index = scaleOptions.map(e => e.data).indexOf(view);
+    const newIndex = index <= 0 ? 0 : index - 1;
+    selection.select(newIndex);
+    onViewModeChange(scaleOptions[newIndex].data!);
+  };
 
-    const scaleDown = (view: ViewMode) => {
-        const index = scaleOptions.map(e => e.data).indexOf(view);
-        const newIndex = index + 1 >= scaleOptions.length ? scaleOptions.length - 1 : index + 1;
-        selection.select(newIndex);
-        onViewModeChange(scaleOptions[newIndex].data!);
-    };
+  const scaleDown = (view: ViewMode) => {
+    const index = scaleOptions.map(e => e.data).indexOf(view);
+    const newIndex = index + 1 >= scaleOptions.length ? scaleOptions.length - 1 : index + 1;
+    selection.select(newIndex);
+    onViewModeChange(scaleOptions[newIndex].data!);
+  };
 
-    return (
+  return (
         <div className="flex-row">
             <Observer selectedItem={selectedItem}>
                 {({selectedItem}) => (
                     <div className="flex-row">
                         <Dropdown
-                            ariaLabel={"Button Dropdown " + selectedItem + " selected"}
+                            ariaLabel={`Button Dropdown ${  selectedItem  } selected`}
                             className="scale-dropdown"
                             placeholder={selectedItem}
                             items={scaleOptions}
@@ -108,5 +108,5 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
                 label="Show Links"
             />
         </div>
-    );
+  );
 };

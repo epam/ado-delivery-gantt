@@ -3,7 +3,7 @@ import { ganttTableBuilder } from "./GanttTable";
 import { ganttTooltipContentBuilder } from "./GanttTooltipContent"
 
 export {
-    GanttHeader,
-    ganttTableBuilder,
-    ganttTooltipContentBuilder
+  GanttHeader,
+  ganttTableBuilder,
+  ganttTooltipContentBuilder
 };

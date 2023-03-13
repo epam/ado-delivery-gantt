@@ -1,6 +1,7 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+
 const PATHS = { src: path.join(__dirname, 'src'), output: path.join(__dirname, 'dist') };
 const dev_suffix = ":dev";
 const dev_entry = [path.join(PATHS.src, 'interceptors.ts')];
@@ -56,9 +57,7 @@ module.exports = {
       {
         test: /\.(png|jpg|jpeg|woff|woff2|eot|ttf|svg)$/,
         type: "asset/inline", generator: {
-          dataUrl: content => {
-            return `data:application/font-woff;base64,${content.toString("base64")}`
-          }
+          dataUrl: content => `data:application/font-woff;base64,${content.toString("base64")}`
         }
       }
     ],

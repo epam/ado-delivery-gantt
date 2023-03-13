@@ -1,9 +1,9 @@
 import * as React from "react";
 import { useMemo } from "react";
 import { Task } from 'gantt-task-react';
+import { Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ItemStatus, ProgressInterface } from "../../../service/ProgressCalculationService";
 import { toLocaleDateStringFactory } from "./common";
-import { Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 
 type GanttTableProps = {
   rowHeight: number;
@@ -40,7 +40,7 @@ const ganttTableBuilder: GanttTableBuilder = {
       );
       const _rowWidth = parseInt(rowWidth);
 
-      const StatusCircle = ({status}: {status: ItemStatus}) => {
+      function StatusCircle({status}: {status: ItemStatus}) {
         const statusPropsArray = [
           { statusValue: ItemStatus.DONE, statusProps: { ...Statuses.Success } },
           { statusValue: ItemStatus.NOT_STARTED, statusProps: { ...Statuses.Queued } },
@@ -66,10 +66,10 @@ const ganttTableBuilder: GanttTableBuilder = {
 
       return map && (
         <div
-          className={"taskListWrapper"}
+          className="taskListWrapper"
           style={{
-            fontFamily: fontFamily,
-            fontSize: fontSize
+            fontFamily,
+            fontSize
           }}
         >
           {tasks.map(t => {
@@ -84,19 +84,19 @@ const ganttTableBuilder: GanttTableBuilder = {
 
             return (
               <div
-                className={"taskListTableRow"}
+                className="taskListTableRow"
                 style={{ height: rowHeight }}
                 key={`${t.id}row`}
               >
                 <div
-                  className={"taskListCell"}
+                  className="taskListCell"
                   style={{
                     minWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
                     maxWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
                   }}
                   title={t.name}
                 >
-                  <div className={"taskListNameWrapper"}>
+                  <div className="taskListNameWrapper">
                     <div
                       className={
                         expanderSymbol
@@ -111,14 +111,14 @@ const ganttTableBuilder: GanttTableBuilder = {
                   </div>
                 </div>
                 <div
-                  className={"ganttTable_HeaderSeparator"}
+                  className="ganttTable_HeaderSeparator"
                   style={{
                     height: rowHeight * 0.5,
                     marginTop: rowHeight * 0.2,
                   }}
                 />
                 <div
-                  className={"taskListCell"}
+                  className="taskListCell"
                   style={{
                     minWidth: isNaN(_rowWidth) ? rowWidth : 1 * _rowWidth,
                     maxWidth: isNaN(_rowWidth) ? rowWidth : 1 * _rowWidth,
@@ -132,14 +132,14 @@ const ganttTableBuilder: GanttTableBuilder = {
                   &nbsp;
                 </div>
                 <div
-                  className={"ganttTable_HeaderSeparator"}
+                  className="ganttTable_HeaderSeparator"
                   style={{
                     height: rowHeight * 0.5,
                     marginTop: rowHeight * 0.2,
                   }}
                 />
                 <div
-                  className={"taskListCell"}
+                  className="taskListCell"
                   style={{
                     minWidth: isNaN(_rowWidth) ? rowWidth : 0.75 * _rowWidth,
                     maxWidth: isNaN(_rowWidth) ? rowWidth : 0.75 * _rowWidth,
@@ -149,14 +149,14 @@ const ganttTableBuilder: GanttTableBuilder = {
                   &nbsp;{status ? `${t.progress} %` : ""}
                 </div>
                 <div
-                  className={"ganttTable_HeaderSeparator"}
+                  className="ganttTable_HeaderSeparator"
                   style={{
                     height: rowHeight * 0.5,
                     marginTop: rowHeight * 0.2,
                   }}
                 />
                 <div
-                  className={"taskListCell"}
+                  className="taskListCell"
                   style={{
                     minWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
                     maxWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,

@@ -5,41 +5,41 @@ import { ProgressInterface } from "service/ProgressCalculationService";
 import { toLocaleDateStringFactory } from "./common";
 
 type StandardTooltipContentProps = {
-    task: Task;
-    fontSize: string;
-    locale: string;
-    fontFamily: string;
+  task: Task;
+  fontSize: string;
+  locale: string;
+  fontFamily: string;
 };
 
 export type GanttTooltipContent = React.FC<StandardTooltipContentProps>;
 
 export interface GanttTooltipContentBuilder {
-    build: { (map: Map<string, ProgressInterface>): GanttTooltipContent }
+  build: { (map: Map<string, ProgressInterface>): GanttTooltipContent }
 }
 
 export const ganttTooltipContentBuilder: GanttTooltipContentBuilder = {
-    build(map: Map<string, ProgressInterface>): GanttTooltipContent {
-        return ({
-            task,
-            fontSize,
-            locale,
-            fontFamily
-        }) => {
-            const toLocaleDateString = useMemo(
-                () => toLocaleDateStringFactory(locale),
-                [locale]
-            );
-            const context = map.get(task.id);
-            const taskId = task.id.split("_").pop();
+  build(map: Map<string, ProgressInterface>): GanttTooltipContent {
+    return ({
+      task,
+      fontSize,
+      locale,
+      fontFamily
+    }) => {
+      const toLocaleDateString = useMemo(
+        () => toLocaleDateStringFactory(locale),
+        [locale]
+      );
+      const context = map.get(task.id);
+      const taskId = task.id.split("_").pop();
 
-            return (
+      return (
                 <div className="tooltipDefaultContainer" style={{ fontSize, fontFamily }}>
-                    <span style={{ fontSize: fontSize }}>{context ? taskId || "" : ""} {task.name}</span>
+                    <span style={{ fontSize }}>{context ? taskId || "" : ""} {task.name}</span>
                     <b>&nbsp;{context ? `${toLocaleDateString(task.start)} - ${toLocaleDateString(task.end)}` : ""}</b>
                     <span>&nbsp;{context ? context.state || "" : ""}</span>
-                    <b style={{ fontSize: fontSize }}>&nbsp;{context ? `${task.progress} %` : ""}</b>
+                    <b style={{ fontSize }}>&nbsp;{context ? `${task.progress} %` : ""}</b>
                 </div>
-            );
-        }
+      );
     }
+  }
 };

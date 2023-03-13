@@ -144,10 +144,10 @@ export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterf
             const key = `${id}`;
             const { connections } = acc;
             return { ...acc, connections: { ...connections, [key]: [next] }, lastAccessedKey: key };
-          } else {
-            const { lastAccessedKey: key, connections } = acc;
-            return { ...acc, connections: { ...connections, [key]: [...connections[key], next] } };
-          }
+          } 
+          const { lastAccessedKey: key, connections } = acc;
+          return { ...acc, connections: { ...connections, [key]: [...connections[key], next] } };
+          
         }, { connections: {} } as { lastAccessedKey: string, connections: { [key: string]: WorkItemLink[]; } });
 
         return { id, ids: workItems.map(({ target: { id } }) => id), connections };
