@@ -291,10 +291,10 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
               progressColor: progress?.status?.progressColor,
               progressSelectedColor: progress?.status?.progressSelectedColor
             },
-            type: hasChild && PROJECT || TASK,
+            type: PROJECT,
             project: parentId,
             hideChildren: true,
-            dependencies: [parentId]
+            dependencies: hasChild ? [parentId] : [parentId, "add-expanderSymbol"],
           });
         });
 
@@ -335,10 +335,10 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
               progressColor: progress?.status?.progressColor,
               progressSelectedColor: progress?.status?.progressSelectedColor
             },
-            type: hasChild && PROJECT || TASK,
+            type: PROJECT,
             project: parentId,
             hideChildren: true,
-            dependencies: [parentId],
+			dependencies: hasChild ? [parentId] : [parentId, "add-expanderSymbol"],
           });
         });
     });

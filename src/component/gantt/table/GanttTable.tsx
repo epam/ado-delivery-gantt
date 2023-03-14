@@ -76,10 +76,8 @@ const ganttTableBuilder: GanttTableBuilder = {
             const status = map.get(t.id);
 
             let expanderSymbol = "";
-            if (t.hideChildren === false) {
-              expanderSymbol = "▼";
-            } else if (t.hideChildren === true) {
-              expanderSymbol = "▶";
+            if(!t.dependencies?.find(dependency => dependency === "add-expanderSymbol")){
+              expanderSymbol = t.hideChildren ? "▶" : "▼";
             }
 
             return (
