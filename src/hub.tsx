@@ -13,6 +13,7 @@ import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import { useEffect, useState } from "react";
 import { LayoutTab } from "./component"
+import { handleError } from "./service/ErrorHandler";
 
 interface IHubState {
   selectedTabId: string;
@@ -60,7 +61,7 @@ export function Hub() {
 
   const initializeFullScreenState = async () => {
     const layoutService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
-    const fullScreenMode = await layoutService.getFullScreenMode();
+    const fullScreenMode = await layoutService.getFullScreenMode().catch(error => handleError(error,'Full screen cant be loaded',false));
     if (fullScreenMode !== hubState.fullScreenMode) {
       setHubState(current => ({ ...current, fullScreenMode }));
     }

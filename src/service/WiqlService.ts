@@ -7,6 +7,7 @@ import {
 
 import { getClient } from 'azure-devops-extension-api';
 import { FilterInterface } from 'component/gantt/GanttChartTab';
+import { handleError } from './ErrorHandler';
 
 
 const clients = {
@@ -86,7 +87,7 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<TeamIt
     const response = await clients.workItemsClient.getWorkItem(value?.workItems?.[0].id, projectName, ["System.IterationPath"]);
     const path: string = response?.fields?.["System.IterationPath"];
     return path?.substring(path.lastIndexOf("\\") + 1);
-  });
+  }).catch(error=> handleError(error, 'No iteration assigned to the team',''));
   return clients.workClient.getTeamIterations({
     project: projectName,
     projectId,
@@ -112,7 +113,7 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<TeamIt
       start: iterations[0]?.attributes?.startDate || start,
       end: iterations[iterations.length - 1]?.attributes?.finishDate || end
     }
-  });
+  }).catch(error => handleError(error,'Error, when getTeamIterations method called',[]));
 }
 
 export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterface): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
@@ -152,5 +153,5 @@ export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterf
 
         return { id, ids: workItems.map(({ target: { id } }) => id), connections };
       });
-  });
+  }).catch(error => handleError(error,'Error, when getTeamFieldValues method called',{id:{}, ids:[], connections:[]}));
 };

@@ -20,12 +20,13 @@ import {
   WorkItemTrackingServiceIds,
 } from 'azure-devops-extension-api/WorkItemTracking';
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
-import { TeamSettingsIteration } from 'azure-devops-extension-api/Work';
 import { ProgressInterface, TeamDictionaryValue, getProgressMap } from "../../service/ProgressCalculationService";
 import { ViewSwitcher } from './ViewSwitcher';
-import { TeamFilterHub, IterationFilterHub, MultiFilterHub } from '../FilterHub';
 import { GanttHeader, ganttTableBuilder, ganttTooltipContentBuilder } from './table';
 import { fetchTeamWorkItems, fetchIterationDefinition, TeamIteration } from '../../service/WiqlService';
+import { TeamSettingsIteration } from 'azure-devops-extension-api/Work';
+import { FilterBarSection, FilterType } from "../FilterBarSection";
+import { IFilterState } from "azure-devops-ui/Utilities/Filter";
 
 export interface FilterInterface {
   teams?: WebApiTeam[] | undefined;
@@ -65,14 +66,14 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
   const allTeam = { id: "all", name: "All" } as WebApiTeam;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [view, setView] = useState<ViewMode>(ViewMode.Day);
-  const [teams, setTeams] = useState<WebApiTeam[]>([allTeam]);
   const [progressMap, setProgressMap] = useState<Map<string, ProgressInterface>>(new Map<string, ProgressInterface>());
   const [isChecked, setIsChecked] = useState(true);
   const [isCheckedViewLinks, setIsCheckedViewLinks] = useState(false);
   const [chartLoad, setChartLoad] = useState(true);
-  const [teamSelected, setTeamSelected] = useState(false);
-  const [filterContext, setFilterContext] = useState({ states: new Set() } as FilterInterface);
+  const filterContext = useRef({ states: new Set() } as FilterInterface);
   const [currentPeriodColor] = useState(DEFAULT_CURRENT_PERIOD_COLOR);
+
+  const [showFilterTab, setShowFilterTab] = useState(false);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const onCurrentPosition = useCallback(() => {
@@ -93,6 +94,10 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
     }
   }, [wrapperRef]);
 
+  const onFilterTabShow = useCallback(() => {
+    setShowFilterTab(!showFilterTab);
+  }, [showFilterTab]);
+
   useEffect(() => {
     (async () => {
       await SDK.ready();
@@ -112,11 +117,11 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
 
   useEffect(() => {
     document.addEventListener('scroll', handleCalendarScroll, true);
-	onViewLinksChange(isCheckedViewLinks);
+    onViewLinksChange(isCheckedViewLinks);
     return () => {
       document.removeEventListener('scroll', handleCalendarScroll, true);
     };
-  },[[view]])
+  }, [[view]])
 
   const calculateVisiblePageWidth = () => {
     const ganttTable = document.querySelector(".ganttTable") as HTMLElement;
@@ -130,7 +135,7 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
     }
   }
 
-  const handleCalendarScroll = () =>{
+  const handleCalendarScroll = () => {
     const calendarTop = document.querySelectorAll(".calendarTop");
     const bar = document.querySelector(".bolt-tabbar") as HTMLElement;
     const viewContainer = document.querySelector(".ViewContainer") as HTMLElement;
@@ -139,19 +144,19 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
     const calendarParent = document.querySelector(".calendar")?.parentElement;
     const defaultPadding = 30
 
-    barYPosition == 0? (
-      viewContainer.style.top = `${barBottomPosition  }px`, viewContainer.style.position = "sticky"): (
+    barYPosition == 0 ? (
+      viewContainer.style.top = `${barBottomPosition}px`, viewContainer.style.position = "sticky") : (
       viewContainer.style.top = "", viewContainer.style.position = "");
 
     if (calendarParent && viewContainer && view === ViewMode.Day) {
       calculateVisiblePageWidth();
       let previousLinePosition = 0;
       calendarParent!.style.position = "relative";
-      viewContainer.style.marginLeft="auto"
+      viewContainer.style.marginLeft = "auto"
       viewContainer!.style.zIndex = "1"
       const xParentCalendar = calendarParent.getBoundingClientRect().x;
       // TODO should be calculated with display resizing
-      const currentPosition = isChecked? Number(visiblePageWidth + visiblePageWidth/2 - 100 - xParentCalendar): Number(visiblePageWidth/2 - xParentCalendar);
+      const currentPosition = isChecked ? Number(visiblePageWidth + visiblePageWidth / 2 - 100 - xParentCalendar) : Number(visiblePageWidth / 2 - xParentCalendar);
 
       calendarTop.forEach((it1) => {
         const lineChildren = it1.children[0];
@@ -338,7 +343,7 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
             type: PROJECT,
             project: parentId,
             hideChildren: true,
-			dependencies: hasChild ? [parentId] : [parentId, "add-expanderSymbol"],
+            dependencies: hasChild ? [parentId] : [parentId, "add-expanderSymbol"],
           });
         });
     });
@@ -349,82 +354,92 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
 
   const onFilterContextChange = (project: IProjectInfo, context: FilterInterface): void => {
     setChartLoad(true);
-    reloadTasks(context)
-      .then(() => setFilterContext(context));
+    reloadTasks(context);
   };
 
   const onTeamChange = (project: IProjectInfo, teams: WebApiTeam[], isDefaultState: boolean): void => {
-    const _teamFilter = teams && teams.length > 0 ? { teams } : { teams: undefined, shift: undefined };
-    const { states } = filterContext;
+    const _teamFilter = teams && teams.length > 0 ? { teams: teams, shift: undefined } : { teams: undefined, shift: undefined };
+    const { states } = filterContext.current;
     !isDefaultState && states.add("team") || states.delete("team");
-    setTeams(teams);
-    setTeamSelected(teams && teams.length === 1);
-    onFilterContextChange(project, { ...filterContext, ..._teamFilter, states });
+    filterContext.current = { ...filterContext.current, ..._teamFilter, states };
   };
 
   const onWorkTypes = (project: IProjectInfo, items: string[], isDefaultState: boolean): void => {
     const _workTypesFilter = { workTypes: items };
-    const { states } = filterContext;
+    const { states } = filterContext.current;
     !isDefaultState && states.add("work_type") || states.delete("work_type");
-    onFilterContextChange(project, { ...filterContext, ..._workTypesFilter, states });
+    filterContext.current = { ...filterContext.current, ..._workTypesFilter, states } as FilterInterface;
   };
 
   const onIterationChange = (project: IProjectInfo, iteration: TeamSettingsIteration, isDefaultState: boolean) => {
-    onFilterContextChange(project, { ...filterContext, shift: Number(iteration?.path) });
+    filterContext.current = { ...filterContext.current, shift: Number(iteration?.path) };
+  };
+
+  const onFilterBarChange = (project: IProjectInfo, filterState: IFilterState): void => {
+    const teams = filterState[FilterType.TEAMS]?.value as WebApiTeam[];
+    onTeamChange(project, teams, false);
+
+    const types = filterState[FilterType.TYPES]?.value as string[];
+    onWorkTypes(project, types, false);
+
+    const iterations = filterState[FilterType.ITERATIONS]?.value as string[];
+    if (iterations && teams?.length === 1) {
+      onIterationChange(project, { path: iterations?.[0] } as TeamSettingsIteration, false);
+    }
+    onFilterContextChange(project, filterContext.current);
   };
 
   return (
-		<div>
-			<div className="ViewContainer">
-				<div className="flex-row">
-					{teamSelected && (
-						<IterationFilterHub
-							project={context?.project!}
-							team={teams[0]}
-							onChange={onIterationChange}
-						/>
-					)}
-					<TeamFilterHub
-						project={context?.project!}
-						item={allTeam}
-						itemsFn={(project) => fetchTeams(project).then(items => [...items])}
-						onChange={onTeamChange}
-					/>
-					<MultiFilterHub project={context?.project!} onChange={onWorkTypes} />
-					<ViewSwitcher
-						onViewModeChange={setView}
-						onViewListChange={setIsChecked}
-						onViewLinksChange={onViewLinksChange}
-						onCurrentPosition={onCurrentPosition}
-						isChartLoad={chartLoad}
-						isChecked={isChecked}
-						isCheckedViewLinks={isCheckedViewLinks}
-						viewMode={view}
-					/>
-				</div>
-			</div>
-			<div className="flex-column Wrapper" style={{ marginTop: 10 }} ref={wrapperRef}>
-				{!chartLoad ? (
-					<Gantt
-						TaskListHeader={GanttHeader}
-						TaskListTable={ganttTableBuilder.build(progressMap)}
-						TooltipContent={ganttTooltipContentBuilder.build(progressMap)}
-						tasks={tasks}
-						viewMode={view}
-						columnWidth={columnWidthByViewMode[view || ViewMode.Day]}
-						listCellWidth={isChecked ? '100px' : ''}
-						onExpanderClick={handleExpanderClick}
-						onSelect={handleSelectClick}
-						todayColor={currentPeriodColor}
-						barFill={50}
-						arrowColor={isCheckedViewLinks ? 'black' : ''}
-					/>
-				) : (
-					<div style={{ marginTop: 50 }}>
-						<Spinner size={SpinnerSize.large} label="Loading..." />
-					</div>
-				)}
-			</div>
-		</div>
+    <div>
+      <div className="ViewContainer flex-column">
+        <div className="flex-row">
+          <ViewSwitcher
+            onViewModeChange={setView}
+            onViewListChange={setIsChecked}
+            onViewLinksChange={onViewLinksChange}
+            onCurrentPosition={onCurrentPosition}
+            onFilterTabShow={onFilterTabShow}
+            isChartLoad={chartLoad}
+            isChecked={isChecked}
+            isCheckedViewLinks={isCheckedViewLinks}
+            viewMode={view}
+            isShowFilterTab={showFilterTab}
+          />
+        </div>
+        {
+          (showFilterTab) ?
+            <div className="flex-row">
+              <FilterBarSection
+                project={context?.project!}
+                team={filterContext.current.teams?.[0]}
+                itemsFn={(project) => fetchTeams(project).then(items => [...items])}
+                onChange={onFilterBarChange}
+              />
+            </div> : ""
+        }
+      </div>
+      <div className="flex-column Wrapper" style={{ marginTop: 10 }} ref={wrapperRef}>
+        {!chartLoad ? (
+          <Gantt
+            TaskListHeader={GanttHeader}
+            TaskListTable={ganttTableBuilder.build(progressMap)}
+            TooltipContent={ganttTooltipContentBuilder.build(progressMap)}
+            tasks={tasks}
+            viewMode={view}
+            columnWidth={columnWidthByViewMode[view || ViewMode.Day]}
+            listCellWidth={isChecked ? '100px' : ''}
+            onExpanderClick={handleExpanderClick}
+            onSelect={handleSelectClick}
+            todayColor={currentPeriodColor}
+            barFill={50}
+            arrowColor={isCheckedViewLinks ? 'black' : ''}
+          />
+        ) : (
+          <div style={{ marginTop: 50 }}>
+            <Spinner size={SpinnerSize.large} label="Loading..." />
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

@@ -21,10 +21,12 @@ export interface ViewSwitcherProps {
   isCheckedViewLinks: boolean,
   viewMode: ViewMode;
   isChartLoad: boolean;
+  isShowFilterTab: boolean;
   onViewListChange: (isChecked: boolean) => void;
   onViewLinksChange: (isCheckedLinksView: boolean) => void;
   onViewModeChange: (viewMode: ViewMode) => void;
   onCurrentPosition: () => void;
+  onFilterTabShow: () => void;
 }
 
 const selection = new DropdownSelection();
@@ -34,10 +36,12 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
   onViewListChange,
   onViewLinksChange,
   onCurrentPosition,
+  onFilterTabShow,
   isChecked,
   isCheckedViewLinks,
   viewMode,
-  isChartLoad
+  isChartLoad,
+  isShowFilterTab
 }) => {
 
   const selectedItem = new ObservableValue<ViewMode>(viewMode);
@@ -61,52 +65,57 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
   };
 
   return (
-        <div className="flex-row">
-            <Observer selectedItem={selectedItem}>
-                {({selectedItem}) => (
-                    <div className="flex-row">
-                        <Dropdown
-                            ariaLabel={`Button Dropdown ${  selectedItem  } selected`}
-                            className="scale-dropdown"
-                            placeholder={selectedItem}
-                            items={scaleOptions}
-                            selection={selection}
-                            minCalloutWidth={140}
-                            renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
-                            onSelect={onSelect} />
-                            <Button
-                                ariaLabel="Scale Up"
-                                iconProps={{ iconName: "Add" }}
-                                disabled={selectedItem === scaleOptions[0].data}
-                                onClick={() => scaleUp(selectedItem)}
-                            />
-                            <Button
-                                ariaLabel="Scale Down"
-                                iconProps={{ iconName: "Remove" }}
-                                disabled={selectedItem === scaleOptions[scaleOptions.length - 1].data}
-                                onClick={() => scaleDown(selectedItem)}
-                            />
-                            <Button
-                                ariaLabel="Today"
-                                text="Today"
-                                disabled={isChartLoad}
-					            onClick={onCurrentPosition} 
-					        />
-                    </div>
-                        
-                )}
-            </Observer>
+    <div className="flex-row">
+      <Observer selectedItem={selectedItem}>
+        {({ selectedItem }) => (
+          <div className="flex-row">
+            <Dropdown
+              ariaLabel={`Button Dropdown ${selectedItem} selected`}
+              className="scale-dropdown"
+              placeholder={selectedItem}
+              items={scaleOptions}
+              selection={selection}
+              minCalloutWidth={140}
+              renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
+              onSelect={onSelect} />
+            <Button
+              ariaLabel="Scale Up"
+              iconProps={{ iconName: "Add" }}
+              disabled={selectedItem === scaleOptions[0].data}
+              onClick={() => scaleUp(selectedItem)}
+            />
+            <Button
+              ariaLabel="Scale Down"
+              iconProps={{ iconName: "Remove" }}
+              disabled={selectedItem === scaleOptions[scaleOptions.length - 1].data}
+              onClick={() => scaleDown(selectedItem)}
+            />
+            <Button
+              ariaLabel="Today"
+              text="Today"
+              disabled={isChartLoad}
+              onClick={onCurrentPosition}
+            />
+            <Button
+              ariaLabel="Filter"
+              iconProps={{ iconName: isShowFilterTab ? "FilterSolid" : "Filter" }}
+              onClick={onFilterTabShow}
+            />
+          </div>
 
-            <Checkbox
-                onChange={() => onViewListChange(!isChecked)}
-                checked={isChecked}
-                label="Show Tree"
-            />
-            <Checkbox
-                onChange={() => onViewLinksChange(!isCheckedViewLinks)}
-                checked={isCheckedViewLinks}
-                label="Show Links"
-            />
-        </div>
+        )}
+      </Observer>
+
+      <Checkbox
+        onChange={() => onViewListChange(!isChecked)}
+        checked={isChecked}
+        label="Show Tree"
+      />
+      <Checkbox
+        onChange={() => onViewLinksChange(!isCheckedViewLinks)}
+        checked={isCheckedViewLinks}
+        label="Show Links"
+      />
+    </div>
   );
 };
