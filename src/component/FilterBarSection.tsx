@@ -9,7 +9,6 @@ import { IProjectInfo, getClient } from 'azure-devops-extension-api';
 import { WebApiTeam } from 'azure-devops-extension-api/Core';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { ObservableArray, ObservableValue } from 'azure-devops-ui/Core/Observable';
-import { ArrayItemProvider } from 'azure-devops-ui/Utilities/Provider';
 import { WorkItemTrackingRestClient, WorkItemTypeReference } from 'azure-devops-extension-api/WorkItemTracking';
 import { localeIgnoreCaseComparer } from 'azure-devops-ui/Core/Util/String';
 import { fetchIterationDefinition } from '../service/WiqlService';

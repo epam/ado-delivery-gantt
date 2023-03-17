@@ -45,7 +45,6 @@ const VSTS_SCHEDULING_TARGET_DATE = 'Microsoft.VSTS.Scheduling.TargetDate';
 const WORK_ITEM_TYPE = 'System.WorkItemType';
 const ITEM_TITLE = 'System.Title';
 const PROJECT = 'project';
-const TASK = 'task';
 const DEFAULT_CURRENT_PERIOD_COLOR = '#F3EFEF'
 
 const columnWidthByViewMode: { [key: string]: number } = {
@@ -58,12 +57,11 @@ const columnWidthByViewMode: { [key: string]: number } = {
 
 let visiblePageWidth: number;
 
-type Context = { project?: IProjectInfo, rootCategory: string };
+type Context = { project?: IProjectInfo, rootCategory: string, workItemTypes: Map<string, string> };
 
 export const GanttChartTab: React.FC<GanttChartTabProps> = ({
   context,
 }) => {
-  const allTeam = { id: "all", name: "All" } as WebApiTeam;
   const [tasks, setTasks] = useState<Task[]>([]);
   const [view, setView] = useState<ViewMode>(ViewMode.Day);
   const [progressMap, setProgressMap] = useState<Map<string, ProgressInterface>>(new Map<string, ProgressInterface>());
@@ -72,6 +70,8 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
   const [chartLoad, setChartLoad] = useState(true);
   const filterContext = useRef({ states: new Set() } as FilterInterface);
   const [currentPeriodColor] = useState(DEFAULT_CURRENT_PERIOD_COLOR);
+  const [popupClosed, setpopupClosed] = useState(false);
+  const [tasksUnfolded] = useState<Map<string, Task>>(new Map<string, Task>)
 
   const [showFilterTab, setShowFilterTab] = useState(false);
 
@@ -101,13 +101,13 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
   useEffect(() => {
     (async () => {
       await SDK.ready();
-      const { project, rootCategory } = context;
-      if (project && rootCategory) {
+      const { project, rootCategory, workItemTypes } = context;
+      if (project && rootCategory && workItemTypes) {
         const teams = await fetchTeams(project);
         const teamDictionary = await collectTeamDictionary(teams);
         const teamIterations = await Promise.all(teams.map(fetchIterationDefinition));
 
-        const progressMap = buildProgressMap(teams, teamDictionary);
+        const progressMap = buildProgressMap(teams, teamDictionary, workItemTypes);
         setProgressMap(progressMap);
 
         loadTasks(rootCategory, progressMap, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
@@ -179,13 +179,13 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
 
   const reloadTasks = async (filterContext: FilterInterface) => {
     const { states, shift } = filterContext;
-    const { project, rootCategory } = context;
+    const { project, rootCategory, workItemTypes } = context;
 
     const teams = await fetchTeams(project!, filterContext);
     const teamDictionary = await collectTeamDictionary(teams, filterContext);
     const teamIterations = await Promise.all(teams.map(fetchIterationDefinition));
 
-    const _progressMap = states.size === 0 && !shift ? buildProgressMap(teams, teamDictionary) : progressMap;
+    const _progressMap = states.size === 0 && !shift ? buildProgressMap(teams, teamDictionary, workItemTypes) : progressMap;
     setProgressMap(_progressMap);
 
     loadTasks(rootCategory, progressMap, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
@@ -200,6 +200,9 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
   };
 
   const handleExpanderClick = (task: Task): void => {
+    if (!tasksUnfolded.delete(task.id)) {
+      tasksUnfolded.set(task.id, task)
+    }
     setTasks(tasks.map((t) => (t.id === task.id ? task : t)));
   };
 
@@ -213,9 +216,16 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
 
     const taskId = task.id.split("_").pop();
     if (isSelected && Number(taskId)) {
-      navSvc.openWorkItem(parseInt(taskId!));
+      await navSvc.openWorkItem(parseInt(taskId!));
+      setpopupClosed(true)
     }
   };
+
+  useEffect(() => {
+    setChartLoad(true);
+    reloadTasks(filterContext.current)
+    setpopupClosed(false);
+  }, [popupClosed])
 
   const fetchTeams = async (project: IProjectInfo, filter?: FilterInterface): Promise<WebApiTeam[]> => {
     const { name: projectName } = project;
@@ -224,7 +234,7 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
       .then(teams => teams.filter(({ id }) => filter?.teams?.some(it => it.id === id) ?? true));
   }
 
-  const buildProgressMap = (teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>) => getProgressMap(teams, teamDictionary)
+  const buildProgressMap = (teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, workItemTypes: Map<string, string>) => getProgressMap(teams, teamDictionary, workItemTypes)
 
   const collectTeamDictionary = async (teams: WebApiTeam[], filter?: FilterInterface): Promise<Map<string, TeamDictionaryValue>> => {
     const workItemsClient = getClient(WorkItemTrackingRestClient);
@@ -258,7 +268,7 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
         styles: { backgroundColor: "white", backgroundSelectedColor: "white", progressColor: "white", progressSelectedColor: "white" },
         progress: 0,
         type: PROJECT,
-        hideChildren: true,
+        hideChildren: !tasksUnfolded.has(teamId),
       });
 
       const { connections, map } = teamDictionary.get(teamId) as TeamDictionaryValue;
@@ -283,12 +293,14 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
           const workItem = map.get(`${id}`) as WorkItem;
           const progress = progressMap.get(`${teamId}_${workItem.id}`);
           const hasChild = workItem?.relations?.some(({ attributes = {} }) => attributes.name === 'Child');
-          const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}`
+          const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}`;
+          const itemId = `${teamId}_${workItem.id}`
+
           ganttTasks.push({
             start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
             end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
             name: workItem.fields[ITEM_TITLE],
-            id: `${teamId}_${workItem.id}`,
+            id: itemId,
             progress: progress?.subtaskProgress || 0,
             styles: {
               backgroundColor: progress?.status?.backgroundColor,
@@ -298,7 +310,7 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
             },
             type: PROJECT,
             project: parentId,
-            hideChildren: true,
+            hideChildren: !tasksUnfolded.has(itemId),
             dependencies: hasChild ? [parentId] : [parentId, "add-expanderSymbol"],
           });
         });
@@ -314,7 +326,7 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
         styles: { backgroundColor: "white", backgroundSelectedColor: "white", progressColor: "white", progressSelectedColor: "white" },
         progress: 0,
         type: PROJECT,
-        hideChildren: true,
+        hideChildren: !tasksUnfolded.has(othersId),
       });
 
       Object.keys(connections)
@@ -326,13 +338,14 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
           const workItem = map.get(`${id}`) as WorkItem;
           const progress = progressMap.get(`${teamId}_${workItem.id}`);
           const hasChild = workItem?.relations?.some(({ attributes = {} }) => attributes.name === 'Child');
-          const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}_others`
+          const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}_others`;
+          const itemId = `${teamId}_${workItem.id}`
 
           ganttTasks.push({
             start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
             end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
             name: workItem.fields[ITEM_TITLE],
-            id: `${teamId}_${workItem.id}`,
+            id: itemId,
             progress: progress?.subtaskProgress || 0,
             styles: {
               backgroundColor: progress?.status?.backgroundColor,
@@ -342,7 +355,7 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
             },
             type: PROJECT,
             project: parentId,
-            hideChildren: true,
+            hideChildren: !tasksUnfolded.has(itemId),
             dependencies: hasChild ? [parentId] : [parentId, "add-expanderSymbol"],
           });
         });

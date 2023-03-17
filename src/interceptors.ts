@@ -10,7 +10,7 @@ window.LOCAL_API_HOST_NAME = "localhost";
 
 type ApiUri = RequestInfo | URL;
 
-const getLocalAPiBasePath = (uri: string) => uri.replace(/^(?:https?:)([/]{2,2})[^/]+/, `http:$1${window.LOCAL_API_HOST_NAME}`);
+const getLocalAPiBasePath = (uri: string) => uri.replace(/^(?:https?:)([/]{2,2})dev[.][^/]+/, `http:$1${window.LOCAL_API_HOST_NAME}`);
 
 const resolveRequestUri = (req: ApiUri): ApiUri => {
   if (typeof Request !== "undefined" && req instanceof Request) {

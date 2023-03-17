@@ -4,6 +4,8 @@ import { Task } from 'gantt-task-react';
 import { Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ItemStatus, ProgressInterface } from "../../../service/ProgressCalculationService";
 import { toLocaleDateStringFactory } from "./common";
+import { Icon, IconSize } from "azure-devops-ui/Icon";
+import { Image } from "azure-devops-ui/Image";
 
 type GanttTableProps = {
   rowHeight: number;
@@ -40,7 +42,7 @@ const ganttTableBuilder: GanttTableBuilder = {
       );
       const _rowWidth = parseInt(rowWidth);
 
-      function StatusCircle({status}: {status: ItemStatus}) {
+      function StatusCircle({ status }: { status: ItemStatus }) {
         const statusPropsArray = [
           { statusValue: ItemStatus.DONE, statusProps: { ...Statuses.Success } },
           { statusValue: ItemStatus.NOT_STARTED, statusProps: { ...Statuses.Queued } },
@@ -74,11 +76,27 @@ const ganttTableBuilder: GanttTableBuilder = {
         >
           {tasks.map(t => {
             const status = map.get(t.id);
+            let deep = 0;
 
-            let expanderSymbol = "";
-            if(!t.dependencies?.find(dependency => dependency === "add-expanderSymbol")){
-              expanderSymbol = t.hideChildren ? "▶" : "▼";
+            if (status) {
+              if (status.deep) {
+                deep = status.deep;
+              } else {
+                const parent = map.get(`${status.teamId}_${status.parentId}`);
+                const parent_deep = parent?.deep ? parent.deep : 0;
+                deep = parent_deep + 10;
+                status.deep = deep;
+              }
+            } else if (t.project) {
+              deep = 10;
             }
+
+            let expanderSymbol = <Icon />;
+            if (!t.dependencies?.find(dependency => dependency === "add-expanderSymbol")) {
+              expanderSymbol = t.hideChildren ? <Icon iconName="ChevronRight" size={IconSize.small} /> : <Icon iconName="ChevronDown" size={IconSize.small} />;
+            }
+
+            const itemIcon = status && status.iconUri ? <img src={status.iconUri} height={12} width={12} /> : "";
 
             return (
               <div
@@ -91,6 +109,7 @@ const ganttTableBuilder: GanttTableBuilder = {
                   style={{
                     minWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
                     maxWidth: isNaN(_rowWidth) ? rowWidth : 2 * _rowWidth,
+                    paddingLeft: deep
                   }}
                   title={t.name}
                 >
@@ -105,7 +124,7 @@ const ganttTableBuilder: GanttTableBuilder = {
                     >
                       {expanderSymbol}
                     </div>
-                    <div>{t.name}</div>
+                    <div>{itemIcon}&nbsp;{t.name}</div>
                   </div>
                 </div>
                 <div

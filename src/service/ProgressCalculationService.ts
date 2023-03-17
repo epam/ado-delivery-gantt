@@ -4,11 +4,14 @@ import { WorkItem, WorkItemLink } from "azure-devops-extension-api/WorkItemTrack
 export interface ProgressInterface {
   parentId: number;
   subtaskProgress: number;
-  timelineProgress?: number;
-  status?: Styles;
   type: string;
   state: string;
   description: string;
+  teamId: string;
+  deep?: number;
+  status?: Styles;
+  timelineProgress?: number;
+  iconUri?: string;
 }
 
 export type TeamDictionaryValue = { connections: { [key: string]: WorkItemLink[]; }, map: Map<string, WorkItem> };
@@ -17,7 +20,7 @@ const htmlPattern = /<(?:.|\s)*?>/g;
 
 const stripHTML = (data: any) => (`${data || ""}`).replace(/<(?:.|\s)*?>/g, "");
 
-export function getProgressMap(teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>): Map<string, ProgressInterface> {
+export function getProgressMap(teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, workItemTypes: Map<string, string>): Map<string, ProgressInterface> {
   const progressMap = new Map<string, ProgressInterface>();
 
   teams.forEach(team => {
@@ -27,7 +30,12 @@ export function getProgressMap(teams: WebApiTeam[], teamDictionary: Map<string, 
       .map(itemId => connections[itemId])
       .filter(it => it.length === 1)
       .reduce((acc, next) => [...acc, ...next], [])
-      .forEach(it => calculateSimpleItems(team.id, map.get(`${it.target.id}`)!, progressMap));
+      .forEach(it => {
+        const item = map.get(`${it.target.id}`)!;
+        const progressItem = calculateSimpleItems(team.id, item);
+        const iconUri = workItemTypes.get(progressItem.type);
+        progressMap.set(`${team.id}_${item.id}`, { ...progressItem, ...(iconUri ? { iconUri } : {}) });
+      });
 
     const set = new Set<string>();
 
@@ -39,7 +47,12 @@ export function getProgressMap(teams: WebApiTeam[], teamDictionary: Map<string, 
     const parentsId = new Set(itemsWithChild.filter(it => it.source).map(it => it.source.id))
     itemsWithChild
       .filter(it => !parentsId.has(it.target.id))
-      .forEach(it => calculateSimpleItems(team.id, map.get(`${it.target.id}`)!, progressMap));
+      .forEach(it => {
+        const item = map.get(`${it.target.id}`)!;
+        const progressItem = calculateSimpleItems(team.id, item);
+        const iconUri = workItemTypes.get(progressItem.type);
+        progressMap.set(`${team.id}_${item.id}`, { ...progressItem, ...(iconUri ? { iconUri } : {}) });
+      });
 
     Object.keys(connections)
       .map(itemId => connections[itemId])
@@ -47,7 +60,17 @@ export function getProgressMap(teams: WebApiTeam[], teamDictionary: Map<string, 
       .forEach(it => {
         it.slice().reverse()
           .filter(it => parentsId.has(it.target.id))
-          .forEach(e => calculateTimelineProgressItems(team.id, map.get(`${e.target.id}`)!, progressMap))
+          .forEach(e => {
+            const item = map.get(`${e.target.id}`)!;
+            const subItems = Array.from(progressMap.values())
+              .filter(subItem => subItem.parentId === item.id)
+              .map(subItem => subItem.subtaskProgress);
+
+            const progressItem = calculateTimelineProgressItems(team.id, map.get(`${e.target.id}`)!, subItems);
+
+            const iconUri = workItemTypes.get(progressItem.type);
+            progressMap.set(`${team.id}_${item.id}`, { ...progressItem, ...(iconUri ? { iconUri } : {}) });
+          })
       });
   });
   return progressMap;
@@ -77,37 +100,36 @@ interface Styles {
   name: ItemStatus;
 }
 
-function calculateSimpleItems(id: string, item: WorkItem, progressMap: Map<string, ProgressInterface>) {
+function calculateSimpleItems(id: string, item: WorkItem) {
   const itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 100 : 0;
   const parentId = getParentId(item);
-  progressMap.set(`${id}_${item.id}`, {
+  return {
     parentId: parentId ? parseInt(parentId) : 0,
     subtaskProgress: itemProgress,
     status: itemProgress > 0 ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : { ...statusStyles[ItemStatus.NOT_STARTED], name: ItemStatus.NOT_STARTED },
     type: item.fields["System.WorkItemType"],
     state: item.fields["System.State"],
-    description: stripHTML(item.fields["System.Description"])
-  });
+    description: stripHTML(item.fields["System.Description"]),
+    teamId: id
+  };
 }
 
-function calculateTimelineProgressItems(id: string, item: WorkItem, progressMap: Map<string, ProgressInterface>) {
+function calculateTimelineProgressItems(id: string, item: WorkItem, subItemProgress: number[]) {
   // items.forEach(item => {
   const startDate = new Date(item.fields['Microsoft.VSTS.Scheduling.StartDate']);
   const endDate = new Date(item.fields['Microsoft.VSTS.Scheduling.TargetDate']);
-  const subitemProgress = Array.from(progressMap.values())
-    .filter(subItem => subItem.parentId === item.id)
-    .map(subItem => subItem.subtaskProgress);
-  const itemProgress = calculateProgress(startDate, endDate, subitemProgress);
+  const itemProgress = calculateProgress(startDate, endDate, subItemProgress);
   const parentId = getParentId(item);
 
-  progressMap.set(`${id}_${item.id}`, {
+  return {
     parentId: parentId ? parseInt(parentId) : 0,
     subtaskProgress: item.fields["System.State"] === 'Closed' ? 100 : itemProgress[0],
     status: item.fields["System.State"] === 'Closed' ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : itemProgress[1],
     type: item.fields["System.WorkItemType"],
     state: item.fields["System.State"],
-    description: stripHTML(item.fields["System.Description"])
-  });
+    description: stripHTML(item.fields["System.Description"]),
+    teamId: id
+  };
 }
 
 function getParentId(item: WorkItem) {
