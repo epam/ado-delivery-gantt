@@ -1,5 +1,5 @@
-import { GanttChartTab } from "./GanttChartTab";
+import { GanttView } from "./GanttView";
 
 export {
-  GanttChartTab
+  GanttView
 };

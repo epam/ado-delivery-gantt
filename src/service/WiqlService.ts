@@ -1,13 +1,13 @@
 import { TeamSettingsIteration, WorkRestClient } from 'azure-devops-extension-api/Work';
-import { WebApiTeam } from 'azure-devops-extension-api/Core';
+import { TeamContext, WebApiTeam } from 'azure-devops-extension-api/Core';
 import {
   WorkItemTrackingRestClient,
   WorkItemLink,
 } from 'azure-devops-extension-api/WorkItemTracking';
 
 import { getClient } from 'azure-devops-extension-api';
-import { FilterInterface } from 'component/gantt/GanttChartTab';
-import { handleError } from './ErrorHandler';
+import { FilterInterface } from 'component/gantt/GanttView';
+import { handleError } from './helper';
 
 
 const clients = {
@@ -86,34 +86,30 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<TeamIt
   ).then(async value => {
     const response = await clients.workItemsClient.getWorkItem(value?.workItems?.[0].id, projectName, ["System.IterationPath"]);
     const path: string = response?.fields?.["System.IterationPath"];
-    return path?.substring(path.lastIndexOf("\\") + 1);
-  }).catch(error=> handleError(error, 'No iteration assigned to the team',''));
-  return clients.workClient.getTeamIterations({
-    project: projectName,
-    projectId,
-    team: name,
-    teamId: id,
-  }, "current").then((iterations = []) => {
-    const currentDate = new Date();
-    const start = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    );
-    const end = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      14
-    );
 
-    return {
-      teamId: id,
-      iterations,
-      currentIteration: iterationName,
-      start: iterations[0]?.attributes?.startDate || start,
-      end: iterations[iterations.length - 1]?.attributes?.finishDate || end
-    }
-  }).catch(error => handleError(error,'Error, when getTeamIterations method called',[]));
+    return path?.substring(path.lastIndexOf("\\") + 1);
+  }).handle('', 'No iteration assigned to the team');
+
+  if (iterationName === undefined || iterationName.length == 0) {
+    return Promise.resolve({} as TeamIteration);
+  }
+
+  const teamContext = { project: projectName, projectId, team: name, teamId: id } as TeamContext;
+
+  return clients.workClient.getTeamIterations(teamContext, "current")
+    .then((iterations = []) => {
+      const currentDate = new Date();
+      const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const end = new Date(currentDate.getFullYear(), currentDate.getMonth(), 14);
+
+      return {
+        teamId: id,
+        iterations,
+        currentIteration: iterationName,
+        start: iterations[0]?.attributes?.startDate || start,
+        end: iterations[iterations.length - 1]?.attributes?.finishDate || end
+      } as TeamIteration
+    }).handle({} as TeamIteration, 'Error, when getTeamIterations method called');
 }
 
 export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterface): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
@@ -126,7 +122,7 @@ export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterf
     teamId: id,
   }).then(({ values }) => {
     const areas = values.map(({ value }) => `'${value}'`);
-    const _types = filter?.workTypes?.map(value => `'${value}'`);
+    const _types = filter?.workTypes?.map(({ name }) => `'${name}'`);
     return clients.workItemsClient
       .queryByWiql(
         {
@@ -145,13 +141,13 @@ export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterf
             const key = `${id}`;
             const { connections } = acc;
             return { ...acc, connections: { ...connections, [key]: [next] }, lastAccessedKey: key };
-          } 
+          }
           const { lastAccessedKey: key, connections } = acc;
           return { ...acc, connections: { ...connections, [key]: [...connections[key], next] } };
-          
+
         }, { connections: {} } as { lastAccessedKey: string, connections: { [key: string]: WorkItemLink[]; } });
 
         return { id, ids: workItems.map(({ target: { id } }) => id), connections };
       });
-  }).catch(error => handleError(error,'Error, when getTeamFieldValues method called',{id:{}, ids:[], connections:[]}));
+  }).handle({ id: "", ids: [], connections: {} }, 'Error, when getTeamFieldValues method called');
 };

@@ -54,19 +54,18 @@ Once it starts up, you will have to go through the steps of allowing the `localh
 Once you are logged in to Azure DevOps, your extension should be running. Set a breakpoint in a method in VS Code and you should see that breakpoint hit when that method executes.
 
 ## Release 
-### Dev
-1. Uprates vss-extension.json
-    - version
-    - publisher
-2. npm run package:dev  
-3. tfx extension publish --manifest-globs vss-extension-dev.json --overrides-file configs/dev.json --token {YOUR_TOKEN}
 
-### Release
-1. Uprates vss-extension.json
-    - version
-    - publisher
+All build/package/publish commands explicitly depend on below environment variables:
+ - NODE_ENV - stands for setting mode type default to `development`;
+ - PUBLISHER_NAME - contains actual extension publisher name;
+ - EXTENSION_NAME - specifies extension name to being displayed upon;
+ - EXTENSION_VERSION - stands for extension version.
+ 
+### Development/Production release notes
+1. Set appropriate/relevant values mentioned above env variables 
+    - Take into account for NODE_ENV variable only two supported modes are available - production/development
 2. npm run package  
-3. tfx extension publish --manifest-globs vss-extension.json --overrides-file configs/release.json --token {YOUR_TOKEN}
+3. npm run publish -- {YOUR_TOKEN}
 
 ## Icons
 [Material design icon](https://github.com/google/material-design-icons) was used, which is redistributed under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0.html). The color of the icon for dark theme was modified.

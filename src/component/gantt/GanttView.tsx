@@ -6,38 +6,32 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import * as SDK from 'azure-devops-extension-sdk';
 
 import { Gantt, Task, ViewMode } from 'gantt-task-react';
+import { WebApiTeam } from 'azure-devops-extension-api/Core';
 import {
-  getClient,
-  IProjectInfo,
-} from 'azure-devops-extension-api';
-import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
-import {
-  WorkItemTrackingRestClient,
-  WorkItemExpand,
-  WorkItemErrorPolicy,
   WorkItem,
   IWorkItemFormNavigationService,
   WorkItemTrackingServiceIds,
 } from 'azure-devops-extension-api/WorkItemTracking';
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
-import { ProgressInterface, TeamDictionaryValue, getProgressMap } from "../../service/ProgressCalculationService";
-import { ViewSwitcher } from './ViewSwitcher';
+import { ProgressInterface, TeamDictionaryValue } from "../../service/ProgressCalculationService";
 import { GanttHeader, ganttTableBuilder, ganttTooltipContentBuilder } from './table';
-import { fetchTeamWorkItems, fetchIterationDefinition, TeamIteration } from '../../service/WiqlService';
+import { fetchIterationDefinition, TeamIteration } from '../../service/WiqlService';
 import { TeamSettingsIteration } from 'azure-devops-extension-api/Work';
-import { FilterBarSection, FilterType } from "../FilterBarSection";
+import { GanttFilterBar, GanttViewBar, FilterType } from "./bars";
 import { IFilterState } from "azure-devops-ui/Utilities/Filter";
+import { AdoApiUtil, BacklogItem, Context, TeamItem } from "../../service/helper";
 
 export interface FilterInterface {
-  teams?: WebApiTeam[] | undefined;
-  workTypes?: string[],
+  teams?: TeamItem[];
+  workTypes?: BacklogItem[],
   tags?: string[],
   shift?: number;
   states: Set<string>;
 }
 
 export interface GanttChartTabProps {
-  context: Context
+  context: Context;
+  progressMap: Map<string, ProgressInterface>;
 }
 
 const VSTS_SCHEDULING_START_DATE = 'Microsoft.VSTS.Scheduling.StartDate';
@@ -57,14 +51,12 @@ const columnWidthByViewMode: { [key: string]: number } = {
 
 let visiblePageWidth: number;
 
-type Context = { project?: IProjectInfo, rootCategory: string, workItemTypes: Map<string, string> };
-
-export const GanttChartTab: React.FC<GanttChartTabProps> = ({
+export const GanttView: React.FC<GanttChartTabProps> = ({
   context,
+  progressMap
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [view, setView] = useState<ViewMode>(ViewMode.Day);
-  const [progressMap, setProgressMap] = useState<Map<string, ProgressInterface>>(new Map<string, ProgressInterface>());
   const [isChecked, setIsChecked] = useState(true);
   const [isCheckedViewLinks, setIsCheckedViewLinks] = useState(false);
   const [chartLoad, setChartLoad] = useState(true);
@@ -101,19 +93,18 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
   useEffect(() => {
     (async () => {
       await SDK.ready();
-      const { project, rootCategory, workItemTypes } = context;
-      if (project && rootCategory && workItemTypes) {
-        const teams = await fetchTeams(project);
-        const teamDictionary = await collectTeamDictionary(teams);
+      const { project, workItemTypes, options } = context;
+      if (project && workItemTypes) {
+        filterContext.current = { ...filterContext.current, teams: options.teams, workTypes: options.backlog, } as FilterInterface;
+        const [{ name: rootCategory }] = options.backlog.sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1);
+        const teams = await AdoApiUtil.fetchTeams(project, filterContext.current);
+        const teamDictionary = await AdoApiUtil.collectTeamDictionary(teams, filterContext.current);
         const teamIterations = await Promise.all(teams.map(fetchIterationDefinition));
 
-        const progressMap = buildProgressMap(teams, teamDictionary, workItemTypes);
-        setProgressMap(progressMap);
-
-        loadTasks(rootCategory, progressMap, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
+        loadTasks(rootCategory, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
       }
     })();
-  }, [context]);
+  }, [progressMap, context]);
 
   useEffect(() => {
     document.addEventListener('scroll', handleCalendarScroll, true);
@@ -139,8 +130,8 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
     const calendarTop = document.querySelectorAll(".calendarTop");
     const bar = document.querySelector(".bolt-tabbar") as HTMLElement;
     const viewContainer = document.querySelector(".ViewContainer") as HTMLElement;
-    const barYPosition = bar.getBoundingClientRect().y;
-    const barBottomPosition = String(bar.getBoundingClientRect().bottom);
+    const barYPosition = bar?.getBoundingClientRect().y;
+    const barBottomPosition = String(bar ? bar.getBoundingClientRect().bottom : 0);
     const calendarParent = document.querySelector(".calendar")?.parentElement;
     const defaultPadding = 30
 
@@ -178,17 +169,15 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
   }
 
   const reloadTasks = async (filterContext: FilterInterface) => {
-    const { states, shift } = filterContext;
-    const { project, rootCategory, workItemTypes } = context;
-
-    const teams = await fetchTeams(project!, filterContext);
-    const teamDictionary = await collectTeamDictionary(teams, filterContext);
+    const { project, options } = context;
+    const teams = await AdoApiUtil.fetchTeams(project!, filterContext);
+    const teamDictionary = await AdoApiUtil.collectTeamDictionary(teams, filterContext);
     const teamIterations = await Promise.all(teams.map(fetchIterationDefinition));
-
-    const _progressMap = states.size === 0 && !shift ? buildProgressMap(teams, teamDictionary, workItemTypes) : progressMap;
-    setProgressMap(_progressMap);
-
-    loadTasks(rootCategory, progressMap, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
+    [...progressMap.values()].forEach(it => delete it.deep);
+    const [{ name: rootCategory }] = options.backlog
+      .filter(it => filterContext.workTypes?.map(it => it.name).indexOf(it.name) || -1 >= 0)
+      .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1);
+    loadTasks(rootCategory, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
   }
 
   const onViewLinksChange = (value: boolean) => {
@@ -222,38 +211,14 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
   };
 
   useEffect(() => {
-    setChartLoad(true);
-    reloadTasks(filterContext.current)
-    setpopupClosed(false);
+    if (popupClosed) {
+      setChartLoad(true);
+      reloadTasks(filterContext.current)
+      setpopupClosed(false);
+    }
   }, [popupClosed])
 
-  const fetchTeams = async (project: IProjectInfo, filter?: FilterInterface): Promise<WebApiTeam[]> => {
-    const { name: projectName } = project;
-    const coreClient = getClient(CoreRestClient);
-    return coreClient.getTeams(projectName)
-      .then(teams => teams.filter(({ id }) => filter?.teams?.some(it => it.id === id) ?? true));
-  }
-
-  const buildProgressMap = (teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, workItemTypes: Map<string, string>) => getProgressMap(teams, teamDictionary, workItemTypes)
-
-  const collectTeamDictionary = async (teams: WebApiTeam[], filter?: FilterInterface): Promise<Map<string, TeamDictionaryValue>> => {
-    const workItemsClient = getClient(WorkItemTrackingRestClient);
-
-    const teamWorkItems = await Promise.all(teams.map(it => fetchTeamWorkItems(it, filter)));
-
-    const projectItems: Map<string, TeamDictionaryValue>[] = await Promise.all(teamWorkItems.map(({ id, ids, connections }) => ids.length > 0 ? workItemsClient.getWorkItemsBatch({
-      $expand: WorkItemExpand.All,
-      asOf: new Date(),
-      errorPolicy: WorkItemErrorPolicy.Omit,
-      fields: [],
-      ids
-    }).then((items = []) => new Map<string, TeamDictionaryValue>([[id, { connections, map: new Map(items.map(item => [`${item.id}`, item])) }]]))
-      : Promise.resolve(new Map<string, TeamDictionaryValue>([[id, { connections: {}, map: new Map() }]]))));
-
-    return projectItems.reduce((acc, next) => new Map([...acc, ...next]), new Map());
-  };
-
-  const loadTasks = (rootCategory: string, progressMap: Map<string, ProgressInterface>, teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, teamIterations: Map<string, TeamIteration>) => {
+  const loadTasks = (rootCategory: string, teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, teamIterations: Map<string, TeamIteration>) => {
     const ganttTasks: Task[] = [];
     teams.forEach(team => {
       const teamId = team.id;
@@ -365,48 +330,48 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
     setChartLoad(false);
   };
 
-  const onFilterContextChange = (project: IProjectInfo, context: FilterInterface): void => {
+  const onFilterContextChange = (context: FilterInterface): void => {
     setChartLoad(true);
     reloadTasks(context);
   };
 
-  const onTeamChange = (project: IProjectInfo, teams: WebApiTeam[], isDefaultState: boolean): void => {
+  const onTeamChange = (teams: TeamItem[], isDefaultState: boolean): void => {
     const _teamFilter = teams && teams.length > 0 ? { teams: teams, shift: undefined } : { teams: undefined, shift: undefined };
     const { states } = filterContext.current;
     !isDefaultState && states.add("team") || states.delete("team");
     filterContext.current = { ...filterContext.current, ..._teamFilter, states };
   };
 
-  const onWorkTypes = (project: IProjectInfo, items: string[], isDefaultState: boolean): void => {
+  const onWorkTypes = (items: BacklogItem[], isDefaultState: boolean): void => {
     const _workTypesFilter = { workTypes: items };
     const { states } = filterContext.current;
     !isDefaultState && states.add("work_type") || states.delete("work_type");
     filterContext.current = { ...filterContext.current, ..._workTypesFilter, states } as FilterInterface;
   };
 
-  const onIterationChange = (project: IProjectInfo, iteration: TeamSettingsIteration, isDefaultState: boolean) => {
+  const onIterationChange = (iteration: TeamSettingsIteration, isDefaultState: boolean) => {
     filterContext.current = { ...filterContext.current, shift: Number(iteration?.path) };
   };
 
-  const onFilterBarChange = (project: IProjectInfo, filterState: IFilterState): void => {
-    const teams = filterState[FilterType.TEAMS]?.value as WebApiTeam[];
-    onTeamChange(project, teams, false);
+  const onFilterBarChange = (filterState: IFilterState): void => {
+    const teams = filterState[FilterType.TEAMS]?.value as TeamItem[];
+    onTeamChange(teams, false);
 
-    const types = filterState[FilterType.TYPES]?.value as string[];
-    onWorkTypes(project, types, false);
+    const types = filterState[FilterType.TYPES]?.value as BacklogItem[];
+    onWorkTypes(types, false);
 
     const iterations = filterState[FilterType.ITERATIONS]?.value as string[];
     if (iterations && teams?.length === 1) {
-      onIterationChange(project, { path: iterations?.[0] } as TeamSettingsIteration, false);
+      onIterationChange({ path: iterations?.[0] } as TeamSettingsIteration, false);
     }
-    onFilterContextChange(project, filterContext.current);
+    onFilterContextChange(filterContext.current);
   };
 
   return (
     <div>
       <div className="ViewContainer flex-column">
         <div className="flex-row">
-          <ViewSwitcher
+          <GanttViewBar
             onViewModeChange={setView}
             onViewListChange={setIsChecked}
             onViewLinksChange={onViewLinksChange}
@@ -422,17 +387,18 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
         {
           (showFilterTab) ?
             <div className="flex-row">
-              <FilterBarSection
-                project={context?.project!}
+              <GanttFilterBar
+                ganttId={context?.ganttId!}
                 team={filterContext.current.teams?.[0]}
-                itemsFn={(project) => fetchTeams(project).then(items => [...items])}
+                teamsFn={() => context.options.teams}
+                workItemTypes={() => context.options.backlog}
                 onChange={onFilterBarChange}
               />
             </div> : ""
         }
       </div>
-      <div className="flex-column Wrapper" style={{ marginTop: 10 }} ref={wrapperRef}>
-        {!chartLoad ? (
+      {!chartLoad ? (
+        <div className="flex-column Wrapper" style={{ marginTop: 10 }} ref={wrapperRef}>
           <Gantt
             TaskListHeader={GanttHeader}
             TaskListTable={ganttTableBuilder.build(progressMap)}
@@ -447,12 +413,12 @@ export const GanttChartTab: React.FC<GanttChartTabProps> = ({
             barFill={50}
             arrowColor={isCheckedViewLinks ? 'black' : ''}
           />
-        ) : (
-          <div style={{ marginTop: 50 }}>
-            <Spinner size={SpinnerSize.large} label="Loading..." />
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div style={{ marginTop: 50 }}>
+          <Spinner size={SpinnerSize.large} label="Loading..." />
+        </div>
+      )}
     </div>
   );
 };

@@ -1,3 +1,5 @@
-import { LayoutTab } from "./LayoutTab";
+import { GanttPage } from "./GanttPage";
+import { BoardPage, ITableItem } from "./BoardPage";
+import { AddGanttPanel } from "./panel/AddGanttPanel"
 
-export { LayoutTab }
+export { GanttPage, BoardPage, ITableItem, AddGanttPanel }

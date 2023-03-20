@@ -103,10 +103,11 @@ interface Styles {
 function calculateSimpleItems(id: string, item: WorkItem) {
   const itemProgress = item.fields["Microsoft.VSTS.Common.ClosedDate"] ? 100 : 0;
   const parentId = getParentId(item);
+  const status = itemProgress > 0 ? ItemStatus.DONE : item.fields["System.State"] === "Active" ? ItemStatus.ON_TRACK : ItemStatus.NOT_STARTED;
   return {
     parentId: parentId ? parseInt(parentId) : 0,
     subtaskProgress: itemProgress,
-    status: itemProgress > 0 ? { ...statusStyles[ItemStatus.DONE], name: ItemStatus.DONE } : { ...statusStyles[ItemStatus.NOT_STARTED], name: ItemStatus.NOT_STARTED },
+    status: {...statusStyles[status], name: status},
     type: item.fields["System.WorkItemType"],
     state: item.fields["System.State"],
     description: stripHTML(item.fields["System.Description"]),
@@ -115,7 +116,6 @@ function calculateSimpleItems(id: string, item: WorkItem) {
 }
 
 function calculateTimelineProgressItems(id: string, item: WorkItem, subItemProgress: number[]) {
-  // items.forEach(item => {
   const startDate = new Date(item.fields['Microsoft.VSTS.Scheduling.StartDate']);
   const endDate = new Date(item.fields['Microsoft.VSTS.Scheduling.TargetDate']);
   const itemProgress = calculateProgress(startDate, endDate, subItemProgress);

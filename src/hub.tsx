@@ -8,15 +8,17 @@ import * as SDK from "azure-devops-extension-sdk";
 import { CommonServiceIds, IHostPageLayoutService } from "azure-devops-extension-api";
 
 import { Header, TitleSize } from "azure-devops-ui/Header";
+
 import { Page } from "azure-devops-ui/Page";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
-import { Tab, TabBar, TabSize } from "azure-devops-ui/Tabs";
 import { useEffect, useState } from "react";
-import { LayoutTab } from "./component"
-import { handleError } from "./service/ErrorHandler";
+import { BoardPage, GanttPage, ITableItem, AddGanttPanel } from "./component"
+import { ExtensionManagementUtil, GanttHubDocument, handleError } from "./service/helper";
 
 interface IHubState {
-  selectedTabId: string;
+  ganttId?: string;
+  panelExpanded: boolean;
+  backButtonEnabled: boolean;
   fullScreenMode: boolean;
   headerDescription?: string;
   useLargeTitle?: boolean;
@@ -25,7 +27,10 @@ interface IHubState {
 
 export function Hub() {
 
-  const [hubState, setHubState] = useState<IHubState>({ fullScreenMode: false, selectedTabId: 'layout' });
+  const [items, setItems] = useState<GanttHubDocument[]>([]);
+  const [hubState, setHubState] = useState<IHubState>({ backButtonEnabled: false, panelExpanded: false, fullScreenMode: false });
+
+  const { ganttId, panelExpanded, backButtonEnabled, headerDescription, useLargeTitle } = hubState;
 
   useEffect(() => {
     const load = async () => {
@@ -33,21 +38,37 @@ export function Hub() {
       initializeFullScreenState();
     };
 
-    load()
-      .catch(console.error);
+    load().catch(console.error);
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      if (!backButtonEnabled && !panelExpanded) {
+        const items = await ExtensionManagementUtil.getItems().handle([], "Failed to fetch gannt items");
+        setItems(items);
+      }
+    })();
+  }, [panelExpanded, backButtonEnabled])
 
-  const getPageContent = () => {
-    const { selectedTabId } = hubState;
-    if (selectedTabId === "layout") {
-      return <LayoutTab />;
-    }
+  const onPanelClick = async () => {
+    setHubState(current => ({ ...current, panelExpanded: true }));
   }
 
   const getCommandBarItems = (): IHeaderCommandBarItem[] => {
     const { fullScreenMode } = hubState;
     return [
+      {
+        id: "gantt",
+        text: "Gantt",
+        onActivate: () => { onPanelClick() },
+        iconProps: {
+          iconName: 'Add'
+        },
+        isPrimary: true,
+        tooltipProps: {
+          text: "Open a panel with custom extension content"
+        }
+      },
       {
         id: "fullScreen",
         ariaLabel: fullScreenMode ? "Exit full screen mode" : "Enter full screen mode",
@@ -61,7 +82,7 @@ export function Hub() {
 
   const initializeFullScreenState = async () => {
     const layoutService = await SDK.getService<IHostPageLayoutService>(CommonServiceIds.HostPageLayoutService);
-    const fullScreenMode = await layoutService.getFullScreenMode().catch(error => handleError(error,'Full screen cant be loaded',false));
+    const fullScreenMode = await layoutService.getFullScreenMode().handle(false, 'Full screen cant be loaded');
     if (fullScreenMode !== hubState.fullScreenMode) {
       setHubState(current => ({ ...current, fullScreenMode }));
     }
@@ -75,12 +96,13 @@ export function Hub() {
     layoutService.setFullScreenMode(fullScreenMode);
   }
 
-  const onSelectedTabChanged = (newTabId: string) => {
-    setHubState(current => ({ ...current, selectedTabId: newTabId }));
-  }
+  const onRowSelect = React.useCallback((data: ITableItem, isChecked: boolean) => {
+    setHubState(current => ({ ...current, ganttId: data.id, backButtonEnabled: !isChecked }))
+  }, [backButtonEnabled]);
 
-
-  const { selectedTabId, headerDescription, useCompactPivots, useLargeTitle } = hubState;
+  const onPanelDismiss = React.useCallback((isChecked: boolean) => {
+    setHubState(current => ({ ...current, panelExpanded: !isChecked }))
+  }, [panelExpanded]);
 
   return (
     <Page className="sample-hub flex-grow">
@@ -88,21 +110,19 @@ export function Hub() {
       <Header title="Delivery Gantt"
         commandBarItems={getCommandBarItems()}
         description={headerDescription}
+        backButtonProps={backButtonEnabled ? { onClick: () => setHubState(current => ({ ...current, backButtonEnabled: false })) } : undefined}
         titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />
 
+      {panelExpanded && (
+        <AddGanttPanel isChecked={panelExpanded} onDismiss={onPanelDismiss} />
+      )}
 
-      <TabBar
-        onSelectedTabChanged={onSelectedTabChanged}
-        selectedTabId={selectedTabId}
-        tabSize={useCompactPivots ? TabSize.Compact : TabSize.Tall}>
-
-        <Tab name="Layout" id="layout" />
-      </TabBar>
-
-      {getPageContent()}
+      {!backButtonEnabled ?
+        <BoardPage isChecked={backButtonEnabled} onRowSelect={onRowSelect} items={items} />
+        : <GanttPage ganttId={ganttId!} />
+      }
     </Page>
   );
-
 }
 
 const container = document.getElementById("root");

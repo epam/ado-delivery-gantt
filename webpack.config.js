@@ -3,13 +3,14 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const PATHS = { src: path.join(__dirname, 'src'), output: path.join(__dirname, 'dist') };
-const dev_suffix = ":dev";
+const dev_mode = "development";
 const dev_entry = [path.join(PATHS.src, 'interceptors.ts')];
 const assembleEntries = (entries) => Object.keys(entries)
   .map(key => ({ key, value: entries[key] }))
   .map(({ key, value }, index) => ({ [key]: !index ? [...dev_entry, ...(Array.isArray(value) && value || [value])] : value }))
   .reduce((acc, next) => ({ ...acc, ...next }), {});
-const devEntriesResolver = (entries) => (process.env.npm_lifecycle_event.endsWith(dev_suffix)) ? assembleEntries(entries) : entries;
+const devEntriesResolver = (entries) => (process.env.NODE_ENV === dev_mode) ? assembleEntries(entries) : entries;
+
 module.exports = {
   entry: devEntriesResolver({ hub: [path.join(PATHS.src, 'hub.tsx')] }),
   devtool: "inline-source-map",

@@ -16,7 +16,7 @@ const scaleOptions: Array<IListBoxItem<ViewMode>> = [
   { id: ViewMode.Year, text: ViewMode.Year, data: ViewMode.Year }
 ];
 
-export interface ViewSwitcherProps {
+export interface ViewBarProps {
   isChecked: boolean;
   isCheckedViewLinks: boolean,
   viewMode: ViewMode;
@@ -31,7 +31,7 @@ export interface ViewSwitcherProps {
 
 const selection = new DropdownSelection();
 
-export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
+export const GanttViewBar: React.FC<ViewBarProps> = ({
   onViewModeChange,
   onViewListChange,
   onViewLinksChange,

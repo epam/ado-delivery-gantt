@@ -5,7 +5,6 @@ import { Status, Statuses, StatusSize } from "azure-devops-ui/Status";
 import { ItemStatus, ProgressInterface } from "../../../service/ProgressCalculationService";
 import { toLocaleDateStringFactory } from "./common";
 import { Icon, IconSize } from "azure-devops-ui/Icon";
-import { Image } from "azure-devops-ui/Image";
 
 type GanttTableProps = {
   rowHeight: number;
