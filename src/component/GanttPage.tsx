@@ -63,7 +63,12 @@ export const GanttPage: React.FC<GanttPagerops> = ({
         setPageLoad(false);
       }
     })();
-  }, [ganttId])
+  }, [ganttId, resetProgressMap])
+
+  const reloadProgressMap = (id: string) => {
+    // id for reset only related tree!
+    setResetProgressMap(!resetProgressMap);
+  }
 
   return (
     <div className="page-content page-content-top rhythm-vertical-16">
@@ -77,6 +82,7 @@ export const GanttPage: React.FC<GanttPagerops> = ({
           <GanttView
             context={context!}
             progressMap={progressMap}
+            reloadProgressMap={reloadProgressMap}
           />
         </div>
       </Card>)

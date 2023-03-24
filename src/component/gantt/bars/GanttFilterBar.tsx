@@ -4,7 +4,7 @@ import { KeywordFilterBarItem } from "azure-devops-ui/TextFilterBarItem";
 import { FILTER_APPLIED_EVENT, Filter, IFilterState } from 'azure-devops-ui/Utilities/Filter';
 import { DropdownFilterBarItem } from 'azure-devops-ui/Dropdown';
 import { DropdownMultiSelection, DropdownSelection } from 'azure-devops-ui/Utilities/DropdownSelection';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { ObservableArray } from 'azure-devops-ui/Core/Observable';
 import { fetchIterationDefinition } from '../../../service/WiqlService';
@@ -29,8 +29,7 @@ export enum FilterType {
 // temporary filter data cache
 const filterCache = new Map<string, Promise<any>>();
 
-const computeFilterByKey = (fn: (...args: any) => Promise<any>, ...args: any): Promise<any> => {
-  const key = `${fn}${args}`;
+const computeFilterByKey = (key: string, fn: (...args: any) => Promise<any>, ...args: any): Promise<any> => {
   if (filterCache.has(key)) {
     return filterCache.get(key)!;
   }
@@ -61,6 +60,8 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
 
   const [teamSelected, setTeamSelected] = useState(team);
 
+  const filterState = useRef(filter.getState());
+
   useEffect(() => {
     const loadTeamsTypeOptions = async () => {
       const teams = teamsFn();
@@ -74,6 +75,7 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
           teamItemOptions.push(...teamOptions);
           teamsSelection.select(0, teamItemOptions.length, true, true);
         }
+        filterState.current = filter.getState();
       })
       .catch(console.error);
 
@@ -91,7 +93,7 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
 
   const fetchTeamIteration = async (team?: TeamItem) => {
     if (teamSelected) {
-      const { iterations, currentIteration } = await computeFilterByKey(fetchIterationDefinition, team!)
+      const { iterations, currentIteration } = await computeFilterByKey(team!.id, fetchIterationDefinition, team!)
         .then(definition => {
           return {
             iterations: definition.iterations,
@@ -107,6 +109,7 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
       const index = itemsOptions.findIndex(it => it.text === currentIteration)
       iterationsSelection.clear();
       iterationsSelection.select(index);
+      filterState.current = filter.getState();
     }
   };
 
@@ -127,11 +130,20 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
         .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1)
         .map(item => ({ id: item.name, data: item, text: item.name })));
       typesSelection.select(0, typeItemOptions.length, true, true);
+      filterState.current = filter.getState();
     }
     loadWorkItemTypes().catch(console.error);
-    console.log("---- loadWorkItemTypes -----", ganttId);
     return () => { typeItemOptions.removeAll() };
   }, [ganttId]);
+
+  const onFilterStateChanged = () => {
+    if (filter.getState()[FilterType.TYPES] !== filterState.current[FilterType.TYPES]
+      || filter.getState()[FilterType.TEAMS] !== filterState.current[FilterType.TEAMS]
+      || filter.getState()[FilterType.ITERATIONS] !== filterState.current[FilterType.ITERATIONS]) {
+      filterState.current = filter.getState();
+      onChange?.(filter.getState());
+    }
+  };
 
   return (
     <FilterBar filter={filter}>
@@ -143,7 +155,7 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
           filter={filter}
           items={iterationItemOptions}
           selection={iterationsSelection}
-          onCollapse={() => onChange?.(filter.getState())}
+          onCollapse={onFilterStateChanged}
           placeholder="Iterations"
         />)}
 
@@ -152,7 +164,7 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
         filter={filter}
         items={teamItemOptions}
         selection={teamsSelection}
-        onCollapse={() => onChange?.(filter.getState())}
+        onCollapse={onFilterStateChanged}
         placeholder="Teams"
       />
 
@@ -161,7 +173,7 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
         filter={filter}
         items={typeItemOptions}
         selection={typesSelection}
-        onCollapse={() => onChange?.(filter.getState())}
+        onCollapse={onFilterStateChanged}
         placeholder="Types"
       />
 

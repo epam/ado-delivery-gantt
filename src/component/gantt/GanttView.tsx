@@ -32,6 +32,7 @@ export interface FilterInterface {
 export interface GanttChartTabProps {
   context: Context;
   progressMap: Map<string, ProgressInterface>;
+  reloadProgressMap: (id: string) => void
 }
 
 const VSTS_SCHEDULING_START_DATE = 'Microsoft.VSTS.Scheduling.StartDate';
@@ -53,7 +54,8 @@ let visiblePageWidth: number;
 
 export const GanttView: React.FC<GanttChartTabProps> = ({
   context,
-  progressMap
+  progressMap,
+  reloadProgressMap
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [view, setView] = useState<ViewMode>(ViewMode.Day);
@@ -62,7 +64,7 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
   const [chartLoad, setChartLoad] = useState(true);
   const filterContext = useRef({ states: new Set() } as FilterInterface);
   const [currentPeriodColor] = useState(DEFAULT_CURRENT_PERIOD_COLOR);
-  const [popupClosed, setpopupClosed] = useState(false);
+  const [openWorkItem, setOpenWorkItem] = useState("");
   const [tasksUnfolded] = useState<Map<string, Task>>(new Map<string, Task>)
 
   const [showFilterTab, setShowFilterTab] = useState(false);
@@ -199,6 +201,7 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
     task: Task,
     isSelected: boolean
   ): Promise<void> => {
+    setOpenWorkItem("")
     const navSvc = await SDK.getService<IWorkItemFormNavigationService>(
       WorkItemTrackingServiceIds.WorkItemFormNavigationService
     );
@@ -206,17 +209,17 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
     const taskId = task.id.split("_").pop();
     if (isSelected && Number(taskId)) {
       await navSvc.openWorkItem(parseInt(taskId!));
-      setpopupClosed(true)
+      setOpenWorkItem(`${taskId}`)
     }
   };
 
   useEffect(() => {
-    if (popupClosed) {
+    if (openWorkItem.length > 0) {
       setChartLoad(true);
-      reloadTasks(filterContext.current)
-      setpopupClosed(false);
+      reloadProgressMap(openWorkItem);
+      reloadTasks(filterContext.current);
     }
-  }, [popupClosed])
+  }, [openWorkItem])
 
   const loadTasks = (rootCategory: string, teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, teamIterations: Map<string, TeamIteration>) => {
     const ganttTasks: Task[] = [];

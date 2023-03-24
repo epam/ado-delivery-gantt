@@ -44,6 +44,10 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
   const nameObservable = new ObservableValue<string | undefined>("");
   const descriptionObservable = new ObservableValue<string | undefined>("");
 
+  const ganttNameHasError = new ObservableValue<boolean | undefined>(true);
+  const teamSelectHasError = new ObservableValue<boolean | undefined>(true);
+  const backlogSelectHasError = new ObservableValue<boolean | undefined>(true);
+
   useEffect(() => {
     (async () => {
       await SDK.ready();
@@ -59,6 +63,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
         team.push(...teams.map(({ id, name }) => ({ id, text: name, data: { id, name } } as IListBoxItem<TeamItem>)));
         teams.forEach(team => teamMap.set(team.id, team));
         teamSelection.select(0, teams.length, true, true);
+        teamSelectHasError.value = teamSelection.selectedCount === 0;
 
         const backlogConfigurations = await workRestClient.getBacklogConfigurations({
           project: project.name,
@@ -78,6 +83,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
           .map(t => { return { id: t.name, data: t, text: t.name } }));
         backlogConfigurations.forEach(backlog => backlogMap.set(backlog.name, backlog));
         backlogSelection.select(0, backlogConfigurations.length, true, true);
+        backlogSelectHasError.value = backlogSelection.selectedCount === 0;
       }
     })();
   }, [])
@@ -125,14 +131,19 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
           </div>
           <div className="padding-horizontal-20 rhythm-vertical-16">
             <FormItem
-              label="Name"
+              label="Name*"
               message="Custom Gantt name"
             >
               <TextField
                 value={nameObservable}
-                onChange={(e, newValue) => (nameObservable.value = newValue)}
+                onChange={(e, newValue) => {
+                  nameObservable.value = newValue;
+                  ganttNameHasError.value = (nameObservable.value?.trim().length === 0);
+                }}
                 placeholder="Name"
                 width={TextFieldWidth.auto}
+                maxLength={64}
+                required={true}
               />
             </FormItem>
           </div>
@@ -147,13 +158,14 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
                 onChange={(e, newValue) => (descriptionObservable.value = newValue)}
                 multiline
                 rows={4}
+                maxLength={255}
                 width={TextFieldWidth.auto}
               />
             </FormItem>
           </div>
           <div className="padding-horizontal-20 rhythm-vertical-16">
             <FormItem
-              label="Team"
+              label="Team*"
               message="Team selection"
             >
               <Observer selection={teamSelection}>
@@ -169,6 +181,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
                         onClick: () => {
                           teamSelection.clear();
                           teamMap.clear();
+                          teamSelectHasError.value = true;
                         }
                       }
                     ]}
@@ -176,7 +189,10 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
                     minCalloutWidth={300}
                     showFilterBox={true}
                     renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
-                    onSelect={(_, { data }) => { !teamMap.has(data!.id) && teamMap.set(data!.id, data!) || teamMap.delete(data!.id); }}
+                    onSelect={(_, { data }) => {
+                      !teamMap.has(data!.id) && teamMap.set(data!.id, data!) || teamMap.delete(data!.id);
+                      teamSelectHasError.value = teamSelection.selectedCount === 0;
+                    }}
                     selection={teamSelection}
                   />)}
               </Observer>
@@ -184,7 +200,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
           </div>
           <div className="padding-horizontal-20 rhythm-vertical-16">
             <FormItem
-              label="Backlog"
+              label="Backlog*"
               message="Baclog selection"
             >
               <Observer selection={backlogSelection}>
@@ -200,6 +216,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
                         onClick: () => {
                           backlogSelection.clear();
                           backlogMap.clear();
+                          backlogSelectHasError.value = true;
                         }
                       }
                     ]}
@@ -207,7 +224,10 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
                     minCalloutWidth={300}
                     showFilterBox={true}
                     renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
-                    onSelect={(_, { data }) => { !backlogMap.has(data!.name) && backlogMap.set(data!.name, data!) || backlogMap.delete(data!.name); }}
+                    onSelect={(_, { data }) => {
+                      !backlogMap.has(data!.name) && backlogMap.set(data!.name, data!) || backlogMap.delete(data!.name);
+                      backlogSelectHasError.value = backlogSelection.selectedCount === 0;
+                    }}
                     selection={backlogSelection}
                   />)}
               </Observer>
@@ -221,21 +241,27 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
             text="Cancel"
             onClick={() => onDismiss(isChecked)}
           />
-          <Button
-            text="Create"
-            primary={true}
-            // disabled={nameObservable.value?.trim().length === 0  || team.value.length == 0 || backlog.value.length === 0}
-            onClick={() => {
-              onSave(nameObservable.value!,
-                descriptionObservable.value!,
-                [...teamMap.values()],
-                [...backlogMap.values()],
-              );
-            }
-            }
-          />
+          <Observer name={ganttNameHasError} teamSelect={teamSelectHasError} taskSelect={backlogSelectHasError}>
+            {() => (
+              <Button
+                text="Create"
+                primary={true}
+                disabled={ganttNameHasError.value || teamSelectHasError.value || backlogSelectHasError.value}
+                onClick={() => {
+                  onSave(nameObservable.value!,
+                    descriptionObservable.value!,
+                    [...teamMap.values()],
+                    [...backlogMap.values()],
+                  );
+                }
+                }
+              />
+            )}
+          </Observer>
         </ButtonGroup>
       </PanelFooter>
     </CustomPanel>
   );
 }
+
+

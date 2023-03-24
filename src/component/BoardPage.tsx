@@ -3,8 +3,7 @@ import "./component.scss";
 import * as React from 'react';
 
 import { Card } from "azure-devops-ui/Card";
-import { ObservableValue } from "azure-devops-ui/Core/Observable";
-import { Observer } from "azure-devops-ui/Observer";
+import { IReadonlyObservableValue, ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observable";
 import {
   ITableColumn,
   Table,
@@ -16,12 +15,9 @@ import {
   ColumnMore,
   SimpleTableCell,
 } from "azure-devops-ui/Table";
-
-import { ArrayItemProvider } from "azure-devops-ui/Utilities/Provider";
+import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
 
 import { ISimpleListCell } from "azure-devops-ui/List";
-import { Status, Statuses, StatusSize } from "azure-devops-ui/Status";
-import { css } from "azure-devops-ui/Util";
 import { Icon, IconSize } from "azure-devops-ui/Icon";
 
 import { VssPersona } from "azure-devops-ui/VssPersona";
@@ -37,17 +33,6 @@ export interface ITableItem extends ISimpleTableCell {
   last_modified: ISimpleListCell;
   created: ISimpleListCell;
 }
-
-const renderStatus = (className?: string) => {
-  return (
-    <Status
-      {...Statuses.Success}
-      ariaLabel="Success"
-      className={css(className, "bolt-table-status-icon")}
-      size={StatusSize.s}
-    />
-  );
-};
 
 const renderPlan = (className?: string) => {
   return (
@@ -88,6 +73,28 @@ const renderPersonaColumn = (
   );
 }
 
+const onSize = (event: MouseEvent | KeyboardEvent, index: number, width: number) => {
+  (columns[index].width as ObservableValue<number>).value = width;
+}
+
+const sortFunctions = [
+  // Sort on Name column
+  (left: ITableItem, right: ITableItem): number => {
+    console.log("==sortFunctions==")
+    return left.name.text!.localeCompare(right.name.text!);
+  },
+
+  // Sort on created_by column
+  (left: ITableItem, right: ITableItem): number => {
+    return left.created_by!.localeCompare(right.created_by!);
+  },
+
+  // Sort on last_modified_by column
+  (left: ITableItem, right: ITableItem): number => {
+    return left.last_modified_by!.localeCompare(right.last_modified_by!);
+  },
+];
+
 const columns: ITableColumn<ITableItem>[] = [
   {
     id: "name",
@@ -98,6 +105,7 @@ const columns: ITableColumn<ITableItem>[] = [
       ariaLabelAscending: "Sorted A to Z",
       ariaLabelDescending: "Sorted Z to A",
     },
+    onSize: onSize,
     width: new ObservableValue(-30),
   },
   {
@@ -109,6 +117,7 @@ const columns: ITableColumn<ITableItem>[] = [
       ariaLabelAscending: "Sorted A to Z",
       ariaLabelDescending: "Sorted Z to A",
     },
+    onSize: onSize,
     width: new ObservableValue(-30),
   },
   {
@@ -120,6 +129,7 @@ const columns: ITableColumn<ITableItem>[] = [
       ariaLabelAscending: "Sorted A to Z",
       ariaLabelDescending: "Sorted Z to A",
     },
+    onSize: onSize,
     width: new ObservableValue(-30),
   },
   {
@@ -127,6 +137,7 @@ const columns: ITableColumn<ITableItem>[] = [
     name: "description",
     readonly: true,
     renderCell: renderSimpleCell,
+    onSize: onSize,
     width: new ObservableValue(-30),
   },
   {
@@ -135,6 +146,7 @@ const columns: ITableColumn<ITableItem>[] = [
     name: "Last Modified",
     readonly: true,
     renderCell: renderSimpleCell,
+    onSize: onSize,
     width: new ObservableValue(-30),
   },
   {
@@ -143,6 +155,7 @@ const columns: ITableColumn<ITableItem>[] = [
     name: "Created",
     readonly: true,
     renderCell: renderSimpleCell,
+    onSize: onSize,
     width: new ObservableValue(-30),
   },
   new ColumnMore(() => {
@@ -156,24 +169,6 @@ const columns: ITableColumn<ITableItem>[] = [
   }),
 ];
 
-const sortFunctions = [
-  // Sort on Name column
-  (item1: ITableItem, item2: ITableItem): number => {
-    return item1.name.text!.localeCompare(item2.name.text!);
-  },
-
-  // Sort on created_by column
-  (item1: ITableItem, item2: ITableItem): number => {
-    return item1.created_by!.localeCompare(item2.created_by!);
-  },
-
-  // Sort on last_modified_by column
-  (item1: ITableItem, item2: ITableItem): number => {
-    return item1.last_modified_by!.localeCompare(item2.last_modified_by!);
-  },
-  null,
-];
-
 export interface BoardPageProps {
   isChecked: boolean;
   items: GanttHubDocument[];
@@ -185,6 +180,7 @@ export const BoardPage: React.FC<BoardPageProps> = ({
   items,
   onRowSelect
 }) => {
+
   const tableData = items.map(it => ({
     id: it.id,
     name: { iconProps: { render: renderPlan }, text: it.name },
@@ -194,49 +190,52 @@ export const BoardPage: React.FC<BoardPageProps> = ({
     last_modified: { iconProps: { render: renderDate }, text: it.lastModifiedDate.toISOString() },
     created: { iconProps: { render: renderDate }, text: it.createdDate.toISOString() },
   } as ITableItem));
-  const itemProvider = new ObservableValue<ArrayItemProvider<ITableItem>>(
-    new ArrayItemProvider(tableData)
-  );
 
-  const sortingBehavior = new ColumnSorting<ITableItem>((columnIndex: number, proposedSortOrder: SortOrder) => {
-    itemProvider.value =
-      new ArrayItemProvider(
-        sortItems(
-          columnIndex,
-          proposedSortOrder,
-          sortFunctions,
-          columns,
-          tableData
+  const itemProvider = new ObservableArray<ITableItem | IReadonlyObservableValue<ITableItem | undefined>>(tableData);
+
+  const sortingBehavior = React.useCallback((tableData: ITableItem[], itemProvider: ObservableArray<ITableItem | IReadonlyObservableValue<ITableItem | undefined>>) => {
+    return new ColumnSorting<ITableItem>(
+      (index: number, order: SortOrder, event: React.KeyboardEvent<HTMLElement> | React.MouseEvent<HTMLElement>) => {
+        itemProvider.splice(
+          0,
+          itemProvider.length,
+          ...sortItems<ITableItem>(
+            index,
+            order,
+            sortFunctions,
+            columns,
+            tableData
+          )
         )
-      );
-  });
+      });
+
+  }, [items])
 
   return (
     <div className="page-content page-content-top flex-column rhythm-vertical-16">
-      <Card
-        className="flex-grow bolt-table-card"
-        contentProps={{ contentPadding: false }}
-        titleProps={{ text: "Gantt Boards" }}
-      >
-        <Observer
-          itemProvider={itemProvider}
-          sortingBehavior={sortingBehavior}>
-          {
-            (observableProps: { itemProvider: ArrayItemProvider<ITableItem>, sortingBehavior: ColumnSorting<ITableItem> }) => (
-              <Table<ITableItem>
-                ariaLabel="Gantt Boards"
-                behaviors={[observableProps.sortingBehavior]}
-                className="table-example"
-                columns={columns}
-                containerClassName="h-scroll-auto"
-                itemProvider={observableProps.itemProvider}
-                showLines={true}
-                onSelect={(_event, data) => onRowSelect(data.data, isChecked)}
-              // onActivate={(_event, row) => console.log("Activated Row - " + row.index)}
-              />
-            )}
-        </Observer>
-      </Card>
+      {
+        items.length ? (<Card
+          className="flex-grow bolt-table-card"
+          contentProps={{ contentPadding: false, className: "gantt-card-content" }}
+          titleProps={{ text: "Gantt Boards" }}
+        >
+          <Table<ITableItem>
+            ariaLabel="Gantt Boards"
+            behaviors={[sortingBehavior(tableData, itemProvider)]}
+            className="table-example"
+            columns={columns}
+            containerClassName="h-scroll-auto"
+            itemProvider={(itemProvider)}
+            showLines={true}
+            onSelect={(_event, data) => onRowSelect(data.data, isChecked)}
+          />
+        </Card>)
+          : (
+            <div style={{ marginTop: 50 }}>
+              <Spinner size={SpinnerSize.large} label="Loading..." />
+            </div>
+          )
+      }
     </div>
   );
 };

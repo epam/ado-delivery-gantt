@@ -97,6 +97,7 @@ export function Hub() {
   }
 
   const onRowSelect = React.useCallback((data: ITableItem, isChecked: boolean) => {
+    setItems([]);
     setHubState(current => ({ ...current, ganttId: data.id, backButtonEnabled: !isChecked }))
   }, [backButtonEnabled]);
 
