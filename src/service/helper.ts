@@ -1,6 +1,6 @@
 import { IProjectInfo } from "azure-devops-extension-api/Common/CommonServices";
 import { ExtensionManagementRestClient } from "azure-devops-extension-api/ExtensionManagement"
-import { getClient } from 'azure-devops-extension-api';
+import { IVssRestClientOptions, getClient } from 'azure-devops-extension-api';
 import { CoreRestClient, WebApiTeam } from "azure-devops-extension-api/Core";
 import { WorkItemTrackingRestClient, WorkItemExpand, WorkItemErrorPolicy } from "azure-devops-extension-api/WorkItemTracking";
 import { FilterInterface } from "component/gantt/GanttView";
@@ -136,17 +136,17 @@ export const ExtensionManagementUtil = {
 }
 
 export const AdoApiUtil = {
-  async fetchTeams(project: IProjectInfo, filter?: FilterInterface): Promise<WebApiTeam[]> {
+  async fetchTeams(project: IProjectInfo, filter?: FilterInterface, clientOptions?: IVssRestClientOptions): Promise<WebApiTeam[]> {
     const { name: projectName } = project;
-    const coreClient = getClient(CoreRestClient);
+    const coreClient = getClient(CoreRestClient, clientOptions);
     return coreClient.getTeams(projectName)
       .then(teams => teams.filter(({ id }) => filter?.teams?.some(it => it.id === id) ?? true));
   },
 
-  async collectTeamDictionary(teams: WebApiTeam[], filter?: FilterInterface): Promise<Map<string, TeamDictionaryValue>> {
-    const workItemsClient = getClient(WorkItemTrackingRestClient);
+  async collectTeamDictionary(teams: WebApiTeam[], filter?: FilterInterface, clientOptions?: IVssRestClientOptions): Promise<Map<string, TeamDictionaryValue>> {
+    const workItemsClient = getClient(WorkItemTrackingRestClient, clientOptions);
 
-    const teamWorkItems = await Promise.all(teams.map(it => fetchTeamWorkItems(it, filter)));
+    const teamWorkItems = await Promise.all(teams.map(it => fetchTeamWorkItems(it, filter, clientOptions)));
 
     const projectItems: Map<string, TeamDictionaryValue>[] = await Promise.all(teamWorkItems.map(({ id, ids, connections }) => ids.length > 0 ? workItemsClient.getWorkItemsBatch({
       $expand: WorkItemExpand.All,

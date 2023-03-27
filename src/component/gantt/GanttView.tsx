@@ -101,7 +101,7 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
         const [{ name: rootCategory }] = options.backlog.sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1);
         const teams = await AdoApiUtil.fetchTeams(project, filterContext.current);
         const teamDictionary = await AdoApiUtil.collectTeamDictionary(teams, filterContext.current);
-        const teamIterations = await Promise.all(teams.map(fetchIterationDefinition));
+        const teamIterations = await Promise.all(teams.map(team => fetchIterationDefinition(team)));
 
         loadTasks(rootCategory, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
       }
@@ -174,7 +174,7 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
     const { project, options } = context;
     const teams = await AdoApiUtil.fetchTeams(project!, filterContext);
     const teamDictionary = await AdoApiUtil.collectTeamDictionary(teams, filterContext);
-    const teamIterations = await Promise.all(teams.map(fetchIterationDefinition));
+    const teamIterations = await Promise.all(teams.map(team => fetchIterationDefinition(team)));
     [...progressMap.values()].forEach(it => delete it.deep);
     const [{ name: rootCategory }] = options.backlog
       .filter(it => filterContext.workTypes?.map(it => it.name).indexOf(it.name) || -1 >= 0)

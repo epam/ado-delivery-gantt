@@ -1,3 +1,4 @@
+const webpack = require("webpack");
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
@@ -7,13 +8,13 @@ const dev_mode = "development";
 const dev_entry = [path.join(PATHS.src, 'interceptors.ts')];
 const assembleEntries = (entries) => Object.keys(entries)
   .map(key => ({ key, value: entries[key] }))
-  .map(({ key, value }, index) => ({ [key]: !index ? [...dev_entry, ...(Array.isArray(value) && value || [value])] : value }))
+  .map(({ key, value }, index) => ({ [key]: (process.env.NODE_ENV === dev_mode) ? [...dev_entry, ...(Array.isArray(value) && value || [value])] : value }))
   .reduce((acc, next) => ({ ...acc, ...next }), {});
-const devEntriesResolver = (entries) => (process.env.NODE_ENV === dev_mode) ? assembleEntries(entries) : entries;
 
 module.exports = {
-  entry: devEntriesResolver({ hub: [path.join(PATHS.src, 'hub.tsx')] }),
+  entry: assembleEntries({ hub: [path.join(PATHS.src, 'hub.tsx')], daemon: [path.join(PATHS.src, 'daemon/worker.ts')] }),
   devtool: "inline-source-map",
+  target: "web",
   output: {
     filename: "[name].js",
     publicPath: "/dist/",
@@ -28,6 +29,12 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: "[name].css",
+    }),
+    new webpack.ProvidePlugin({
+      //window: "typeof window !== 'undefined' ? window : self",
+    }),
+    new webpack.DefinePlugin({
+      window: 'self'
     })
   ],
   module: {

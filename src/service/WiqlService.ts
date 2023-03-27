@@ -5,17 +5,15 @@ import {
   WorkItemLink,
 } from 'azure-devops-extension-api/WorkItemTracking';
 
-import { getClient } from 'azure-devops-extension-api';
+import { IVssRestClientOptions, getClient } from 'azure-devops-extension-api';
 import { FilterInterface } from 'component/gantt/GanttView';
-import { handleError } from './helper';
-
 
 const clients = {
-  get workClient() {
-    return getClient(WorkRestClient);
+  workClient(clientOptions?: IVssRestClientOptions) {
+    return getClient(WorkRestClient, clientOptions);
   },
-  get workItemsClient() {
-    return getClient(WorkItemTrackingRestClient);
+  workItemsClient(clientOptions?: IVssRestClientOptions) {
+    return getClient(WorkItemTrackingRestClient, clientOptions);
   }
 }
 
@@ -75,16 +73,16 @@ const queries = {
 
 export type TeamIteration = { teamId: string, currentIteration?: string, iterations: TeamSettingsIteration[], start: Date, end: Date };
 
-export const fetchIterationDefinition = async (team: WebApiTeam): Promise<TeamIteration> => {
+export const fetchIterationDefinition = async (team: WebApiTeam, clientOptions?: IVssRestClientOptions): Promise<TeamIteration> => {
   const { projectName, projectId, id, name } = team;
-  const iterationName = await clients.workItemsClient.queryByWiql(
+  const iterationName = await clients.workItemsClient(clientOptions).queryByWiql(
     {
       query: queries.currentIterationName()
     },
     projectId,
     id
   ).then(async value => {
-    const response = await clients.workItemsClient.getWorkItem(value?.workItems?.[0].id, projectName, ["System.IterationPath"]);
+    const response = await clients.workItemsClient(clientOptions).getWorkItem(value?.workItems?.[0].id, projectName, ["System.IterationPath"]);
     const path: string = response?.fields?.["System.IterationPath"];
 
     return path?.substring(path.lastIndexOf("\\") + 1);
@@ -96,7 +94,7 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<TeamIt
 
   const teamContext = { project: projectName, projectId, team: name, teamId: id } as TeamContext;
 
-  return clients.workClient.getTeamIterations(teamContext, "current")
+  return clients.workClient(clientOptions).getTeamIterations(teamContext, "current")
     .then((iterations = []) => {
       const currentDate = new Date();
       const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -112,10 +110,10 @@ export const fetchIterationDefinition = async (team: WebApiTeam): Promise<TeamIt
     }).handle({} as TeamIteration, 'Error, when getTeamIterations method called');
 }
 
-export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterface): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
+export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterface, clientOptions?: IVssRestClientOptions): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
   const { projectName, projectId, id, name } = team;
 
-  return clients.workClient.getTeamFieldValues({
+  return clients.workClient(clientOptions).getTeamFieldValues({
     project: projectName,
     projectId,
     team: name,
@@ -123,7 +121,7 @@ export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterf
   }).then(({ values }) => {
     const areas = values.map(({ value }) => `'${value}'`);
     const _types = filter?.workTypes?.map(({ name }) => `'${name}'`);
-    return clients.workItemsClient
+    return clients.workItemsClient(clientOptions)
       .queryByWiql(
         {
           query: queries.taskHierarchy(areas, _types, filter?.tags, filter?.shift)

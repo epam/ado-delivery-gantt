@@ -109,7 +109,6 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
       const index = itemsOptions.findIndex(it => it.text === currentIteration)
       iterationsSelection.clear();
       iterationsSelection.select(index);
-      filterState.current = filter.getState();
     }
   };
 
