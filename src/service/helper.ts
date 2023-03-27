@@ -30,7 +30,8 @@ export type GanttHubDocument = {
   options: {
     teams: TeamItem[];
     backlog: BacklogItem[]
-  }
+  };
+  __etag?: number;
 };
 
 export interface GanttError extends Error {
@@ -132,6 +133,9 @@ export const ExtensionManagementUtil = {
   },
   async deleteItem(id: string): Promise<void> {
     return await runOn((publisherId, extensionId) => extensionManagementClient.deleteDocumentByName(publisherId, extensionId, scope, scopeValue, collectionName, id));
+  },
+  async updateItem(record: any): Promise<GanttHubDocument> {
+    return await runOn((publisherId, extensionId) => extensionManagementClient.updateDocumentByName(record, publisherId, extensionId, scope, scopeValue, collectionName));
   }
 }
 

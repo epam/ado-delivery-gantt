@@ -73,10 +73,6 @@ const renderPersonaColumn = (
   );
 }
 
-const onSize = (event: MouseEvent | KeyboardEvent, index: number, width: number) => {
-  (columns[index].width as ObservableValue<number>).value = width;
-}
-
 const sortFunctions = [
   // Sort on Name column
   (left: ITableItem, right: ITableItem): number => {
@@ -95,91 +91,101 @@ const sortFunctions = [
   },
 ];
 
-const columns: ITableColumn<ITableItem>[] = [
-  {
-    id: "name",
-    name: "Name",
-    readonly: true,
-    renderCell: renderSimpleCell,
-    sortProps: {
-      ariaLabelAscending: "Sorted A to Z",
-      ariaLabelDescending: "Sorted Z to A",
-    },
-    onSize: onSize,
-    width: new ObservableValue(-30),
-  },
-  {
-    id: "created_by",
-    name: "Created by",
-    readonly: true,
-    renderCell: renderPersonaColumn,
-    sortProps: {
-      ariaLabelAscending: "Sorted A to Z",
-      ariaLabelDescending: "Sorted Z to A",
-    },
-    onSize: onSize,
-    width: new ObservableValue(-30),
-  },
-  {
-    id: "last_modified_by",
-    name: "Last Modified by",
-    readonly: true,
-    renderCell: renderPersonaColumn,
-    sortProps: {
-      ariaLabelAscending: "Sorted A to Z",
-      ariaLabelDescending: "Sorted Z to A",
-    },
-    onSize: onSize,
-    width: new ObservableValue(-30),
-  },
-  {
-    id: "description",
-    name: "description",
-    readonly: true,
-    renderCell: renderSimpleCell,
-    onSize: onSize,
-    width: new ObservableValue(-30),
-  },
-  {
-    id: "last_modified",
-    maxWidth: 300,
-    name: "Last Modified",
-    readonly: true,
-    renderCell: renderSimpleCell,
-    onSize: onSize,
-    width: new ObservableValue(-30),
-  },
-  {
-    id: "created",
-    maxWidth: 300,
-    name: "Created",
-    readonly: true,
-    renderCell: renderSimpleCell,
-    onSize: onSize,
-    width: new ObservableValue(-30),
-  },
-  new ColumnMore(() => {
-    return {
-      id: "sub-menu",
-      items: [
-        { id: "edit", text: "edit" },
-        { id: "delete", text: "delete" },
-      ],
-    };
-  }),
-];
-
 export interface BoardPageProps {
   isChecked: boolean;
   items: GanttHubDocument[];
   onRowSelect: (data: ITableItem, isChecked: boolean) => void;
+  onRowEdit: (editPanelItemId: GanttHubDocument) => void;
 }
 
 export const BoardPage: React.FC<BoardPageProps> = ({
   isChecked,
   items,
-  onRowSelect
+  onRowSelect,
+  onRowEdit
 }) => {
+  const onSize = (event: MouseEvent | KeyboardEvent, index: number, width: number) => {
+    (columns[index].width as ObservableValue<number>).value = width;
+  }
+
+  const columns: ITableColumn<ITableItem>[] = [
+    {
+      id: "name",
+      name: "Name",
+      readonly: true,
+      renderCell: renderSimpleCell,
+      sortProps: {
+        ariaLabelAscending: "Sorted A to Z",
+        ariaLabelDescending: "Sorted Z to A",
+      },
+      onSize: onSize,
+      width: new ObservableValue(-30),
+    },
+    {
+      id: "created_by",
+      name: "Created by",
+      readonly: true,
+      renderCell: renderPersonaColumn,
+      sortProps: {
+        ariaLabelAscending: "Sorted A to Z",
+        ariaLabelDescending: "Sorted Z to A",
+      },
+      onSize: onSize,
+      width: new ObservableValue(-30),
+    },
+    {
+      id: "last_modified_by",
+      name: "Last Modified by",
+      readonly: true,
+      renderCell: renderPersonaColumn,
+      sortProps: {
+        ariaLabelAscending: "Sorted A to Z",
+        ariaLabelDescending: "Sorted Z to A",
+      },
+      onSize: onSize,
+      width: new ObservableValue(-30),
+    },
+    {
+      id: "description",
+      name: "description",
+      readonly: true,
+      renderCell: renderSimpleCell,
+      onSize: onSize,
+      width: new ObservableValue(-30),
+    },
+    {
+      id: "last_modified",
+      maxWidth: 300,
+      name: "Last Modified",
+      readonly: true,
+      renderCell: renderSimpleCell,
+      onSize: onSize,
+      width: new ObservableValue(-30),
+    },
+    {
+      id: "created",
+      maxWidth: 300,
+      name: "Created",
+      readonly: true,
+      renderCell: renderSimpleCell,
+      onSize: onSize,
+      width: new ObservableValue(-30),
+    },
+    new ColumnMore((item) => {
+      return {
+        id: "sub-menu",
+        items: [
+          { id: "edit", text: "Edit", onActivate: () => openEditPanel(item) },
+          { id: "delete", text: "Delete" },
+        ],
+      };
+    }),
+  ];
+
+  const openEditPanel = (item: ITableItem) => {
+    const selectedItem = items.find(it => it.id === item.id);
+    selectedItem && onRowEdit(selectedItem);
+  }
 
   const tableData = items.map(it => ({
     id: it.id,

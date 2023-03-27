@@ -1,3 +1,3 @@
-import { AddGanttPanel } from "./AddGanttPanel";
+import { GanttDetailsPanel } from "./GanttDetailsPanel";
 
-export {AddGanttPanel}
+export {GanttDetailsPanel}

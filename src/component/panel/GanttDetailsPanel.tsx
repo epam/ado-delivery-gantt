@@ -7,7 +7,7 @@ import {
   getClient,
   IProjectPageService,
 } from 'azure-devops-extension-api';
-import { CoreRestClient } from 'azure-devops-extension-api/Core';
+import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
 
 import { BacklogItem, ExtensionManagementUtil, GanttHubDocument, TeamItem } from "../../service/helper";
 import { ContentSize } from "azure-devops-ui/Callout";
@@ -24,12 +24,14 @@ import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { DropdownMultiSelection } from "azure-devops-ui/Utilities/DropdownSelection";
 import { BacklogLevelConfiguration, WorkRestClient } from "azure-devops-extension-api/Work";
 
-export interface NewPanelProps {
+export interface GanttPanelProps {
+  itemToEdit?: GanttHubDocument;
   isChecked: boolean;
   onDismiss: (isChecked: boolean) => void;
 }
 
-export const AddGanttPanel: React.FC<NewPanelProps> = ({
+export const GanttDetailsPanel: React.FC<GanttPanelProps> = ({
+  itemToEdit,
   isChecked,
   onDismiss,
 }) => {
@@ -41,10 +43,10 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
   const backlog = new ObservableArray<IListBoxItem<BacklogItem>>();
   const backlogMap = new Map<string, BacklogItem>();
 
-  const nameObservable = new ObservableValue<string | undefined>("");
-  const descriptionObservable = new ObservableValue<string | undefined>("");
+  const nameObservable = new ObservableValue<string | undefined>(itemToEdit ? itemToEdit.name : "");
+  const descriptionObservable = new ObservableValue<string | undefined>(itemToEdit ? itemToEdit?.description : "");
 
-  const ganttNameHasError = new ObservableValue<boolean | undefined>(true);
+  const ganttNameHasError = new ObservableValue<boolean | undefined>(itemToEdit == undefined);
   const teamSelectHasError = new ObservableValue<boolean | undefined>(true);
   const backlogSelectHasError = new ObservableValue<boolean | undefined>(true);
 
@@ -61,8 +63,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
 
         const teams = await coreClient.getTeams(project.name);
         team.push(...teams.map(({ id, name }) => ({ id, text: name, data: { id, name } } as IListBoxItem<TeamItem>)));
-        teams.forEach(team => teamMap.set(team.id, team));
-        teamSelection.select(0, teams.length, true, true);
+        itemToEdit ? markSelectedTeams(teams) : selectAllTeams(teams)
         teamSelectHasError.value = teamSelection.selectedCount === 0;
 
         const backlogConfigurations = await workRestClient.getBacklogConfigurations({
@@ -81,28 +82,60 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
         backlog.push(...backlogConfigurations
           .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1)
           .map(t => { return { id: t.name, data: t, text: t.name } }));
-        backlogConfigurations.forEach(backlog => backlogMap.set(backlog.name, backlog));
-        backlogSelection.select(0, backlogConfigurations.length, true, true);
+        itemToEdit ? markSelectedBacklogs(backlogConfigurations) : selectAllBacklogs(backlogConfigurations)
         backlogSelectHasError.value = backlogSelection.selectedCount === 0;
       }
     })();
   }, [])
 
+  const selectAllTeams = (teams: WebApiTeam[]): void => {
+    teams.forEach(team => teamMap.set(team.id, team));
+    teamSelection.select(0, teams.length, true, true);
+  }
+
+  const markSelectedTeams = (teams: WebApiTeam[]): void => {
+    const teamIds = teams.map(t => t.id);
+    itemToEdit?.options.teams
+      .forEach(team => {
+        teamMap.set(team.id, team);
+        teamIds.some(t => t === team.id) && teamSelection?.select(teamIds.indexOf(team.id), 1, true, true);
+      })
+  }
+
+  const selectAllBacklogs = (backlogConfigurations: BacklogItem[]): void => {
+    backlogConfigurations.forEach(backlog => backlogMap.set(backlog.name, backlog));
+    backlogSelection.select(0, backlogConfigurations.length, true, true);
+  }
+
+  const markSelectedBacklogs = (backlogConfigurations: BacklogItem[]): void => {
+    backlogConfigurations.forEach((backlog, index) => {
+      if (itemToEdit?.options.backlog.some(b => b.name == backlog.name)) {
+        backlogMap.set(backlog.name, backlog)
+        backlogSelection.select(index, 1, true, true);
+      }
+    })
+  }
+
   const onSave = React.useCallback(async (name: string, description: string, teams: TeamItem[], backlog: BacklogItem[]) => {
     const createdBy = SDK.getUser().displayName;
     const now = new Date().toISOString();
-    const item = await ExtensionManagementUtil.createItem({
+    const itemDetails = {
       name,
       description,
       createdBy,
       lastModifiedBy: createdBy,
-      createdDate: now,
+      createdDate: itemToEdit?.createdDate || now,
       lastModifiedDate: now,
       options: {
         teams,
         backlog
-      }
-    }).handle({} as GanttHubDocument, "Unable create new gant board.", true)
+      },
+      __etag: (itemToEdit ? itemToEdit.__etag : undefined),
+      id: (itemToEdit ? itemToEdit.id : undefined)
+    };
+    const item = itemToEdit
+      ? await ExtensionManagementUtil.updateItem(itemDetails).handle({} as GanttHubDocument, "Unable to update Gantt board.", true)
+      : await ExtensionManagementUtil.createItem(itemDetails).handle({} as GanttHubDocument, "Unable to create new Gantt board.", true)
 
     if (Object.keys(item).length !== 0) {
       onDismiss(isChecked);
@@ -117,7 +150,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
       <CustomHeader className="bolt-header-with-commandbar">
         <HeaderTitleArea>
           <HeaderTitleRow>
-            <HeaderTitle titleSize={TitleSize.Large} children={"New delivery gantt"}></HeaderTitle>
+            <HeaderTitle titleSize={TitleSize.Large} children={itemToEdit ? "Edit " + itemToEdit.name : "New delivery gantt"}></HeaderTitle>
           </HeaderTitleRow>
         </HeaderTitleArea>
         <PanelCloseButton
@@ -140,7 +173,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
                   nameObservable.value = newValue;
                   ganttNameHasError.value = (nameObservable.value?.trim().length === 0);
                 }}
-                placeholder="Name"
+                placeholder={itemToEdit ? itemToEdit.name : "Name"}
                 width={TextFieldWidth.auto}
                 maxLength={64}
                 required={true}
@@ -159,6 +192,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
                 multiline
                 rows={4}
                 maxLength={255}
+                placeholder={itemToEdit ? itemToEdit.description : "Description"}
                 width={TextFieldWidth.auto}
               />
             </FormItem>
@@ -201,7 +235,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
           <div className="padding-horizontal-20 rhythm-vertical-16">
             <FormItem
               label="Backlog*"
-              message="Baclog selection"
+              message="Backlog selection"
             >
               <Observer selection={backlogSelection}>
                 {() => (
@@ -244,7 +278,7 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
           <Observer name={ganttNameHasError} teamSelect={teamSelectHasError} taskSelect={backlogSelectHasError}>
             {() => (
               <Button
-                text="Create"
+                text={itemToEdit ? "Update" : "Create"}
                 primary={true}
                 disabled={ganttNameHasError.value || teamSelectHasError.value || backlogSelectHasError.value}
                 onClick={() => {
@@ -263,5 +297,3 @@ export const AddGanttPanel: React.FC<NewPanelProps> = ({
     </CustomPanel>
   );
 }
-
-

@@ -12,7 +12,7 @@ import { Header, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { useEffect, useState } from "react";
-import { AddGanttPanel, BoardPage, GanttPage, ITableItem } from "./component"
+import { GanttDetailsPanel, BoardPage, GanttPage, ITableItem } from "./component"
 import { ExtensionManagementUtil, GanttHubDocument } from "./service/helper";
 import { ProgressInterface } from "service/ProgressCalculationService";
 import { DaemonCommandType, DaemonConfiguration, DaemonEventCallback, DaemonEventHandler, DaemonEventType, ProgressMapReadyPayload, daemonCommandBuilder } from "./daemon";
@@ -21,6 +21,7 @@ import { HubContext, daemonController, RootHubContext } from "./context";
 interface IHubState {
   ganttId?: string;
   panelExpanded: boolean;
+  itemToEdit?: GanttHubDocument;
   backButtonEnabled: boolean;
   fullScreenMode: boolean;
   headerDescription?: string;
@@ -35,9 +36,9 @@ export function Hub() {
     workItemTypes: new Map<string, string>(),
     progressMap: new Map<string, ProgressInterface>()
   } as HubContext);
-  const [hubState, setHubState] = useState<IHubState>({ backButtonEnabled: false, panelExpanded: false, fullScreenMode: false });
+  const [hubState, setHubState] = useState<IHubState>({ backButtonEnabled: false, panelExpanded: false, itemToEdit: undefined, fullScreenMode: false });
 
-  const { ganttId, panelExpanded, backButtonEnabled, headerDescription, useLargeTitle } = hubState;
+  const { ganttId, panelExpanded, itemToEdit, backButtonEnabled, headerDescription, useLargeTitle } = hubState;
   const { workItemTypes, progressMap, project } = context;
 
   useEffect(() => {
@@ -177,8 +178,12 @@ export function Hub() {
   }, [backButtonEnabled]);
 
   const onPanelDismiss = React.useCallback((isChecked: boolean) => {
-    setHubState(current => ({ ...current, panelExpanded: !isChecked }))
+    setHubState(current => ({ ...current, panelExpanded: !isChecked, itemToEdit: undefined }))
   }, [panelExpanded]);
+
+  const showEditPanel = React.useCallback((itemToEdit: GanttHubDocument) => {
+    setHubState(current => ({ ...current, panelExpanded: true, itemToEdit: itemToEdit }))
+  }, [itemToEdit]);
 
   return (
     <RootHubContext.Provider value={{ workItemTypes, progressMap, project, daemonController }}>
@@ -191,11 +196,11 @@ export function Hub() {
           titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />
 
         {panelExpanded && (
-          <AddGanttPanel isChecked={panelExpanded} onDismiss={onPanelDismiss} />
+          <GanttDetailsPanel itemToEdit={itemToEdit} isChecked={panelExpanded} onDismiss={onPanelDismiss} />
         )}
 
         {!backButtonEnabled ?
-          <BoardPage isChecked={backButtonEnabled} onRowSelect={onRowSelect} items={items} />
+          <BoardPage onRowEdit={showEditPanel} isChecked={backButtonEnabled} onRowSelect={onRowSelect} items={items} />
           : <GanttPage ganttId={ganttId!} />
         }
 
