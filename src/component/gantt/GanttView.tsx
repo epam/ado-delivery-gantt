@@ -38,6 +38,7 @@ export interface GanttChartTabProps {
 const VSTS_SCHEDULING_START_DATE = 'Microsoft.VSTS.Scheduling.StartDate';
 const VSTS_SCHEDULING_TARGET_DATE = 'Microsoft.VSTS.Scheduling.TargetDate';
 const WORK_ITEM_TYPE = 'System.WorkItemType';
+const WORK_ITEM_TAGS = "System.Tags";
 const ITEM_TITLE = 'System.Title';
 const PROJECT = 'project';
 const DEFAULT_CURRENT_PERIOD_COLOR = '#F3EFEF'
@@ -63,6 +64,7 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
   const [isCheckedViewLinks, setIsCheckedViewLinks] = useState(false);
   const [chartLoad, setChartLoad] = useState(true);
   const filterContext = useRef({ states: new Set() } as FilterInterface);
+  const ganttTags = useRef<string[]>();
   const [currentPeriodColor] = useState(DEFAULT_CURRENT_PERIOD_COLOR);
   const [openWorkItem, setOpenWorkItem] = useState("");
   const [tasksUnfolded] = useState<Map<string, Task>>(new Map<string, Task>)
@@ -177,7 +179,7 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
     const teamIterations = await Promise.all(teams.map(team => fetchIterationDefinition(team)));
     [...progressMap.values()].forEach(it => delete it.deep);
     const [{ name: rootCategory }] = options.backlog
-      .filter(it => filterContext.workTypes?.map(it => it.name).indexOf(it.name) || -1 >= 0)
+      .filter(it => filterContext.workTypes?.map(it => it.name).indexOf(it.name) || true)
       .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1);
     loadTasks(rootCategory, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
   }
@@ -219,10 +221,11 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
       reloadProgressMap(openWorkItem);
       reloadTasks(filterContext.current);
     }
-  }, [openWorkItem])
+  }, [openWorkItem]);
 
   const loadTasks = (rootCategory: string, teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, teamIterations: Map<string, TeamIteration>) => {
     const ganttTasks: Task[] = [];
+    const tags = new Set<string>();
     teams.forEach(team => {
       const teamId = team.id;
       const iteration = teamIterations.get(teamId);
@@ -309,6 +312,9 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
           const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}_others`;
           const itemId = `${teamId}_${workItem.id}`
 
+          const itemTags = workItem.fields[WORK_ITEM_TAGS] as string;
+          itemTags?.split(";").filter(it => it !== undefined).map(it => it.trim()).forEach(tags.add, tags);
+
           ganttTasks.push({
             start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
             end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
@@ -329,6 +335,7 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
         });
     });
 
+    ganttTags.current = [...tags];
     setTasks(ganttTasks);
     setChartLoad(false);
   };
@@ -356,12 +363,19 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
     filterContext.current = { ...filterContext.current, shift: Number(iteration?.path) };
   };
 
+  const onTagsChange = (tags: string[]) => {
+    filterContext.current = { ...filterContext.current, tags: tags };
+  }
+
   const onFilterBarChange = (filterState: IFilterState): void => {
     const teams = filterState[FilterType.TEAMS]?.value as TeamItem[];
     onTeamChange(teams, false);
 
     const types = filterState[FilterType.TYPES]?.value as BacklogItem[];
     onWorkTypes(types, false);
+
+    const tags = filterState[FilterType.TAGS]?.value as string[];
+    onTagsChange(tags);
 
     const iterations = filterState[FilterType.ITERATIONS]?.value as string[];
     if (iterations && teams?.length === 1) {
@@ -391,6 +405,7 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
           (showFilterTab) ?
             <div className="flex-row">
               <GanttFilterBar
+                tags={ganttTags.current}
                 ganttId={context?.ganttId!}
                 team={filterContext.current.teams?.[0]}
                 teamsFn={() => context.options.teams}

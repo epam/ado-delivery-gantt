@@ -9,10 +9,11 @@ import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { ObservableArray } from 'azure-devops-ui/Core/Observable';
 import { fetchIterationDefinition } from '../../../service/WiqlService';
 import { TeamSettingsIteration } from 'azure-devops-extension-api/Work';
-import { BacklogItem, TeamItem } from 'service/helper';
+import { BacklogItem, TeamItem } from '../../../service/helper';
 
 
 export interface FilterBarProps {
+  tags?: string[],
   ganttId: String,
   team?: TeamItem,
   teamsFn: () => TeamItem[];
@@ -23,7 +24,8 @@ export interface FilterBarProps {
 export enum FilterType {
   TEAMS = "teams",
   TYPES = "types",
-  ITERATIONS = "iterations"
+  ITERATIONS = "iterations",
+  TAGS = "tags"
 }
 
 // temporary filter data cache
@@ -46,11 +48,16 @@ const teamItemOptions = new ObservableArray<IListBoxItem<TeamItem>>();
 const typesSelection = new DropdownMultiSelection();
 const typeItemOptions = new ObservableArray<IListBoxItem<BacklogItem>>();
 
+// tags
+const tagSelection = new DropdownMultiSelection();
+const tagItemOptions = new ObservableArray<IListBoxItem<string>>();
+
 // iterations
 const iterationsSelection = new DropdownSelection();
 const iterationItemOptions = new ObservableArray<IListBoxItem<string>>();
 
 export const GanttFilterBar: React.FC<FilterBarProps> = ({
+  tags,
   ganttId,
   team,
   teamsFn,
@@ -63,6 +70,14 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
   const filterState = useRef(filter.getState());
 
   useEffect(() => {
+    if (tags && tagItemOptions.length === 0) {
+      const tagOptions = tags.map(tag => ({ id: tag, text: tag, data: tag } as IListBoxItem<string>));
+      tagItemOptions.removeAll();
+      tagItemOptions.push(...tagOptions);
+    }
+  }, [tags]);
+
+  useEffect(() => {
     const loadTeamsTypeOptions = async () => {
       const teams = teamsFn();
       const itemsOptions: Array<IListBoxItem<TeamItem>> = teams.map(it => ({ id: it.id, text: it.name, data: it } as IListBoxItem<TeamItem>));
@@ -73,7 +88,6 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
       .then((teamOptions = []) => {
         if (teamOptions.length > 0) {
           teamItemOptions.push(...teamOptions);
-          teamsSelection.select(0, teamItemOptions.length, true, true);
         }
         filterState.current = filter.getState();
       })
@@ -128,7 +142,6 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
       typeItemOptions.push(...workItemTypes()
         .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1)
         .map(item => ({ id: item.name, data: item, text: item.name })));
-      typesSelection.select(0, typeItemOptions.length, true, true);
       filterState.current = filter.getState();
     }
     loadWorkItemTypes().catch(console.error);
@@ -138,7 +151,8 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
   const onFilterStateChanged = () => {
     if (filter.getState()[FilterType.TYPES] !== filterState.current[FilterType.TYPES]
       || filter.getState()[FilterType.TEAMS] !== filterState.current[FilterType.TEAMS]
-      || filter.getState()[FilterType.ITERATIONS] !== filterState.current[FilterType.ITERATIONS]) {
+      || filter.getState()[FilterType.ITERATIONS] !== filterState.current[FilterType.ITERATIONS]
+      || filter.getState()[FilterType.TAGS] !== filterState.current[FilterType.TAGS]) {
       filterState.current = filter.getState();
       onChange?.(filter.getState());
     }
@@ -174,6 +188,15 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
         selection={typesSelection}
         onCollapse={onFilterStateChanged}
         placeholder="Types"
+      />
+
+      <DropdownFilterBarItem
+        filterItemKey={FilterType.TAGS}
+        filter={filter}
+        items={tagItemOptions}
+        selection={tagSelection}
+        onCollapse={onFilterStateChanged}
+        placeholder="Tags"
       />
 
     </FilterBar>
