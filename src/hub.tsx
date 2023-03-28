@@ -12,10 +12,10 @@ import { Header, TitleSize } from "azure-devops-ui/Header";
 import { Page } from "azure-devops-ui/Page";
 import { IHeaderCommandBarItem } from "azure-devops-ui/HeaderCommandBar";
 import { useEffect, useState } from "react";
+import { ProgressInterface } from "service/ProgressCalculationService";
 import { GanttDetailsPanel, BoardPage, GanttPage, ITableItem } from "./component"
 import { ExtensionManagementUtil, GanttHubDocument } from "./service/helper";
-import { ProgressInterface } from "service/ProgressCalculationService";
-import { DaemonCommandType, DaemonConfiguration, DaemonEventCallback, DaemonEventHandler, DaemonEventType, ProgressMapReadyPayload, daemonCommandBuilder } from "./daemon";
+import { DaemonCommandType, DaemonConfiguration, DaemonEventCallback, DaemonEventHandler, DaemonEventType, ProgressMapReadyPayload, daemonCommandBuilder } from "./worker/api";
 import { HubContext, daemonController, RootHubContext } from "./context";
 
 interface IHubState {
@@ -68,6 +68,8 @@ export function Hub() {
 
       daemonController.fireCommand(daemonCommandBuilder()
         .type(DaemonCommandType.AGGREGATE_EXECUTE)
+        .source(Hub.name)
+        .cancelable(true)
         .next(daemonCommandBuilder()
           .type(DaemonCommandType.NO_OP)
           .payload({ project })
@@ -78,7 +80,7 @@ export function Hub() {
               .build())
             .build())
           .build())
-        .build())
+        .build());
 
       initializeFullScreenState();
     };
@@ -103,6 +105,7 @@ export function Hub() {
 
     daemonController.registerHandler(DaemonEventHandler.builder<HubContext>()
       .eventType(DaemonEventType.AGGREGATE_READY)
+      .componentName(Hub.name)
       .callback(contextLoaded)
       .build());
 
@@ -110,10 +113,10 @@ export function Hub() {
       .eventType(DaemonEventType.PROGRESS_MAP_READY)
       .callback(progressMapReady)
       .build());
-    
+
     return () => {
-      daemonController.unregisterHandler(DaemonEventType.AGGREGATE_READY, contextLoaded);
-      daemonController.unregisterHandler(DaemonEventType.PROGRESS_MAP_READY, progressMapReady);
+      daemonController.unregisterHandler(DaemonEventType.PROGRESS_MAP_READY);
+      daemonController.unregisterHandler(DaemonEventType.AGGREGATE_READY + Hub.name);
     }
   }, [context]);
 
@@ -130,9 +133,9 @@ export function Hub() {
     setHubState(current => ({ ...current, panelExpanded: true }));
   }
 
-  const getCommandBarItems = (): IHeaderCommandBarItem[] => {
+  const getCommandBarItems = (ids: Set<string> = new Set()): IHeaderCommandBarItem[] => {
     const { fullScreenMode } = hubState;
-    return [
+    const buttons = [
       {
         id: "gantt",
         text: "Gantt",
@@ -154,6 +157,7 @@ export function Hub() {
         onActivate: () => { onToggleFullScreenMode() }
       }
     ];
+    return buttons.filter(it => !ids.has(it.id));
   };
 
   const initializeFullScreenState = async () => {
@@ -182,22 +186,27 @@ export function Hub() {
   }, [panelExpanded]);
 
   const showEditPanel = React.useCallback((itemToEdit: GanttHubDocument) => {
-    setHubState(current => ({ ...current, panelExpanded: true, itemToEdit: itemToEdit }))
+    setHubState(current => ({ ...current, panelExpanded: true, itemToEdit }))
   }, [itemToEdit]);
+
+  const backButtonHandler = () => {
+    daemonController.fireCommand(daemonCommandBuilder().type(DaemonCommandType.CANCEL).build());
+    setHubState(current => ({ ...current, backButtonEnabled: false }));
+  }
 
   return (
     <RootHubContext.Provider value={{ workItemTypes, progressMap, project, daemonController }}>
       <Page className="sample-hub flex-grow">
 
         <Header title="Delivery Gantt"
-          commandBarItems={getCommandBarItems()}
+          commandBarItems={!backButtonEnabled ? getCommandBarItems() : getCommandBarItems(new Set(["gantt"]))}
           description={headerDescription}
-          backButtonProps={backButtonEnabled ? { onClick: () => setHubState(current => ({ ...current, backButtonEnabled: false })) } : undefined}
+          backButtonProps={backButtonEnabled ? { onClick: backButtonHandler } : undefined}
           titleSize={useLargeTitle ? TitleSize.Large : TitleSize.Medium} />
 
-        {panelExpanded && (
+        {panelExpanded &&
           <GanttDetailsPanel itemToEdit={itemToEdit} isChecked={panelExpanded} onDismiss={onPanelDismiss} />
-        )}
+        }
 
         {!backButtonEnabled ?
           <BoardPage onRowEdit={showEditPanel} isChecked={backButtonEnabled} onRowSelect={onRowSelect} items={items} />

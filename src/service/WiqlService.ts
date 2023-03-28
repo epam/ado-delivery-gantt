@@ -18,7 +18,7 @@ const clients = {
 }
 
 const queries = {
-  taskHierarchy(areas: string[], workItems?: string[], tags?: string[], shift?: number) {
+  taskHierarchy(areas: string[], workItems?: string[], shift?: number) {
     return `
         SELECT
             [System.Id],
@@ -34,10 +34,11 @@ const queries = {
                 AND [Source].[System.TeamProject] = @project
                 ${shift ? `AND [Source].[System.IterationPath] = @CurrentIteration ${shift >= 0 ? ` + ${shift}` : ` - ${shift}`} ` : ``}
                 AND [Source].[System.State] <> ''
-                ${tags?.map((tag) => `AND [Source].[System.Tags] CONTAINS '${tag}'`).join(' ') ?? ''}
                 AND [Source].[System.WorkItemType] ${workItems && workItems.length > 0 ? `in (${workItems})` : `<> ''`}
             )
-            AND ([System.Links.LinkType] = 'System.LinkTypes.Hierarchy-Forward')
+            AND (
+              [System.Links.LinkType] = 'System.LinkTypes.Hierarchy-Forward'
+            )
             AND (
                 [Target].[System.TeamProject] = @project
                 AND [Target].[System.WorkItemType] ${workItems && workItems.length > 0 ? `in (${workItems})` : `<> ''`}
@@ -124,7 +125,7 @@ export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterf
     return clients.workItemsClient(clientOptions)
       .queryByWiql(
         {
-          query: queries.taskHierarchy(areas, _types, filter?.tags, filter?.shift)
+          query: queries.taskHierarchy(areas, _types, filter?.shift)
         },
         projectId,
         id

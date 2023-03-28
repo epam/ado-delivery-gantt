@@ -9,7 +9,6 @@ import {
 } from 'azure-devops-extension-api';
 import { CoreRestClient, WebApiTeam } from 'azure-devops-extension-api/Core';
 
-import { BacklogItem, ExtensionManagementUtil, GanttHubDocument, TeamItem } from "../../service/helper";
 import { ContentSize } from "azure-devops-ui/Callout";
 import { CustomHeader, HeaderTitle, HeaderTitleArea, HeaderTitleRow, TitleSize } from "azure-devops-ui/Header";
 import { CustomPanel, PanelCloseButton, PanelContent, PanelFooter } from "azure-devops-ui/Panel";
@@ -23,6 +22,7 @@ import { ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observabl
 import { IListBoxItem } from "azure-devops-ui/ListBox";
 import { DropdownMultiSelection } from "azure-devops-ui/Utilities/DropdownSelection";
 import { BacklogLevelConfiguration, WorkRestClient } from "azure-devops-extension-api/Work";
+import { BacklogItem, ExtensionManagementUtil, GanttHubDocument, TeamItem } from "../../service/helper";
 
 export interface GanttPanelProps {
   itemToEdit?: GanttHubDocument;
@@ -71,17 +71,15 @@ export const GanttDetailsPanel: React.FC<GanttPanelProps> = ({
           projectId: project.id,
           team: teams[0].name, // todo: assumption backlog config will be the same for all teams - maybe wrong
           teamId: teams[0].id,
-        }).then(({ portfolioBacklogs = [] as BacklogLevelConfiguration[], requirementBacklog = {} as BacklogLevelConfiguration, taskBacklog = {} as BacklogLevelConfiguration }) => {
-          return [...portfolioBacklogs, requirementBacklog, taskBacklog]
-            .reduce((acc, next) => {
-              const { rank = 0, workItemTypes = [] } = next;
-              return [...acc, ...workItemTypes.map(({ name }) => ({ rank, name }))]
-            }, [] as BacklogItem[]);
-        });
+        }).then(({ portfolioBacklogs = [] as BacklogLevelConfiguration[], requirementBacklog = {} as BacklogLevelConfiguration, taskBacklog = {} as BacklogLevelConfiguration }) => [...portfolioBacklogs, requirementBacklog, taskBacklog]
+          .reduce((acc, next) => {
+            const { rank = 0, workItemTypes = [] } = next;
+            return [...acc, ...workItemTypes.map(({ name }) => ({ rank, name }))]
+          }, [] as BacklogItem[]));
 
         backlog.push(...backlogConfigurations
           .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1)
-          .map(t => { return { id: t.name, data: t, text: t.name } }));
+          .map(t => ({ id: t.name, data: t, text: t.name })));
         itemToEdit ? markSelectedBacklogs(backlogConfigurations) : selectAllBacklogs(backlogConfigurations)
         backlogSelectHasError.value = backlogSelection.selectedCount === 0;
       }
@@ -150,7 +148,7 @@ export const GanttDetailsPanel: React.FC<GanttPanelProps> = ({
       <CustomHeader className="bolt-header-with-commandbar">
         <HeaderTitleArea>
           <HeaderTitleRow>
-            <HeaderTitle titleSize={TitleSize.Large} children={itemToEdit ? "Edit " + itemToEdit.name : "New delivery gantt"}></HeaderTitle>
+            <HeaderTitle titleSize={TitleSize.Large} children={itemToEdit ? `Edit ${  itemToEdit.name}` : "New delivery gantt"} />
           </HeaderTitleRow>
         </HeaderTitleArea>
         <PanelCloseButton
@@ -176,7 +174,7 @@ export const GanttDetailsPanel: React.FC<GanttPanelProps> = ({
                 placeholder={itemToEdit ? itemToEdit.name : "Name"}
                 width={TextFieldWidth.auto}
                 maxLength={64}
-                required={true}
+                required
               />
             </FormItem>
           </div>
@@ -221,7 +219,7 @@ export const GanttDetailsPanel: React.FC<GanttPanelProps> = ({
                     ]}
                     items={team}
                     minCalloutWidth={300}
-                    showFilterBox={true}
+                    showFilterBox
                     renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
                     onSelect={(_, { data }) => {
                       !teamMap.has(data!.id) && teamMap.set(data!.id, data!) || teamMap.delete(data!.id);
@@ -256,7 +254,7 @@ export const GanttDetailsPanel: React.FC<GanttPanelProps> = ({
                     ]}
                     items={backlog}
                     minCalloutWidth={300}
-                    showFilterBox={true}
+                    showFilterBox
                     renderExpandable={props => <DropdownExpandableButton style={{ width: 140 }} {...props} />}
                     onSelect={(_, { data }) => {
                       !backlogMap.has(data!.name) && backlogMap.set(data!.name, data!) || backlogMap.delete(data!.name);
@@ -279,7 +277,7 @@ export const GanttDetailsPanel: React.FC<GanttPanelProps> = ({
             {() => (
               <Button
                 text={itemToEdit ? "Update" : "Create"}
-                primary={true}
+                primary
                 disabled={ganttNameHasError.value || teamSelectHasError.value || backlogSelectHasError.value}
                 onClick={() => {
                   onSave(nameObservable.value!,

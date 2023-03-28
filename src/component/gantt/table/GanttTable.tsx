@@ -2,9 +2,9 @@ import * as React from "react";
 import { useMemo } from "react";
 import { Task } from 'gantt-task-react';
 import { Status, Statuses, StatusSize } from "azure-devops-ui/Status";
+import { Icon, IconSize } from "azure-devops-ui/Icon";
 import { ItemStatus, ProgressInterface } from "../../../service/ProgressCalculationService";
 import { toLocaleDateStringFactory } from "./common";
-import { Icon, IconSize } from "azure-devops-ui/Icon";
 
 type GanttTableProps = {
   rowHeight: number;

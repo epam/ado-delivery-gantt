@@ -1,8 +1,10 @@
 import "./component.scss";
 
 import * as React from 'react';
+import { useState, useEffect } from 'react';
 
 import { Card } from "azure-devops-ui/Card";
+import { Dialog } from "azure-devops-ui/Dialog";
 import { IReadonlyObservableValue, ObservableArray, ObservableValue } from "azure-devops-ui/Core/Observable";
 import {
   ITableColumn,
@@ -22,7 +24,7 @@ import { Icon, IconSize } from "azure-devops-ui/Icon";
 
 import { VssPersona } from "azure-devops-ui/VssPersona";
 
-import { GanttHubDocument } from "../service/helper";
+import { ExtensionManagementUtil, GanttHubDocument } from "../service/helper";
 
 export interface ITableItem extends ISimpleTableCell {
   id: string,
@@ -34,61 +36,48 @@ export interface ITableItem extends ISimpleTableCell {
   created: ISimpleListCell;
 }
 
-const renderPlan = (className?: string) => {
-  return (
-    <Icon
-      iconName="PlanView"
-      size={IconSize.small}
-    />
-  );
-};
+const renderPlan = (className?: string) => (
+  <Icon
+    iconName="PlanView"
+    size={IconSize.small}
+  />
+);
 
-const renderDate = (className?: string) => {
-  return (
-    <Icon
-      iconName="DateTime2"
-      size={IconSize.small}
-    />
-  );
-};
+const renderDate = (className?: string) => (
+  <Icon
+    iconName="DateTime2"
+    size={IconSize.small}
+  />
+);
 const renderPersonaColumn = (
   rowIndex: number,
   columnIndex: number,
   tableColumn: ITableColumn<ITableItem>,
   tableItem: ITableItem
-): JSX.Element => {
-  return (
-    <SimpleTableCell
-      key={"col-" + columnIndex}
-      columnIndex={columnIndex}
-      tableColumn={tableColumn}
-      children={
-        <VssPersona
-          // identityDetailsProvider={tableItem.created_by}
-          displayName={tableItem.created_by}
-          size={"small"}
-        />
-      }
-    />
-  );
-}
+): JSX.Element => (
+  <SimpleTableCell
+    key={`col-${columnIndex}`}
+    columnIndex={columnIndex}
+    tableColumn={tableColumn}
+    children={
+      <VssPersona
+        // identityDetailsProvider={tableItem.created_by}
+        displayName={tableItem.created_by}
+        size="small"
+      />
+    }
+  />
+)
 
 const sortFunctions = [
   // Sort on Name column
-  (left: ITableItem, right: ITableItem): number => {
-    console.log("==sortFunctions==")
-    return left.name.text!.localeCompare(right.name.text!);
-  },
+  (left: ITableItem, right: ITableItem): number => left.name.text!.localeCompare(right.name.text!),
 
   // Sort on created_by column
-  (left: ITableItem, right: ITableItem): number => {
-    return left.created_by!.localeCompare(right.created_by!);
-  },
+  (left: ITableItem, right: ITableItem): number => left.created_by!.localeCompare(right.created_by!),
 
   // Sort on last_modified_by column
-  (left: ITableItem, right: ITableItem): number => {
-    return left.last_modified_by!.localeCompare(right.last_modified_by!);
-  },
+  (left: ITableItem, right: ITableItem): number => left.last_modified_by!.localeCompare(right.last_modified_by!),
 ];
 
 export interface BoardPageProps {
@@ -104,6 +93,29 @@ export const BoardPage: React.FC<BoardPageProps> = ({
   onRowSelect,
   onRowEdit
 }) => {
+
+  const [itemToDelete, setItemToDelete] = useState<ITableItem>();
+  const [tableData, setTableData] = useState<ITableItem[]>([]);
+  const itemProvider = new ObservableArray<ITableItem | IReadonlyObservableValue<ITableItem | undefined>>(tableData);
+
+
+  useEffect(() => {
+    (() => {
+      const data = items.map(it => ({
+        id: it.id,
+        name: { iconProps: { render: renderPlan }, text: it.name },
+        created_by: it.createdBy,
+        last_modified_by: it.lastModifiedBy,
+        description: it.description,
+        last_modified: { iconProps: { render: renderDate }, text: it.lastModifiedDate.toISOString() },
+        created: { iconProps: { render: renderDate }, text: it.createdDate.toISOString() },
+      } as ITableItem));
+
+      itemProvider.splice(0, itemProvider.length, ...data);
+      setTableData(data);
+    })();
+  }, [items])
+
   const onSize = (event: MouseEvent | KeyboardEvent, index: number, width: number) => {
     (columns[index].width as ObservableValue<number>).value = width;
   }
@@ -118,7 +130,7 @@ export const BoardPage: React.FC<BoardPageProps> = ({
         ariaLabelAscending: "Sorted A to Z",
         ariaLabelDescending: "Sorted Z to A",
       },
-      onSize: onSize,
+      onSize,
       width: new ObservableValue(-30),
     },
     {
@@ -130,7 +142,7 @@ export const BoardPage: React.FC<BoardPageProps> = ({
         ariaLabelAscending: "Sorted A to Z",
         ariaLabelDescending: "Sorted Z to A",
       },
-      onSize: onSize,
+      onSize,
       width: new ObservableValue(-30),
     },
     {
@@ -142,7 +154,7 @@ export const BoardPage: React.FC<BoardPageProps> = ({
         ariaLabelAscending: "Sorted A to Z",
         ariaLabelDescending: "Sorted Z to A",
       },
-      onSize: onSize,
+      onSize,
       width: new ObservableValue(-30),
     },
     {
@@ -150,7 +162,7 @@ export const BoardPage: React.FC<BoardPageProps> = ({
       name: "description",
       readonly: true,
       renderCell: renderSimpleCell,
-      onSize: onSize,
+      onSize,
       width: new ObservableValue(-30),
     },
     {
@@ -159,7 +171,7 @@ export const BoardPage: React.FC<BoardPageProps> = ({
       name: "Last Modified",
       readonly: true,
       renderCell: renderSimpleCell,
-      onSize: onSize,
+      onSize,
       width: new ObservableValue(-30),
     },
     {
@@ -168,73 +180,93 @@ export const BoardPage: React.FC<BoardPageProps> = ({
       name: "Created",
       readonly: true,
       renderCell: renderSimpleCell,
-      onSize: onSize,
+      onSize,
       width: new ObservableValue(-30),
     },
-    new ColumnMore((item) => {
-      return {
-        id: "sub-menu",
-        items: [
-          { id: "edit", text: "Edit", onActivate: () => openEditPanel(item) },
-          { id: "delete", text: "Delete" },
-        ],
-      };
-    }),
+    new ColumnMore((item) => ({
+      id: "sub-menu",
+      items: [
+        { id: "edit", text: "Edit", onActivate: () => openEditItem(item) },
+        { id: "delete", text: "Delete", onActivate: () => { onDeleteItem(item) } },
+      ],
+    })),
   ];
 
-  const openEditPanel = (item: ITableItem) => {
+  const openEditItem = (item: ITableItem) => {
     const selectedItem = items.find(it => it.id === item.id);
     selectedItem && onRowEdit(selectedItem);
   }
 
-  const tableData = items.map(it => ({
-    id: it.id,
-    name: { iconProps: { render: renderPlan }, text: it.name },
-    created_by: it.createdBy,
-    last_modified_by: it.lastModifiedBy,
-    description: it.description,
-    last_modified: { iconProps: { render: renderDate }, text: it.lastModifiedDate.toISOString() },
-    created: { iconProps: { render: renderDate }, text: it.createdDate.toISOString() },
-  } as ITableItem));
+  const onDeleteItem = (item: ITableItem) => {
+    setItemToDelete(item);
+  }
 
-  const itemProvider = new ObservableArray<ITableItem | IReadonlyObservableValue<ITableItem | undefined>>(tableData);
+  const onDelelete = async () => {
+    const { id } = itemToDelete!;
+    await ExtensionManagementUtil.deleteItem(id);//.handle(viod(), "Enable to delete item", true);
 
-  const sortingBehavior = React.useCallback((tableData: ITableItem[], itemProvider: ObservableArray<ITableItem | IReadonlyObservableValue<ITableItem | undefined>>) => {
-    return new ColumnSorting<ITableItem>(
-      (index: number, order: SortOrder, event: React.KeyboardEvent<HTMLElement> | React.MouseEvent<HTMLElement>) => {
-        itemProvider.splice(
-          0,
-          itemProvider.length,
-          ...sortItems<ITableItem>(
-            index,
-            order,
-            sortFunctions,
-            columns,
-            tableData
-          )
+    const index = tableData.map(it => it.id).indexOf(id);
+    tableData.splice(index, 1);
+    itemProvider.splice(0, itemProvider.length, ...tableData);
+
+    setItemToDelete(undefined);
+  }
+
+  const onDismiss = (): void => {
+    setItemToDelete(undefined);
+  }
+
+  const sortingBehavior = new ColumnSorting<ITableItem>(
+    (index: number, order: SortOrder, event: React.KeyboardEvent<HTMLElement> | React.MouseEvent<HTMLElement>) => {
+      itemProvider.splice(
+        0,
+        itemProvider.length,
+        ...sortItems<ITableItem>(
+          index,
+          order,
+          sortFunctions,
+          columns,
+          tableData
         )
-      });
-
-  }, [items])
+      )
+    });
 
   return (
     <div className="page-content page-content-top flex-column rhythm-vertical-16">
       {
-        items.length ? (<Card
+        tableData.length ? (<Card
           className="flex-grow bolt-table-card"
           contentProps={{ contentPadding: false, className: "gantt-card-content" }}
           titleProps={{ text: "Gantt Boards" }}
         >
           <Table<ITableItem>
             ariaLabel="Gantt Boards"
-            behaviors={[sortingBehavior(tableData, itemProvider)]}
+            behaviors={[sortingBehavior]}
             className="table-example"
             columns={columns}
             containerClassName="h-scroll-auto"
             itemProvider={(itemProvider)}
-            showLines={true}
+            showLines
             onSelect={(_event, data) => onRowSelect(data.data, isChecked)}
           />
+          {itemToDelete && <Dialog
+            titleProps={{ text: "Confirm" }}
+            footerButtonProps={[
+              {
+                text: "Cancel",
+                onClick: onDismiss
+              },
+              {
+                text: "Delete",
+                onClick: onDelelete,
+                primary: true
+              }
+            ]}
+            onDismiss={onDismiss}
+          >
+            Are you sure you want to delete the {itemToDelete.name.text} ?
+          </Dialog>
+          }
         </Card>)
           : (
             <div style={{ marginTop: 50 }}>

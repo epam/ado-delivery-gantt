@@ -13,26 +13,26 @@ import {
   WorkItemTrackingServiceIds,
 } from 'azure-devops-extension-api/WorkItemTracking';
 import { Spinner, SpinnerSize } from "azure-devops-ui/Spinner";
-import { ProgressInterface, TeamDictionaryValue } from "../../service/ProgressCalculationService";
-import { GanttHeader, ganttTableBuilder, ganttTooltipContentBuilder } from './table';
-import { fetchIterationDefinition, TeamIteration } from '../../service/WiqlService';
 import { TeamSettingsIteration } from 'azure-devops-extension-api/Work';
-import { GanttFilterBar, GanttViewBar, FilterType } from "./bars";
 import { IFilterState } from "azure-devops-ui/Utilities/Filter";
-import { AdoApiUtil, BacklogItem, Context, TeamItem } from "../../service/helper";
+import { TeamDictionaryValue } from "../../service/ProgressCalculationService";
+import { GanttHeader, ganttTableBuilder, ganttTooltipContentBuilder } from './table';
+import { TeamIteration } from '../../service/WiqlService';
+import { GanttFilterBar, GanttViewBar, FilterType } from "./bars";
+import { AdoApiUtil, BacklogItem, FilterOptions, TeamItem } from "../../service/helper";
+import { RootHubContext } from "../../context";
+import { daemonCommandBuilder, DaemonCommandType, DaemonEventCallback, DaemonEventHandler, DaemonEventType, TeamDictionaryPayload, TeamIterationsPayload } from "../../worker/api";
 
 export interface FilterInterface {
   teams?: TeamItem[];
   workTypes?: BacklogItem[],
   tags?: string[],
   shift?: number;
-  states: Set<string>;
 }
 
 export interface GanttChartTabProps {
-  context: Context;
-  progressMap: Map<string, ProgressInterface>;
-  reloadProgressMap: (id: string) => void
+  ganttId: string;
+  filterOptions: FilterOptions;
 }
 
 const VSTS_SCHEDULING_START_DATE = 'Microsoft.VSTS.Scheduling.StartDate';
@@ -54,24 +54,24 @@ const columnWidthByViewMode: { [key: string]: number } = {
 let visiblePageWidth: number;
 
 export const GanttView: React.FC<GanttChartTabProps> = ({
-  context,
-  progressMap,
-  reloadProgressMap
+  ganttId,
+  filterOptions,
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [view, setView] = useState<ViewMode>(ViewMode.Day);
   const [isChecked, setIsChecked] = useState(true);
   const [isCheckedViewLinks, setIsCheckedViewLinks] = useState(false);
   const [chartLoad, setChartLoad] = useState(true);
-  const filterContext = useRef({ states: new Set() } as FilterInterface);
+  const filterContext = useRef({} as FilterInterface);
   const ganttTags = useRef<string[]>();
   const [currentPeriodColor] = useState(DEFAULT_CURRENT_PERIOD_COLOR);
   const [openWorkItem, setOpenWorkItem] = useState("");
   const [tasksUnfolded] = useState<Map<string, Task>>(new Map<string, Task>)
-
   const [showFilterTab, setShowFilterTab] = useState(false);
-
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const rootContext = React.useContext(RootHubContext);
+  const { project, workItemTypes, progressMap, daemonController } = rootContext;
+
   const onCurrentPosition = useCallback(() => {
     if (wrapperRef.current) {
       const currentPosition = wrapperRef.current.querySelector(".today > rect");
@@ -96,19 +96,52 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
 
   useEffect(() => {
     (async () => {
-      await SDK.ready();
-      const { project, workItemTypes, options } = context;
-      if (project && workItemTypes) {
-        filterContext.current = { ...filterContext.current, teams: options.teams, workTypes: options.backlog, } as FilterInterface;
-        const [{ name: rootCategory }] = options.backlog.sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1);
+      if (project && workItemTypes && filterOptions) {
+        filterContext.current = { ...filterContext.current, teams: filterOptions.teams, workTypes: filterOptions.backlog, } as FilterInterface;
         const teams = await AdoApiUtil.fetchTeams(project, filterContext.current);
-        const teamDictionary = await AdoApiUtil.collectTeamDictionary(teams, filterContext.current);
-        const teamIterations = await Promise.all(teams.map(team => fetchIterationDefinition(team)));
 
-        loadTasks(rootCategory, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
+        daemonController.fireCommand(daemonCommandBuilder()
+          .type(DaemonCommandType.AGGREGATE_EXECUTE)
+          .id(ganttId)
+          .source(GanttView.name)
+          .cancelable(true)
+          .next(daemonCommandBuilder()
+            .type(DaemonCommandType.NO_OP)
+            .payload({ teams, filter: filterContext.current, filterOptions })
+            .next(daemonCommandBuilder()
+              .type(DaemonCommandType.GET_TEAM_DICTIONARY)
+              .next(daemonCommandBuilder()
+                .type(DaemonCommandType.GET_TEAM_ITERATIONS)
+                .build()).build())
+            .build())
+          .build());
       }
     })();
-  }, [progressMap, context]);
+
+    type AggregateType = TeamDictionaryPayload & TeamIterationsPayload & { filterOptions: FilterOptions, teams: WebApiTeam[], filter: FilterInterface };
+
+    const aggregateReady: DaemonEventCallback<AggregateType> = (event) => {
+      const payload = event.payload!;
+      const { teamDictionary, teamIterations, teams, filter } = payload;
+      const { workTypes = [] } = filter;
+      const [{ name: rootCategory }] = filterOptions.backlog
+        .filter(it => workTypes.map(e => e.name).indexOf(it.name) >= 0)
+        .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1);
+
+      [...progressMap.values()].forEach(it => delete it.deep);
+      loadTasks(rootCategory, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
+    };
+
+    daemonController.registerHandler(DaemonEventHandler.builder<AggregateType>()
+      .eventType(DaemonEventType.AGGREGATE_READY)
+      .componentName(GanttView.name)
+      .callback(aggregateReady)
+      .build());
+
+    return () => {
+      daemonController.unregisterHandler(DaemonEventType.AGGREGATE_READY + GanttView.name);
+    }
+  }, [filterOptions, project, workItemTypes, progressMap]);
 
   useEffect(() => {
     document.addEventListener('scroll', handleCalendarScroll, true);
@@ -173,15 +206,22 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
   }
 
   const reloadTasks = async (filterContext: FilterInterface) => {
-    const { project, options } = context;
     const teams = await AdoApiUtil.fetchTeams(project!, filterContext);
-    const teamDictionary = await AdoApiUtil.collectTeamDictionary(teams, filterContext);
-    const teamIterations = await Promise.all(teams.map(team => fetchIterationDefinition(team)));
-    [...progressMap.values()].forEach(it => delete it.deep);
-    const [{ name: rootCategory }] = options.backlog
-      .filter(it => filterContext.workTypes?.map(it => it.name).indexOf(it.name) || true)
-      .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1);
-    loadTasks(rootCategory, teams, teamDictionary, new Map(teamIterations.map(({ teamId, ...rest }) => [teamId, { ...rest, teamId }])));
+    daemonController.fireCommand(daemonCommandBuilder()
+      .type(DaemonCommandType.AGGREGATE_EXECUTE)
+      .id(ganttId)
+      .source(GanttView.name)
+      .cancelable(true)
+      .next(daemonCommandBuilder()
+        .type(DaemonCommandType.NO_OP)
+        .payload({ teams, filter: filterContext, filterOptions })
+        .next(daemonCommandBuilder()
+          .type(DaemonCommandType.GET_TEAM_DICTIONARY)
+          .next(daemonCommandBuilder()
+            .type(DaemonCommandType.GET_TEAM_ITERATIONS)
+            .build()).build())
+        .build())
+      .build());
   }
 
   const onViewLinksChange = (value: boolean) => {
@@ -218,7 +258,11 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
   useEffect(() => {
     if (openWorkItem.length > 0) {
       setChartLoad(true);
-      reloadProgressMap(openWorkItem);
+      rootContext.daemonController.fireCommand(daemonCommandBuilder()
+        .type(DaemonCommandType.BUILD_PROGRESS_MAP)
+        .payload({ workItemTypes: rootContext.workItemTypes, project: rootContext.project })
+        .build());
+
       reloadTasks(filterContext.current);
     }
   }, [openWorkItem]);
@@ -226,6 +270,8 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
   const loadTasks = (rootCategory: string, teams: WebApiTeam[], teamDictionary: Map<string, TeamDictionaryValue>, teamIterations: Map<string, TeamIteration>) => {
     const ganttTasks: Task[] = [];
     const tags = new Set<string>();
+    const filterTags = new Set(filterContext.current.tags);
+
     teams.forEach(team => {
       const teamId = team.id;
       const iteration = teamIterations.get(teamId);
@@ -266,8 +312,14 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
           const hasChild = workItem?.relations?.some(({ attributes = {} }) => attributes.name === 'Child');
           const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}`;
           const itemId = `${teamId}_${workItem.id}`
+          const itemTags = (workItem.fields[WORK_ITEM_TAGS] as string)?.split(";")
+            .filter(it => it !== undefined)
+            .map(it => it.trim()) || [];
+          itemTags.forEach(tags.add, tags);
 
-          ganttTasks.push({
+          const isPush = filterTags.size == 0 || itemTags.some(it => filterTags.has(it));
+
+          isPush && ganttTasks.push({
             start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
             end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
             name: workItem.fields[ITEM_TITLE],
@@ -312,10 +364,14 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
           const parentId = item?.source?.id ? `${teamId}_${item?.source?.id}` : `${teamId}_others`;
           const itemId = `${teamId}_${workItem.id}`
 
-          const itemTags = workItem.fields[WORK_ITEM_TAGS] as string;
-          itemTags?.split(";").filter(it => it !== undefined).map(it => it.trim()).forEach(tags.add, tags);
+          const itemTags = (workItem.fields[WORK_ITEM_TAGS] as string)?.split(";")
+            .filter(it => it !== undefined)
+            .map(it => it.trim()) || [];
+          itemTags.forEach(tags.add, tags);
 
-          ganttTasks.push({
+          const isPush = filterTags.size == 0 || itemTags.some(it => filterTags.has(it));
+
+          isPush && ganttTasks.push({
             start: workItem.fields[VSTS_SCHEDULING_START_DATE] || start,
             end: workItem.fields[VSTS_SCHEDULING_TARGET_DATE] || end,
             name: workItem.fields[ITEM_TITLE],
@@ -345,21 +401,15 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
     reloadTasks(context);
   };
 
-  const onTeamChange = (teams: TeamItem[], isDefaultState: boolean): void => {
-    const _teamFilter = teams && teams.length > 0 ? { teams: teams, shift: undefined } : { teams: undefined, shift: undefined };
-    const { states } = filterContext.current;
-    !isDefaultState && states.add("team") || states.delete("team");
-    filterContext.current = { ...filterContext.current, ..._teamFilter, states };
+  const onTeamChange = (teams: TeamItem[]): void => {
+    filterContext.current = { ...filterContext.current, teams: teams };
   };
 
-  const onWorkTypes = (items: BacklogItem[], isDefaultState: boolean): void => {
-    const _workTypesFilter = { workTypes: items };
-    const { states } = filterContext.current;
-    !isDefaultState && states.add("work_type") || states.delete("work_type");
-    filterContext.current = { ...filterContext.current, ..._workTypesFilter, states } as FilterInterface;
+  const onWorkTypes = (workTypes: BacklogItem[]): void => {
+    filterContext.current = { ...filterContext.current, workTypes: workTypes };
   };
 
-  const onIterationChange = (iteration: TeamSettingsIteration, isDefaultState: boolean) => {
+  const onIterationChange = (iteration: TeamSettingsIteration) => {
     filterContext.current = { ...filterContext.current, shift: Number(iteration?.path) };
   };
 
@@ -369,18 +419,19 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
 
   const onFilterBarChange = (filterState: IFilterState): void => {
     const teams = filterState[FilterType.TEAMS]?.value as TeamItem[];
-    onTeamChange(teams, false);
+    onTeamChange(teams);
 
     const types = filterState[FilterType.TYPES]?.value as BacklogItem[];
-    onWorkTypes(types, false);
+    onWorkTypes(types);
 
     const tags = filterState[FilterType.TAGS]?.value as string[];
     onTagsChange(tags);
 
     const iterations = filterState[FilterType.ITERATIONS]?.value as string[];
     if (iterations && teams?.length === 1) {
-      onIterationChange({ path: iterations?.[0] } as TeamSettingsIteration, false);
+      onIterationChange({ path: iterations?.[0] } as TeamSettingsIteration);
     }
+
     onFilterContextChange(filterContext.current);
   };
 
@@ -406,10 +457,10 @@ export const GanttView: React.FC<GanttChartTabProps> = ({
             <div className="flex-row">
               <GanttFilterBar
                 tags={ganttTags.current}
-                ganttId={context?.ganttId!}
+                ganttId={ganttId}
                 team={filterContext.current.teams?.[0]}
-                teamsFn={() => context.options.teams}
-                workItemTypes={() => context.options.backlog}
+                teamsFn={() => filterOptions.teams}
+                workItemTypes={() => filterOptions.backlog}
                 onChange={onFilterBarChange}
               />
             </div> : ""

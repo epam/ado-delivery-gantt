@@ -12,7 +12,7 @@ const assembleEntries = (entries) => Object.keys(entries)
   .reduce((acc, next) => ({ ...acc, ...next }), {});
 
 module.exports = {
-  entry: assembleEntries({ hub: [path.join(PATHS.src, 'hub.tsx')], daemon: [path.join(PATHS.src, 'daemon/worker.ts')] }),
+  entry: assembleEntries({ hub: [path.join(PATHS.src, 'hub.tsx')], daemon: [path.join(PATHS.src, 'worker/management')] }),
   devtool: "inline-source-map",
   target: "web",
   output: {
@@ -29,9 +29,6 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: "[name].css",
-    }),
-    new webpack.ProvidePlugin({
-      //window: "typeof window !== 'undefined' ? window : self",
     }),
     new webpack.DefinePlugin({
       window: 'self'

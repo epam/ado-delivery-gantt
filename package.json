@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf ./dist ./out",
     "lint": "eslint --fix .",
-    "env": "cross-env NODE_ENV=development PUBLISHER_NAME= EXTENSION_NAME= EXTENSION_VERSION=0.2.2",
+    "env": "cross-env NODE_ENV=development PUBLISHER_NAME= EXTENSION_NAME= EXTENSION_VERSION=0.2.4",
     "compile": "npm run clean && npm run env -- webpack",
     "package": "npm run compile && npm run env -- tfx extension create --manifest-js extension.config.js --output-path out",
     "publish": "npm run compile && npm run env -- tfx extension publish --manifest-js extension.config.js --output-path out --token",
@@ -18,7 +18,8 @@
     "azure-devops-ui": "file:./libs/azure-devops-ui.tar.gz",
     "gantt-task-react": "0.3.9",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "abortcontroller-polyfill": "1.7.5"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

@@ -7,14 +7,14 @@ import { DropdownMultiSelection, DropdownSelection } from 'azure-devops-ui/Utili
 import { useEffect, useRef, useState } from 'react';
 import { IListBoxItem } from 'azure-devops-ui/ListBox';
 import { ObservableArray } from 'azure-devops-ui/Core/Observable';
-import { fetchIterationDefinition } from '../../../service/WiqlService';
 import { TeamSettingsIteration } from 'azure-devops-extension-api/Work';
 import { BacklogItem, TeamItem } from '../../../service/helper';
+import { fetchIterationDefinition } from '../../../service/WiqlService';
 
 
 export interface FilterBarProps {
   tags?: string[],
-  ganttId: String,
+  ganttId: string,
   team?: TeamItem,
   teamsFn: () => TeamItem[];
   workItemTypes: () => BacklogItem[];
@@ -72,6 +72,7 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
   useEffect(() => {
     if (tags && tagItemOptions.length === 0) {
       const tagOptions = tags.map(tag => ({ id: tag, text: tag, data: tag } as IListBoxItem<string>));
+      filter.setDefaultState({ ...filter.getDefaultState(), [FilterType.TAGS]: { value: [] } });
       tagItemOptions.removeAll();
       tagItemOptions.push(...tagOptions);
     }
@@ -80,6 +81,7 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
   useEffect(() => {
     const loadTeamsTypeOptions = async () => {
       const teams = teamsFn();
+      filter.setDefaultState({ ...filter.getDefaultState(), [FilterType.TEAMS]: { value: teams } });
       const itemsOptions: Array<IListBoxItem<TeamItem>> = teams.map(it => ({ id: it.id, text: it.name, data: it } as IListBoxItem<TeamItem>));
       return itemsOptions;
     };
@@ -108,12 +110,10 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
   const fetchTeamIteration = async (team?: TeamItem) => {
     if (teamSelected) {
       const { iterations, currentIteration } = await computeFilterByKey(team!.id, fetchIterationDefinition, team!)
-        .then(definition => {
-          return {
-            iterations: definition.iterations,
-            currentIteration: definition.currentIteration
-          }
-        });
+        .then(definition => ({
+          iterations: definition.iterations,
+          currentIteration: definition.currentIteration
+        }));
       const iterationNames = addShiftsToIterations(iterations, currentIteration);
 
       const itemsOptions: Array<IListBoxItem<string>> = iterationNames.map(it => ({ id: it.id, text: it.name, data: it.path } as IListBoxItem<string>));
@@ -130,18 +130,18 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
     const currentIteration = iterations.filter(it => it.name === currentIterationName).pop();
     if (currentIteration) {
       const i = iterations.indexOf(currentIteration)
-      return iterations.map((e, j) => {
-        return { ...e, path: String(j - i) };
-      });
+      return iterations.map((e, j) => ({ ...e, path: String(j - i) }));
     }
     return iterations;
   };
 
   useEffect(() => {
     const loadWorkItemTypes = async (): Promise<void> => {
-      typeItemOptions.push(...workItemTypes()
+      const items = workItemTypes();
+      typeItemOptions.push(...items
         .sort(({ rank: r1 = 0 }, { rank: r2 = 0 }) => r2 - r1)
         .map(item => ({ id: item.name, data: item, text: item.name })));
+      filter.setDefaultState({ ...filter.getDefaultState(), [FilterType.TYPES]: { value: items } });
       filterState.current = filter.getState();
     }
     loadWorkItemTypes().catch(console.error);
@@ -153,8 +153,16 @@ export const GanttFilterBar: React.FC<FilterBarProps> = ({
       || filter.getState()[FilterType.TEAMS] !== filterState.current[FilterType.TEAMS]
       || filter.getState()[FilterType.ITERATIONS] !== filterState.current[FilterType.ITERATIONS]
       || filter.getState()[FilterType.TAGS] !== filterState.current[FilterType.TAGS]) {
+
+      const _state = Object.keys(FilterType)
+        .map(it => it.toLowerCase())
+        .map(it => ({ key: it, value: filter.getState()[it]?.value || filter.getDefaultState()[it]?.value }))
+        .filter((value) => value)
+        .map(({ key, value }) => ({ [key]: { value } }))
+        .reduce((acc, next) => ({ ...acc, ...next }), {})
+
       filterState.current = filter.getState();
-      onChange?.(filter.getState());
+      onChange?.(_state);
     }
   };
 
