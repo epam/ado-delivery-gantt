@@ -71,4 +71,4 @@ All build/package/publish commands explicitly depend on below environment variab
 [Material design icon](https://github.com/google/material-design-icons) was used, which is redistributed under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0.html). The color of the icon for dark theme was modified.
 
 ## License
-[MIT](./LICENSE.md)
+[MIT](./LICENSE)
