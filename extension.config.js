@@ -6,7 +6,7 @@ const environments = {
     baseUri: "https://localhost:3000"
   },
   production: {
-    public: false,
+    public: true,
     id: "ado-gantt-plugin",
     name: "Delivery Gantt",
     scopes: [
@@ -54,7 +54,7 @@ module.exports = () => {
     ],
     content: {
       details: {
-        path: "README.md"
+        path: "README_ADO.md"
       }
     },
     icons: {
