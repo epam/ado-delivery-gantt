@@ -2,7 +2,7 @@ import { IProjectInfo } from "azure-devops-extension-api/Common/CommonServices";
 import { ExtensionManagementRestClient } from "azure-devops-extension-api/ExtensionManagement"
 import { IVssRestClientOptions, getClient } from 'azure-devops-extension-api';
 import { CoreRestClient, WebApiTeam } from "azure-devops-extension-api/Core";
-import { WorkItemTrackingRestClient, WorkItemExpand, WorkItemErrorPolicy } from "azure-devops-extension-api/WorkItemTracking";
+import { WorkItemTrackingRestClient, WorkItemExpand, WorkItemErrorPolicy, WorkItemLink } from "azure-devops-extension-api/WorkItemTracking";
 import { FilterInterface } from "component/gantt/GanttView";
 import * as SDK from 'azure-devops-extension-sdk';
 import { TeamDictionaryValue } from "./ProgressCalculationService";
@@ -65,7 +65,7 @@ Promise.prototype.handle = function <T>(fallback?: T, reasonMsg?: string, isDial
 
 export function handleError(error: Error, message?: string): string {
   let ignore = false;
-  let {name} = error;
+  let { name } = error;
   let msg = error.message;
 
   const err = error as GanttError;
@@ -143,17 +143,40 @@ export const AdoApiUtil = {
   },
 
   async collectTeamDictionary(teams: WebApiTeam[], filter?: FilterInterface, clientOptions?: IVssRestClientOptions): Promise<Map<string, TeamDictionaryValue>> {
-    const workItemsClient = getClient(WorkItemTrackingRestClient, clientOptions);
+
     const teamWorkItems = await Promise.all(teams.map(it => fetchTeamWorkItems(it, filter, clientOptions)));
-    const projectItems: Map<string, TeamDictionaryValue>[] = await Promise.all(teamWorkItems.map(({ id, ids, connections }) => ids.length > 0 ? workItemsClient.getWorkItemsBatch({
-      $expand: WorkItemExpand.All,
-      asOf: new Date(),
-      errorPolicy: WorkItemErrorPolicy.Omit,
-      fields: [],
-      ids
-    }).then((items = []) => new Map<string, TeamDictionaryValue>([[id, { connections, map: new Map(items.map(item => [`${item.id}`, item])) }]]))
+    const projectItems: Map<string, TeamDictionaryValue>[] = await Promise.all(teamWorkItems.map(({ id, ids, connections }) => ids.length > 0 ? AdoApiUtil.getWorkItemsBatch(id, ids, connections, clientOptions)
       : Promise.resolve(new Map<string, TeamDictionaryValue>([[id, { connections: {}, map: new Map() }]]))));
 
     return projectItems.reduce((acc, next) => new Map([...acc, ...next]), new Map());
-  }
+  },
+
+  async getWorkItemsBatch(id: string, ids: number[], connections: { [key: string]: WorkItemLink[] }, clientOptions?: IVssRestClientOptions): Promise<Map<string, TeamDictionaryValue>> {
+    let batch = [];
+    if (ids.length > 200) {
+      let index = 0, chunk = 0, length = ids.length;
+      while (index < length) {
+        batch[chunk++] = ids.slice(index, (index += 200));
+      }
+    } else {
+      batch = [ids]
+    }
+
+    let items = [];
+    const workItemsClient = getClient(WorkItemTrackingRestClient, clientOptions);
+    for (let i = 0; i < batch.length; i++) {
+      const chunks = await workItemsClient.getWorkItemsBatch({
+        $expand: WorkItemExpand.All,
+        asOf: new Date(),
+        errorPolicy: WorkItemErrorPolicy.Omit,
+        fields: [],
+        ids: batch[i]
+      });
+
+      items.push(...chunks);
+    }
+
+
+    return Promise.resolve(new Map<string, TeamDictionaryValue>([[id, { connections, map: new Map(items.map(item => [`${item.id}`, item])) }]]));
+  },
 }
