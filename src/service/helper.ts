@@ -2,7 +2,7 @@ import { IProjectInfo } from "azure-devops-extension-api/Common/CommonServices";
 import { ExtensionManagementRestClient } from "azure-devops-extension-api/ExtensionManagement"
 import { IVssRestClientOptions, getClient } from 'azure-devops-extension-api';
 import { CoreRestClient, WebApiTeam } from "azure-devops-extension-api/Core";
-import { WorkItemTrackingRestClient, WorkItemExpand, WorkItemErrorPolicy, WorkItemLink } from "azure-devops-extension-api/WorkItemTracking";
+import { WorkItemTrackingRestClient, WorkItemExpand, WorkItemErrorPolicy, WorkItemLink, WorkItem } from "azure-devops-extension-api/WorkItemTracking";
 import { FilterInterface } from "component/gantt/GanttView";
 import * as SDK from 'azure-devops-extension-sdk';
 import { TeamDictionaryValue } from "./ProgressCalculationService";
@@ -162,21 +162,24 @@ export const AdoApiUtil = {
       batch = [ids]
     }
 
-    let items = [];
     const workItemsClient = getClient(WorkItemTrackingRestClient, clientOptions);
-    for (let i = 0; i < batch.length; i++) {
-      const chunks = await workItemsClient.getWorkItemsBatch({
-        $expand: WorkItemExpand.All,
-        asOf: new Date(),
-        errorPolicy: WorkItemErrorPolicy.Omit,
-        fields: [],
-        ids: batch[i]
+    let map = (await Promise.all(batch.map(it => workItemsClient.getWorkItemsBatch({
+      $expand: WorkItemExpand.All,
+      asOf: new Date(),
+      errorPolicy: WorkItemErrorPolicy.Omit,
+      fields: [],
+      ids: it
+    }).then(data => new Map(data.map(item => [`${item.id}`, item]))).handle(new Map<string, WorkItem>(), "Error fetch items batch!")))
+    ).reduce((acc, next) => {
+      next.forEach((value, key) => {
+        if (!acc.has(key)) {
+          acc.set(key, value);
+        }
       });
 
-      items.push(...chunks);
-    }
+      return acc;
+    }, new Map<string, WorkItem>())
 
-
-    return Promise.resolve(new Map<string, TeamDictionaryValue>([[id, { connections, map: new Map(items.map(item => [`${item.id}`, item])) }]]));
+    return Promise.resolve(new Map<string, TeamDictionaryValue>([[id, { connections, map }]]));
   },
 }
