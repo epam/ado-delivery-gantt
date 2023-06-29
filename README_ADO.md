@@ -46,6 +46,8 @@ Unleash the power of visual project management with the ADO Gantt Chart plugin! 
 
 Get onboard with the ADO Gantt Chart plugin today and witness a spectacular transformation in your project management. Whether it's simplifying tracking for the Program Increment, individual stories progress, or multiple projects in the program, this tool does it all. No more grappling with multiple tools and interfaces; with the ADO Gantt Chart plugin, you get a single, unified view of your project universe.
 
+## Contributing
 
+This project welcomes contributions and suggestions. For details, visit [ado-delivery-gantt](https://github.com/epam/ado-delivery-gantt.git).
 
 ---
