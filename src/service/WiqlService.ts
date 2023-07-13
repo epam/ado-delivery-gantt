@@ -89,26 +89,40 @@ export const fetchIterationDefinition = async (team: WebApiTeam, clientOptions?:
     return path?.substring(path.lastIndexOf("\\") + 1);
   }).handle('', 'No iteration assigned to the team');
 
-  if (iterationName === undefined || iterationName.length == 0) {
-    return Promise.resolve({} as TeamIteration);
-  }
-
   const teamContext = { project: projectName, projectId, team: name, teamId: id } as TeamContext;
-
+  const currentDate = new Date();
+   // Assigned default currentIteration when project miss configuration, to get gannt chart loaded 
   return clients.workClient(clientOptions).getTeamIterations(teamContext, "current")
     .then((iterations = []) => {
-      const currentDate = new Date();
       const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       const end = new Date(currentDate.getFullYear(), currentDate.getMonth(), 14);
 
       return {
         teamId: id,
         iterations,
-        currentIteration: iterationName,
+        currentIteration: iterationName ? iterations[0]?.name || "@CurrentIteration" : "@CurrentIteration",
         start: iterations[0]?.attributes?.startDate || start,
         end: iterations[iterations.length - 1]?.attributes?.finishDate || end
       } as TeamIteration
-    }).handle({} as TeamIteration, 'Error, when getTeamIterations method called');
+    }).handle({
+      teamId: id,
+      iterations: [
+        {
+          id: "b8cea431-dd4f-4efa-868a-3a9a8fe0fa02",
+          name: "Iteration 1",
+          path: "RXR\\Iteration 1",
+          attributes: {
+            startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+            finishDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 14),
+            timeFrame: 1
+          },
+          url: "",
+          _links: {}
+        }],
+      currentIteration: "@CurrentIteration",
+      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
+      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 14),
+    } as TeamIteration, 'Error, when getTeamIterations method called');
 }
 
 export const fetchTeamWorkItems = async (team: WebApiTeam, filter?: FilterInterface, clientOptions?: IVssRestClientOptions): Promise<{ id: string, ids: number[], connections: { [key: string]: WorkItemLink[]; } }> => {
