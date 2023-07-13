@@ -91,12 +91,11 @@ export const fetchIterationDefinition = async (team: WebApiTeam, clientOptions?:
 
   const teamContext = { project: projectName, projectId, team: name, teamId: id } as TeamContext;
   const currentDate = new Date();
+  const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  const end = new Date(currentDate.getFullYear(), currentDate.getMonth(), 14);
    // Assigned default currentIteration when project miss configuration, to get gannt chart loaded 
   return clients.workClient(clientOptions).getTeamIterations(teamContext, "current")
     .then((iterations = []) => {
-      const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-      const end = new Date(currentDate.getFullYear(), currentDate.getMonth(), 14);
-
       return {
         teamId: id,
         iterations,
@@ -112,16 +111,16 @@ export const fetchIterationDefinition = async (team: WebApiTeam, clientOptions?:
           name: "@CurrentIteration",
           path: "CurrentIteration",
           attributes: {
-            startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
-            finishDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 14),
+            startDate: start,
+            finishDate: end,
             timeFrame: 1
           },
           url: "",
           _links: {}
         }],
       currentIteration: "@CurrentIteration",
-      start: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
-      end: new Date(currentDate.getFullYear(), currentDate.getMonth(), 14),
+      start,
+      end,
     } as TeamIteration, 'Error, when getTeamIterations method called');
 }
 
