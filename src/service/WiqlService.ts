@@ -100,7 +100,7 @@ export const fetchIterationDefinition = async (team: WebApiTeam, clientOptions?:
       return {
         teamId: id,
         iterations,
-        currentIteration: iterationName ? iterations[0]?.name || "@CurrentIteration" : "@CurrentIteration",
+        currentIteration: iterationName ? iterationName : iterations[0]?.name || "@CurrentIteration",
         start: iterations[0]?.attributes?.startDate || start,
         end: iterations[iterations.length - 1]?.attributes?.finishDate || end
       } as TeamIteration
@@ -108,9 +108,9 @@ export const fetchIterationDefinition = async (team: WebApiTeam, clientOptions?:
       teamId: id,
       iterations: [
         {
-          id: "b8cea431-dd4f-4efa-868a-3a9a8fe0fa02",
-          name: "Iteration 1",
-          path: "RXR\\Iteration 1",
+          id: "id_current_iteration",
+          name: "@CurrentIteration",
+          path: "CurrentIteration",
           attributes: {
             startDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1),
             finishDate: new Date(currentDate.getFullYear(), currentDate.getMonth(), 14),
