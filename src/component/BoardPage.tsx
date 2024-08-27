@@ -107,8 +107,8 @@ export const BoardPage: React.FC<BoardPageProps> = ({
         created_by: it.createdBy,
         last_modified_by: it.lastModifiedBy,
         description: it.description,
-        last_modified: { iconProps: { render: renderDate }, text: it.lastModifiedDate.toISOString() },
-        created: { iconProps: { render: renderDate }, text: it.createdDate.toISOString() },
+        last_modified: { iconProps: { render: renderDate }, text: new Date( it.lastModifiedDate ).toISOString() },
+        created: { iconProps: { render: renderDate }, text: new Date( it.createdDate ).toISOString() },
       } as ITableItem));
 
       itemProvider.splice(0, itemProvider.length, ...data);
